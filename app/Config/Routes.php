@@ -9,7 +9,7 @@ $routes->get('/', 'Home::index');
 $routes->get('about', 'Home::about');
 $routes->get('contact', 'Home::contact');
 
-// Authentication routes
+// routes for login register and dashboard
 $routes->get('/register', 'Auth::register');
 $routes->post('/register', 'Auth::register');
 $routes->get('/login', 'Auth::login');
