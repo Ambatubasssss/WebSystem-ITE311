@@ -12,26 +12,13 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-<<<<<<< HEAD
-            <a class="navbar-brand fw-bold text-white" href="#">ITE311-MALILAY</a>
-=======
-            <a class="navbar-brand fw-bold text-white" href="<?= base_url(''); ?>">ITE311-MALILAY</a>
->>>>>>> f9b7058 (Added Home controller, routes, and views for basic navigation)
+            <a class="navbar-brand fw-bold text-white" href="<?= base_url(''); ?>">LMS-MALILAY</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-<<<<<<< HEAD
-                        <a class="nav-link text-white" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="#">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="#">Contact</a>
-=======
                         <a class="nav-link text-white" href="<?= base_url(''); ?>">Home</a>
                     </li>
                     <li class="nav-item">
@@ -39,8 +26,19 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-white" href="<?= base_url('contact'); ?>">Contact</a>
->>>>>>> f9b7058 (Added Home controller, routes, and views for basic navigation)
                     </li>
+                    <?php if (session()->get('logged_in')): ?>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="<?= base_url('logout'); ?>">Logout</a>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="<?= base_url('login'); ?>">Login</a>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
@@ -53,10 +51,12 @@
 
     <!-- Footer -->
     <footer class="bg-primary text-center text-white py-3 mt-5">
-        <p class="mb-0">&copy; <?= date('Y') ?> ITE311-MALILAY - All Rights Reserved</p>
+        <p class="mb-0">&copy; <?= date('Y') ?> LMS-MALILAY - All Rights Reserved</p>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+

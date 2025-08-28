@@ -6,8 +6,15 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 $routes->get('/', 'Home::index');
-<<<<<<< HEAD
-=======
 $routes->get('about', 'Home::about');
 $routes->get('contact', 'Home::contact');
->>>>>>> f9b7058 (Added Home controller, routes, and views for basic navigation)
+
+// Authentication routes
+$routes->get('/register', 'Auth::register');
+$routes->post('/register', 'Auth::register');
+$routes->get('/login', 'Auth::login');
+$routes->post('/login', 'Auth::login');
+$routes->get('/logout', 'Auth::logout');
+$routes->get('/dashboard', 'Auth::dashboard');
+
+

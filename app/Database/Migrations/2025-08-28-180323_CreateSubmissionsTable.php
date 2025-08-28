@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateEnrollmentsTable extends Migration
+class CreateSubmissionsTable extends Migration
 {
     public function up()
     {
@@ -15,29 +15,42 @@ class CreateEnrollmentsTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
+            'quiz_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+            ],
             'user_id' => [
                 'type'       => 'INT',
-                'constraint' => 11,
+                'constraint' => 5,
                 'unsigned'   => true,
             ],
-            'course_id' => [
+            'score' => [
                 'type'       => 'INT',
-                'constraint' => 11,
-                'unsigned'   => true,
+                'constraint' => 5,
+                'default'    => 0,
             ],
-            'enrolled_at' => [
+            'submitted_at' => [
                 'type' => 'DATETIME',
                 'null' => false,
             ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
         ]);
         $this->forge->addKey('id', true);
+        $this->forge->addForeignKey('quiz_id', 'quizzes', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('user_id', 'users', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->addForeignKey('course_id', 'courses', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('enrollments');
+        $this->forge->createTable('submissions');
     }
 
     public function down()
     {
-        $this->forge->dropTable('enrollments');
+        $this->forge->dropTable('submissions');
     }
 }
