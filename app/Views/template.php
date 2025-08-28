@@ -12,13 +12,18 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
+<<<<<<< HEAD
             <a class="navbar-brand fw-bold text-white" href="#">ITE311-MALILAY</a>
+=======
+            <a class="navbar-brand fw-bold text-white" href="<?= base_url(''); ?>">ITE311-MALILAY</a>
+>>>>>>> f9b7058 (Added Home controller, routes, and views for basic navigation)
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
+<<<<<<< HEAD
                         <a class="nav-link text-white" href="#">Home</a>
                     </li>
                     <li class="nav-item">
@@ -26,6 +31,15 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-white" href="#">Contact</a>
+=======
+                        <a class="nav-link text-white" href="<?= base_url(''); ?>">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="<?= base_url('about'); ?>">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="<?= base_url('contact'); ?>">Contact</a>
+>>>>>>> f9b7058 (Added Home controller, routes, and views for basic navigation)
                     </li>
                 </ul>
             </div>

@@ -6,4 +6,17 @@ class Home extends BaseController
     {
         return view('home');
     }
+<<<<<<< HEAD
+=======
+
+    public function about()
+    {
+        return view('about');
+    }
+
+    public function contact()
+    {
+        return view('contact');
+    }
+>>>>>>> f9b7058 (Added Home controller, routes, and views for basic navigation)
 }
