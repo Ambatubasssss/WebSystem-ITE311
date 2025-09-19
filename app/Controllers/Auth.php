@@ -42,7 +42,7 @@ class Auth extends BaseController
                 'name' => $name,
                 'email' => $email,
                 'password' => $hashedPassword,
-                'role' => 'user',
+                'role' => 'student',
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
