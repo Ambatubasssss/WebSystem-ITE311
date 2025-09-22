@@ -111,10 +111,24 @@ class Auth extends BaseController
             
             session()->set($sessionData);
 
-            // Set welcome flash message and redirect to dashboard
-            session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
-            
-            return redirect()->to('/dashboard');
+            // Role-based redirection; set success flash only for recognized roles
+            $role = strtolower($user['role'] ?? '');
+            if ($role === 'admin') {
+                session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
+                return redirect()->to('/admin/dashboard');
+            }
+            if ($role === 'teacher') {
+                session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
+                return redirect()->to('/teacher/dashboard');
+            }
+            if ($role === 'student') {
+                session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
+                return redirect()->to('/student/dashboard');
+            }
+
+            // Unknown role fallback
+            session()->setFlashdata('error', 'Your account role is not recognized. Please contact support.');
+            return redirect()->to('/login');
         }
 
         // For GET requests, just load the login view

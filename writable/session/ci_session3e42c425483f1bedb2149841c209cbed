@@ -1,0 +1,1 @@
+__ci_last_regenerate|i:1758549195;_ci_previous_url|s:37:"http://localhost/ITE311-MALILAY/login";userID|s:1:"9";name|s:12:"Student User";email|s:19:"student@example.com";role|s:0:"";logged_in|b:1;success|s:27:"Welcome back, Student User!";__ci_vars|a:2:{s:7:"success";s:3:"old";s:5:"error";s:3:"old";}error|s:60:"Your account role is not recognized. Please contact support.";
