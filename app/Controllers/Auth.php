@@ -152,7 +152,20 @@ class Auth extends BaseController
             return redirect()->to('/login');
         }
 
-        // Load the dashboard view
-        return view('auth/dashboard');
+        // Redirect to role-specific dashboards
+        $role = strtolower(session('role') ?? '');
+        if ($role === 'admin') {
+            return redirect()->to('/admin/dashboard');
+        }
+        if ($role === 'teacher') {
+            return redirect()->to('/teacher/dashboard');
+        }
+        if ($role === 'student') {
+            return redirect()->to('/student/dashboard');
+        }
+
+        // Unknown role
+        session()->setFlashdata('error', 'Your account role is not recognized. Please contact support.');
+        return redirect()->to('/login');
     }
 }
