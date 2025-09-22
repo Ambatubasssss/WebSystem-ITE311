@@ -19,8 +19,8 @@ $routes->get('/dashboard', 'Auth::dashboard');
 
 
 // Role dashboards
-$routes->get('/admin/dashboard', 'Admin::dashboard');
-$routes->get('/teacher/dashboard', 'Teacher::dashboard');
-$routes->get('/student/dashboard', 'Student::dashboard');
+$routes->get('/admin/dashboard', 'Admin::dashboard', ['filter' => 'role:admin']);
+$routes->get('/teacher/dashboard', 'Teacher::dashboard', ['filter' => 'role:teacher']);
+$routes->get('/student/dashboard', 'Student::dashboard', ['filter' => 'role:student']);
 
 
