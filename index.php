@@ -3,6 +3,40 @@
 use CodeIgniter\Boot;
 use Config\Paths;
 
+// Redirect if accessing index.php directly with clean URL
+if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/index.php/') !== false) {
+    $cleanUrl = str_replace('/index.php/', '/', $_SERVER['REQUEST_URI']);
+    $cleanUrl = str_replace('/index.php', '/', $cleanUrl);
+    header('Location: ' . $cleanUrl, true, 301);
+    exit;
+}
+
+// Handle path traversal attempts - redirect to appropriate dashboard
+if (isset($_SERVER['REQUEST_URI']) && (strpos($_SERVER['REQUEST_URI'], '../') !== false || strpos($_SERVER['REQUEST_URI'], '..\\') !== false)) {
+    // Start session to check role
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    
+    $role = strtolower($_SESSION['role'] ?? '');
+    $baseUrl = '/ITE311-MALILAY/';
+    
+    if ($role === 'admin') {
+        $redirectUrl = $baseUrl . 'admin/dashboard';
+    } elseif ($role === 'teacher') {
+        $redirectUrl = $baseUrl . 'teacher/dashboard';
+    } elseif ($role === 'student') {
+        $redirectUrl = $baseUrl . 'student/dashboard';
+    } elseif (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
+        $redirectUrl = $baseUrl . 'dashboard';
+    } else {
+        $redirectUrl = $baseUrl . 'login';
+    }
+    
+    header('Location: ' . $redirectUrl, true, 301);
+    exit;
+}
+
 /*
  *---------------------------------------------------------------
  * CHECK PHP VERSION

@@ -111,24 +111,9 @@ class Auth extends BaseController
             
             session()->set($sessionData);
 
-            // Role-based redirection; set success flash only for recognized roles
-            $role = strtolower($user['role'] ?? '');
-            if ($role === 'admin') {
-                session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
-                return redirect()->to('/admin/dashboard');
-            }
-            if ($role === 'teacher') {
-                session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
-                return redirect()->to('/teacher/dashboard');
-            }
-            if ($role === 'student') {
-                session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
-                return redirect()->to('/student/dashboard');
-            }
-
-            // Unknown role fallback
-            session()->setFlashdata('error', 'Your account role is not recognized. Please contact support.');
-            return redirect()->to('/login');
+            // Unified dashboard redirection for all roles
+            session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
+            return redirect()->to('/dashboard');
         }
 
         // For GET requests, just load the login view
@@ -152,20 +137,21 @@ class Auth extends BaseController
             return redirect()->to('/login');
         }
 
-        // Redirect to role-specific dashboards
+        // Prepare role-specific data (placeholder data for now)
         $role = strtolower(session('role') ?? '');
-        if ($role === 'admin') {
-            return redirect()->to('/admin/dashboard');
-        }
-        if ($role === 'teacher') {
-            return redirect()->to('/teacher/dashboard');
-        }
-        if ($role === 'student') {
-            return redirect()->to('/student/dashboard');
-        }
+        $data = [
+            'role' => $role,
+            'user' => [
+                'id' => session('userID'),
+                'name' => session('name'),
+                'email' => session('email'),
+            ],
+            'stats' => [
+                'totalUsers' => null,
+                'totalCourses' => null,
+            ],
+        ];
 
-        // Unknown role
-        session()->setFlashdata('error', 'Your account role is not recognized. Please contact support.');
-        return redirect()->to('/login');
+        return view('auth/dashboard', $data);
     }
 }

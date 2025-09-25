@@ -14,7 +14,7 @@ Options -Indexes
 	# If you installed CodeIgniter in a subfolder, you will need to
 	# change the following line to match the subfolder you need.
 	# http://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewritebase
-	# RewriteBase /
+	RewriteBase /ITE311-MALILAY/public/
 
 	# Redirect Trailing Slashes...
 	RewriteCond %{REQUEST_FILENAME} !-d
@@ -25,18 +25,6 @@ Options -Indexes
 	RewriteCond %{HTTPS} !=on
 	RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 	RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
-
-	# Redirect any direct access to index.php back to clean URL
-	RewriteCond %{THE_REQUEST} \s/+ITE311-MALILAY/index\.php/([^\s?]*) [NC]
-	RewriteRule ^index\.php/(.*)$ /ITE311-MALILAY/$1 [R=301,L]
-	
-	# Handle direct access to index.php without parameters
-	RewriteCond %{THE_REQUEST} \s/+ITE311-MALILAY/index\.php\s [NC]
-	RewriteRule ^index\.php$ /ITE311-MALILAY/ [R=301,L]
-
-	# Redirect any malformed URLs with path traversal to home
-	RewriteCond %{REQUEST_URI} \.\./ [NC]
-	RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
 
 	# Checks to see if the user is attempting to access a valid file,
 	# such as an image or css document, if this isn't true it sends the
@@ -56,8 +44,8 @@ Options -Indexes
 	ErrorDocument 404 index.php
 </IfModule>
 
-# Custom error pages (removed - using redirects instead)
-
 # Disable server signature start
 ServerSignature Off
 # Disable server signature end
+
+

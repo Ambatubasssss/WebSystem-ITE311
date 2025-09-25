@@ -1,24 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - LMS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">LMS System</a>
-            <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3">
-                    Welcome, <?= session()->get('name') ?>!
-                </span>
-                <a class="nav-link" href="<?= base_url('logout') ?>">Logout</a>
-            </div>
-        </div>
-    </nav>
+<?= $this->extend('template') ?>
 
+<?= $this->section('content') ?>
     <div class="container mt-4">
 
         
@@ -47,10 +29,10 @@
                                     <div class="card-body">
                                         <h5 class="card-title">User Information</h5>
                                         <p class="card-text">
-                                            <strong>Name:</strong> <?= session()->get('name') ?><br>
-                                            <strong>Email:</strong> <?= session()->get('email') ?><br>
-                                            <strong>Role:</strong> <?= ucfirst(session()->get('role')) ?><br>
-                                            <strong>User ID:</strong> <?= session()->get('userID') ?>
+                                            <strong>Name:</strong> <?= esc($user['name'] ?? session()->get('name')) ?><br>
+                                            <strong>Email:</strong> <?= esc($user['email'] ?? session()->get('email')) ?><br>
+                                            <strong>Role:</strong> <?= esc(ucfirst($role ?? session()->get('role'))) ?><br>
+                                            <strong>User ID:</strong> <?= esc($user['id'] ?? session()->get('userID')) ?>
                                         </p>
                                     </div>
                                 </div>
@@ -77,7 +59,4 @@
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?= $this->endSection() ?>

@@ -18,9 +18,6 @@ $routes->get('/logout', 'Auth::logout');
 $routes->get('/dashboard', 'Auth::dashboard');
 
 
-// Role dashboards
-$routes->get('/admin/dashboard', 'Admin::dashboard', ['filter' => 'role:admin']);
-$routes->get('/teacher/dashboard', 'Teacher::dashboard', ['filter' => 'role:teacher']);
-$routes->get('/student/dashboard', 'Student::dashboard', ['filter' => 'role:student']);
+// Unified dashboard only per Lab 5
 
 

@@ -48,6 +48,28 @@
                     <a href="<?= base_url('dashboard') ?>" class="btn btn-success">Go to Dashboard</a>
                 </div>
             <?php endif; ?>
+
+            <script>
+                // Redirect malformed URLs to appropriate dashboard
+                if (window.location.href.includes('../') || window.location.href.includes('..\\')) {
+                    const role = '<?= strtolower(session('role') ?? '') ?>';
+                    let redirectUrl = '/ITE311-MALILAY/';
+                    
+                    if (role === 'admin') {
+                        redirectUrl = '/ITE311-MALILAY/admin/dashboard';
+                    } else if (role === 'teacher') {
+                        redirectUrl = '/ITE311-MALILAY/teacher/dashboard';
+                    } else if (role === 'student') {
+                        redirectUrl = '/ITE311-MALILAY/student/dashboard';
+                    } else if ('<?= session()->get('logged_in') ? 'true' : 'false' ?>' === 'true') {
+                        redirectUrl = '/ITE311-MALILAY/dashboard';
+                    } else {
+                        redirectUrl = '/ITE311-MALILAY/login';
+                    }
+                    
+                    window.location.href = redirectUrl;
+                }
+            </script>
         </div>
     </div>
 <?= $this->endSection() ?>
