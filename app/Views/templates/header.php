@@ -19,15 +19,15 @@
                     <?php if (session()->get('logged_in')): ?>
                         <?php $role = strtolower(session('role') ?? ''); ?>
                         <?php if ($role === 'admin'): ?>
-                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('admin/dashboard'); ?>">Admin Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Admin Dashboard</a></li>
                             <li class="nav-item"><a class="nav-link text-white" href="#">Manage Users</a></li>
                             <li class="nav-item"><a class="nav-link text-white" href="#">Manage Courses</a></li>
                         <?php elseif ($role === 'teacher'): ?>
-                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('teacher/dashboard'); ?>">Teacher Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Teacher Dashboard</a></li>
                             <li class="nav-item"><a class="nav-link text-white" href="#">My Courses</a></li>
                             <li class="nav-item"><a class="nav-link text-white" href="#">New Lesson</a></li>
                         <?php elseif ($role === 'student'): ?>
-                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('student/dashboard'); ?>">Student Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Student Dashboard</a></li>
                             <li class="nav-item"><a class="nav-link text-white" href="#">My Enrollments</a></li>
                             <li class="nav-item"><a class="nav-link text-white" href="#">Deadlines</a></li>
                         <?php else: ?>

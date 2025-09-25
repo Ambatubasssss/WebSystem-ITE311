@@ -50,6 +50,38 @@
                             </div>
                         </div>
 
+                        <?php if (($role ?? session('role')) === 'admin'): ?>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card bg-primary text-white mb-3"><div class="card-body"><h6 class="card-title">Total Users</h6><p class="mb-0">--</p></div></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-success text-white mb-3"><div class="card-body"><h6 class="card-title">Total Courses</h6><p class="mb-0">--</p></div></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-info text-white mb-3"><div class="card-body"><h6 class="card-title">Recent Activity</h6><p class="mb-0">--</p></div></div>
+                            </div>
+                        </div>
+                        <?php elseif (($role ?? session('role')) === 'teacher'): ?>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-primary text-white mb-3"><div class="card-body"><h6 class="card-title">My Courses</h6><p class="mb-0">--</p></div></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-success text-white mb-3"><div class="card-body"><h6 class="card-title">New Submissions</h6><p class="mb-0">--</p></div></div>
+                            </div>
+                        </div>
+                        <?php elseif (($role ?? session('role')) === 'student'): ?>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-primary text-white mb-3"><div class="card-body"><h6 class="card-title">Enrolled Courses</h6><p class="mb-0">--</p></div></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-success text-white mb-3"><div class="card-body"><h6 class="card-title">Upcoming Deadlines</h6><p class="mb-0">--</p></div></div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
                         <div class="alert alert-info">
                             <h6>Protected Dashboard</h6>
                             <p class="mb-0">This is a protected page that only logged-in users can access. If you can see this, it means your authentication system is working correctly!</p>
