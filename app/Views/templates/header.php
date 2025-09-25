@@ -20,16 +20,16 @@
                         <?php $role = strtolower(session('role') ?? ''); ?>
                         <?php if ($role === 'admin'): ?>
                             <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Admin Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#">Manage Users</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#">Manage Courses</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('admin/users'); ?>">Manage Users</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('admin/settings'); ?>">Settings</a></li>
                         <?php elseif ($role === 'teacher'): ?>
                             <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Teacher Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#">My Courses</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#">New Lesson</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('teacher/courses'); ?>">My Courses</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('teacher/grades'); ?>">Grades</a></li>
                         <?php elseif ($role === 'student'): ?>
                             <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Student Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#">My Enrollments</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#">Deadlines</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('student/enrollments'); ?>">My Enrollments</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('student/assignments'); ?>">Assignments</a></li>
                         <?php else: ?>
                             <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Dashboard</a></li>
                         <?php endif; ?>

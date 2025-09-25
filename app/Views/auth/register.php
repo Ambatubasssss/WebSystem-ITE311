@@ -34,7 +34,8 @@
                             </div>
                         <?php endif; ?>
 
-                        <form action="http://localhost/ITE311-MALILAY/register" method="post">
+                        <form action="<?= base_url('register') ?>" method="post">
+                            <?= csrf_field() ?>
                             <div class="mb-3">
                                 <label for="name" class="form-label">Full Name</label>
                                 <input type="text" class="form-control" id="name" name="name" value="<?= old('name') ?>" required>

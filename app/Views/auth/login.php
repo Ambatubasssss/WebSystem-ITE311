@@ -34,7 +34,8 @@
                             </div>
                         <?php endif; ?>
 
-                        <form action="http://localhost/ITE311-MALILAY/login" method="post">
+                        <form action="<?= base_url('login') ?>" method="post">
+                            <?= csrf_field() ?>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email Address</label>
                                 <input type="email" class="form-control" id="email" name="email" value="<?= old('email') ?>" required>

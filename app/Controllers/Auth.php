@@ -28,8 +28,29 @@ class Auth extends BaseController
                 return view('auth/register');
             }
 
-            if (strlen($password) < 6) {
-                session()->setFlashdata('error', 'Password must be at least 6 characters.');
+            // Enhanced password validation
+            if (strlen($password) < 8) {
+                session()->setFlashdata('error', 'Password must be at least 8 characters.');
+                return view('auth/register');
+            }
+
+            if (!preg_match('/[A-Z]/', $password)) {
+                session()->setFlashdata('error', 'Password must contain at least one uppercase letter.');
+                return view('auth/register');
+            }
+
+            if (!preg_match('/[a-z]/', $password)) {
+                session()->setFlashdata('error', 'Password must contain at least one lowercase letter.');
+                return view('auth/register');
+            }
+
+            if (!preg_match('/[0-9]/', $password)) {
+                session()->setFlashdata('error', 'Password must contain at least one number.');
+                return view('auth/register');
+            }
+
+            if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+                session()->setFlashdata('error', 'Password must contain at least one special character.');
                 return view('auth/register');
             }
 
@@ -74,6 +95,15 @@ class Auth extends BaseController
     {
         // Check if form was submitted (POST request)
         if ($this->request->getMethod() === 'POST') {
+            // Rate limiting: Check for too many login attempts
+            $ip = $this->request->getIPAddress();
+            $attemptsKey = 'login_attempts_' . $ip;
+            $attempts = session($attemptsKey) ?? 0;
+            
+            if ($attempts >= 5) {
+                session()->setFlashdata('error', 'Too many login attempts. Please try again later.');
+                return view('auth/login');
+            }
             // Get form data
             $email = $this->request->getPost('email');
             $password = $this->request->getPost('password');
@@ -90,13 +120,17 @@ class Auth extends BaseController
 
             // Check if user was found
             if (!$user) {
-                session()->setFlashdata('error', 'User not found with email: ' . $email);
+                $attempts++;
+                session()->set($attemptsKey, $attempts);
+                session()->setFlashdata('error', 'Invalid credentials. Attempts remaining: ' . (5 - $attempts));
                 return view('auth/login');
             }
 
             // Check password verification
             if (!password_verify($password, $user['password'])) {
-                session()->setFlashdata('error', 'Invalid password for user: ' . $email);
+                $attempts++;
+                session()->set($attemptsKey, $attempts);
+                session()->setFlashdata('error', 'Invalid credentials. Attempts remaining: ' . (5 - $attempts));
                 return view('auth/login');
             }
 
@@ -110,6 +144,9 @@ class Auth extends BaseController
             ];
             
             session()->set($sessionData);
+            
+            // Clear login attempts on successful login
+            session()->remove($attemptsKey);
 
             // Unified dashboard redirection for all roles
             session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
@@ -137,20 +174,34 @@ class Auth extends BaseController
             return redirect()->to('/login');
         }
 
-        // Prepare role-specific data (placeholder data for now)
+        $userModel = new \App\Models\UserModel();
         $role = strtolower(session('role') ?? '');
+        
+        // Fetch role-specific data from database
         $data = [
             'role' => $role,
             'user' => [
                 'id' => session('userID'),
                 'name' => session('name'),
                 'email' => session('email'),
-            ],
-            'stats' => [
-                'totalUsers' => null,
-                'totalCourses' => null,
+                'role' => session('role'),
             ],
         ];
+
+        // Role-specific data fetching
+        if ($role === 'admin') {
+            $data['totalUsers'] = $userModel->countAllResults();
+            $data['totalCourses'] = 0; // Placeholder - would need courses table
+            $data['recentUsers'] = $userModel->orderBy('created_at', 'DESC')->limit(5)->findAll();
+        } elseif ($role === 'teacher') {
+            $data['myCourses'] = ['Math 101', 'Science 202']; // Placeholder
+            $data['pendingAssignments'] = 5; // Placeholder
+            $data['totalStudents'] = $userModel->where('role', 'student')->countAllResults();
+        } elseif ($role === 'student') {
+            $data['enrolledCourses'] = ['History 101', 'Art 303']; // Placeholder
+            $data['upcomingDeadlines'] = ['Assignment 1 (Oct 1)', 'Quiz 2 (Oct 5)']; // Placeholder
+            $data['completedAssignments'] = 3; // Placeholder
+        }
 
         return view('auth/dashboard', $data);
     }
