@@ -1,0 +1,80 @@
+CRITICAL - 2025-09-26 01:21:30 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "admin/settings.php"
+[Method: GET, Route: admin/settings]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('admin/settings.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('admin/settings', [], true)
+ 3 APPPATH\Controllers\Admin.php(36): view('admin/settings', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin->settings()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(93): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-09-26 01:21:51 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "student/assignments.php"
+[Method: GET, Route: student/assignments]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('student/assignments.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('student/assignments', [], true)
+ 3 APPPATH\Controllers\Student.php(42): view('student/assignments', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Student->assignments()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Student))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(93): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-09-26 01:21:54 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "student/assignments.php"
+[Method: GET, Route: student/assignments]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('student/assignments.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('student/assignments', [], true)
+ 3 APPPATH\Controllers\Student.php(42): view('student/assignments', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Student->assignments()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Student))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(93): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-09-26 01:23:20 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "student/assignments.php"
+[Method: GET, Route: student/assignments]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('student/assignments.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('student/assignments', [], true)
+ 3 APPPATH\Controllers\Student.php(42): view('student/assignments', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Student->assignments()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Student))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(93): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-09-26 03:13:02 --> mysqli_sql_exception: Cannot add or update a child row: a foreign key constraint fails (`lms_malilay`.`lessons`, CONSTRAINT `lessons_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE) in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `le...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `le...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `le...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1841): CodeIgniter\Database\BaseConnection->query('INSERT INTO `le...', NULL, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(2230): CodeIgniter\Database\BaseBuilder->batchExecute('_insertBatch', 100)
+#5 C:\xampp\htdocs\ITE311-MALILAY\app\Database\Seeds\LessonSeeder.php(49): CodeIgniter\Database\BaseBuilder->insertBatch(Array)
+#6 C:\xampp\htdocs\ITE311-MALILAY\system\Database\Seeder.php(149): App\Database\Seeds\LessonSeeder->run()
+#7 C:\xampp\htdocs\ITE311-MALILAY\system\Commands\Database\Seed.php(79): CodeIgniter\Database\Seeder->call('App\\Database\\Se...')
+#8 C:\xampp\htdocs\ITE311-MALILAY\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\Seed->run(Array)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('db:seed', Array)
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(388): CodeIgniter\CLI\Console->run()
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(133): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#12 C:\xampp\htdocs\ITE311-MALILAY\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#13 {main}
+ERROR - 2025-09-26 03:13:13 --> mysqli_sql_exception: Cannot add or update a child row: a foreign key constraint fails (`lms_malilay`.`submissions`, CONSTRAINT `submissions_quiz_id_foreign` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE) in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `su...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `su...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `su...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1841): CodeIgniter\Database\BaseConnection->query('INSERT INTO `su...', NULL, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(2230): CodeIgniter\Database\BaseBuilder->batchExecute('_insertBatch', 100)
+#5 C:\xampp\htdocs\ITE311-MALILAY\app\Database\Seeds\SubmissionSeeder.php(30): CodeIgniter\Database\BaseBuilder->insertBatch(Array)
+#6 C:\xampp\htdocs\ITE311-MALILAY\system\Database\Seeder.php(149): App\Database\Seeds\SubmissionSeeder->run()
+#7 C:\xampp\htdocs\ITE311-MALILAY\system\Commands\Database\Seed.php(79): CodeIgniter\Database\Seeder->call('App\\Database\\Se...')
+#8 C:\xampp\htdocs\ITE311-MALILAY\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\Seed->run(Array)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('db:seed', Array)
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(388): CodeIgniter\CLI\Console->run()
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(133): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#12 C:\xampp\htdocs\ITE311-MALILAY\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#13 {main}
