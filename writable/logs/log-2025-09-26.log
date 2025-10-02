@@ -1,0 +1,48 @@
+CRITICAL - 2025-09-26 01:21:30 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "admin/settings.php"
+[Method: GET, Route: admin/settings]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('admin/settings.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('admin/settings', [], true)
+ 3 APPPATH\Controllers\Admin.php(36): view('admin/settings', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin->settings()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(93): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-09-26 01:21:51 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "student/assignments.php"
+[Method: GET, Route: student/assignments]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('student/assignments.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('student/assignments', [], true)
+ 3 APPPATH\Controllers\Student.php(42): view('student/assignments', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Student->assignments()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Student))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(93): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-09-26 01:21:54 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "student/assignments.php"
+[Method: GET, Route: student/assignments]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('student/assignments.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('student/assignments', [], true)
+ 3 APPPATH\Controllers\Student.php(42): view('student/assignments', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Student->assignments()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Student))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(93): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-09-26 01:23:20 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "student/assignments.php"
+[Method: GET, Route: student/assignments]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('student/assignments.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('student/assignments', [], true)
+ 3 APPPATH\Controllers\Student.php(42): view('student/assignments', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Student->assignments()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Student))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(93): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

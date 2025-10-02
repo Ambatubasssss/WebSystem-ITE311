@@ -18,16 +18,10 @@ if (isset($_SERVER['REQUEST_URI']) && (strpos($_SERVER['REQUEST_URI'], '../') !=
         session_start();
     }
     
-    $role = strtolower($_SESSION['role'] ?? '');
     $baseUrl = '/ITE311-MALILAY/';
     
-    if ($role === 'admin') {
-        $redirectUrl = $baseUrl . 'admin/dashboard';
-    } elseif ($role === 'teacher') {
-        $redirectUrl = $baseUrl . 'teacher/dashboard';
-    } elseif ($role === 'student') {
-        $redirectUrl = $baseUrl . 'student/dashboard';
-    } elseif (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
+    // Check if user is logged in
+    if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
         $redirectUrl = $baseUrl . 'dashboard';
     } else {
         $redirectUrl = $baseUrl . 'login';

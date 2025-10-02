@@ -34,9 +34,45 @@ Options -Indexes
 	RewriteCond %{THE_REQUEST} \s/+ITE311-MALILAY/index\.php\s [NC]
 	RewriteRule ^index\.php$ /ITE311-MALILAY/ [R=301,L]
 
-	# Redirect any malformed URLs with path traversal to home
-	RewriteCond %{REQUEST_URI} \.\./ [NC]
-	RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+# Handle specific path traversal patterns with multiple dots
+RewriteCond %{REQUEST_URI} \.\./\.\./ [NC]
+RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+
+# Handle path traversal with index.php
+RewriteCond %{REQUEST_URI} \.\./.*index\.php [NC]
+RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+
+# Handle three dots pattern (.../index.php)
+RewriteCond %{REQUEST_URI} \.\.\./index\.php [NC]
+RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+
+# Handle multiple three dots pattern (.../.../index.php)
+RewriteCond %{REQUEST_URI} \.\.\./\.\.\./index\.php [NC]
+RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+
+# Handle any three dots in URL path
+RewriteCond %{REQUEST_URI} \.\.\./ [NC]
+RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+
+# Handle any path traversal attempts - redirect to clean URL
+RewriteCond %{REQUEST_URI} \.\./ [NC]
+RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+
+# Handle direct access to index.php with path traversal
+RewriteCond %{THE_REQUEST} \s/+ITE311-MALILAY/.*\.\./.*index\.php [NC]
+RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+
+# Handle URLs that would redirect to XAMPP dashboard
+RewriteCond %{THE_REQUEST} \s/+ITE311-MALILAY/\.\./index\.php [NC]
+RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+
+# Prevent access to parent directory files
+RewriteCond %{REQUEST_URI} ^/ITE311-MALILAY/\.\./ [NC]
+RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+
+# Handle any remaining path traversal patterns
+RewriteCond %{REQUEST_URI} \.\./ [NC]
+RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
 
 	# Checks to see if the user is attempting to access a valid file,
 	# such as an image or css document, if this isn't true it sends the
