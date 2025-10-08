@@ -63,6 +63,11 @@ class CourseModel extends Model
         // Get all courses
         $allCourses = $this->findAll();
         
+        // If no courses exist, return empty array
+        if (empty($allCourses)) {
+            return [];
+        }
+        
         // Get enrolled course IDs for this user
         $enrolledCourseIds = $this->db->table('enrollments')
                                     ->select('course_id')

@@ -179,4 +179,140 @@
             </div>
         </div>
     </div>
+
+    <!-- jQuery and AJAX Enrollment Script -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        // Handle enroll button clicks
+        $(document).on('click', '.enroll-btn', function(e) {
+            e.preventDefault();
+            
+            const button = $(this);
+            const courseId = button.data('course-id');
+            const courseTitle = button.data('course-title');
+            
+            // Disable button and show loading state
+            button.prop('disabled', true);
+            button.html('<i class="fas fa-spinner fa-spin"></i> Enrolling...');
+            
+            // Send AJAX request
+            $.ajax({
+                url: '<?= base_url('course/enroll') ?>',
+                type: 'POST',
+                data: {
+                    course_id: courseId,
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Show success message
+                        showAlert('success', response.message);
+                        
+                        // Hide the enrolled course card
+                        button.closest('.col-md-6').fadeOut(500, function() {
+                            $(this).remove();
+                            
+                            // Check if no more available courses
+                            if ($('#availableCoursesContainer .col-md-6').length === 0) {
+                                $('#availableCoursesContainer').html(`
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                        <p class="text-muted">Great! You're enrolled in all available courses.</p>
+                                    </div>
+                                `);
+                            }
+                        });
+                        
+                        // Add to enrolled courses section
+                        addToEnrolledCourses(response.course);
+                        
+                        // Update course counts
+                        updateCourseCounts();
+                        
+                    } else {
+                        // Show error message
+                        showAlert('danger', response.message);
+                        
+                        // Reset button
+                        button.prop('disabled', false);
+                        button.html('<i class="fas fa-plus"></i> Enroll Now');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Show error message
+                    showAlert('danger', 'An error occurred while enrolling. Please try again.');
+                    
+                    // Reset button
+                    button.prop('disabled', false);
+                    button.html('<i class="fas fa-plus"></i> Enroll Now');
+                }
+            });
+        });
+    });
+    
+    function addToEnrolledCourses(course) {
+        const enrolledContainer = $('#enrolledCoursesContainer');
+        
+        // Check if container is empty (showing "no courses" message)
+        if (enrolledContainer.find('.text-center').length > 0) {
+            enrolledContainer.html('<div class="row"></div>');
+        }
+        
+        // Create new course card
+        const courseCard = `
+            <div class="col-md-6 mb-3">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <h6 class="card-title text-primary">${course.title}</h6>
+                        <p class="card-text small">${course.description}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> 
+                            Enrolled: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add to container with animation
+        enrolledContainer.find('.row').append(courseCard);
+        enrolledContainer.find('.col-md-6').last().hide().fadeIn(500);
+    }
+    
+    function updateCourseCounts() {
+        const enrolledCount = $('#enrolledCoursesContainer .col-md-6').length;
+        const availableCount = $('#availableCoursesContainer .col-md-6').length;
+        
+        $('.card.bg-primary .mb-0').text(`${enrolledCount} courses`);
+        $('.card.bg-success .mb-0').text(`${availableCount} courses`);
+    }
+    
+    function showAlert(type, message) {
+        // Remove existing alerts
+        $('.alert-dismissible').remove();
+        
+        // Create new alert
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        
+        const alert = `
+            <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                <i class="fas ${iconClass}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        $('body').append(alert);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            $('.alert-dismissible').fadeOut(500, function() {
+                $(this).remove();
+            });
+        }, 5000);
+    }
+    </script>
 <?= $this->endSection() ?>

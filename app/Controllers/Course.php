@@ -51,17 +51,30 @@ class Course extends BaseController
             ]);
         }
 
+        // Define available courses (matching the hardcoded ones in Auth controller)
+        $availableCourses = [
+            1 => ['id' => 1, 'title' => 'Introduction to Programming', 'description' => 'Learn the fundamentals of programming with hands-on exercises and real-world projects.'],
+            2 => ['id' => 2, 'title' => 'Web Development Basics', 'description' => 'Master HTML, CSS, and JavaScript to build responsive and interactive websites.'],
+            3 => ['id' => 3, 'title' => 'Database Management', 'description' => 'Learn SQL, database design, and data management best practices.'],
+            4 => ['id' => 4, 'title' => 'Mobile App Development', 'description' => 'Create mobile applications using modern frameworks and development tools.'],
+            5 => ['id' => 5, 'title' => 'Cybersecurity Fundamentals', 'description' => 'Understand security threats, vulnerabilities, and protection strategies.'],
+            6 => ['id' => 6, 'title' => 'Data Science and Analytics', 'description' => 'Explore data analysis, machine learning, and statistical modeling techniques.']
+        ];
+        
         // Check if course exists
-        $course = $this->courseModel->find($courseId);
-        if (!$course) {
+        if (!isset($availableCourses[$courseId])) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Course not found.'
             ]);
         }
+        
+        $course = $availableCourses[$courseId];
 
-        // Check if user is already enrolled
-        if ($this->enrollmentModel->isAlreadyEnrolled($userId, $courseId)) {
+        // Check if user is already enrolled using direct database query
+        $db = \Config\Database::connect();
+        $enrollmentQuery = $db->query("SELECT * FROM enrollments WHERE user_id = ? AND course_id = ?", [$userId, $courseId]);
+        if ($enrollmentQuery->getNumRows() > 0) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'You are already enrolled in this course.'
@@ -75,11 +88,14 @@ class Course extends BaseController
             'enrollment_date' => date('Y-m-d H:i:s')
         ];
 
-        // Insert enrollment record
+        // Insert enrollment record using direct database query
         try {
-            $result = $this->enrollmentModel->enrollUser($enrollmentData);
+            $insertQuery = $db->query("
+                INSERT INTO enrollments (user_id, course_id, enrollment_date, created_at, updated_at) 
+                VALUES (?, ?, ?, NOW(), NOW())
+            ", [$userId, $courseId, $enrollmentData['enrollment_date']]);
             
-            if ($result) {
+            if ($db->affectedRows() > 0) {
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Successfully enrolled in ' . $course['title'] . '!',

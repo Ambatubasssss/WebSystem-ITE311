@@ -198,18 +198,40 @@ class Auth extends BaseController
             $data['pendingAssignments'] = 5; // Placeholder
             $data['totalStudents'] = $userModel->where('role', 'student')->countAllResults();
         } elseif ($role === 'student') {
-            // Load real enrollment data for students
-            try {
-                $enrollmentModel = new \App\Models\EnrollmentModel();
-                $courseModel = new \App\Models\CourseModel();
-                
-                $data['enrolledCourses'] = $enrollmentModel->getUserEnrollments($user['id']);
-                $data['availableCourses'] = $courseModel->getCoursesNotEnrolledByUser($user['id']);
-            } catch (\Exception $e) {
-                // Fallback to empty arrays if there's an error
-                $data['enrolledCourses'] = [];
-                $data['availableCourses'] = [];
+            // Define all available courses
+            $allCourses = [
+                ['id' => 1, 'title' => 'Introduction to Programming', 'description' => 'Learn the fundamentals of programming with hands-on exercises and real-world projects.'],
+                ['id' => 2, 'title' => 'Web Development Basics', 'description' => 'Master HTML, CSS, and JavaScript to build responsive and interactive websites.'],
+                ['id' => 3, 'title' => 'Database Management', 'description' => 'Learn SQL, database design, and data management best practices.'],
+                ['id' => 4, 'title' => 'Mobile App Development', 'description' => 'Create mobile applications using modern frameworks and development tools.'],
+                ['id' => 5, 'title' => 'Cybersecurity Fundamentals', 'description' => 'Understand security threats, vulnerabilities, and protection strategies.'],
+                ['id' => 6, 'title' => 'Data Science and Analytics', 'description' => 'Explore data analysis, machine learning, and statistical modeling techniques.']
+            ];
+            
+            // Get enrolled courses from database
+            $db = \Config\Database::connect();
+            $enrollmentsQuery = $db->query("
+                SELECT e.*, c.title, c.description 
+                FROM enrollments e 
+                JOIN courses c ON c.id = e.course_id 
+                WHERE e.user_id = ? 
+                ORDER BY e.enrollment_date DESC
+            ", [$user['id']]);
+            $enrolledCourses = $enrollmentsQuery->getResultArray();
+            
+            // Get enrolled course IDs
+            $enrolledCourseIds = array_column($enrolledCourses, 'course_id');
+            
+            // Filter available courses (not enrolled)
+            $availableCourses = [];
+            foreach ($allCourses as $course) {
+                if (!in_array($course['id'], $enrolledCourseIds)) {
+                    $availableCourses[] = $course;
+                }
             }
+            
+            $data['enrolledCourses'] = $enrolledCourses;
+            $data['availableCourses'] = $availableCourses;
             $data['upcomingDeadlines'] = ['Assignment 1 (Oct 1)', 'Quiz 2 (Oct 5)']; // Placeholder
             $data['completedAssignments'] = 3; // Placeholder
         }

@@ -95,3 +95,128 @@ in APPPATH\Controllers\Auth.php on line 205.
  5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
  6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
  7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-10-08 06:31:53 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:54 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:54 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:54 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:55 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:55 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:55 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:56 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:56 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:56 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:56 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:56 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:57 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:57 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:57 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:57 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:59 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:59 --> Error loading course data: Undefined variable $user
+ERROR - 2025-10-08 06:31:59 --> Error loading course data: Undefined variable $user
+CRITICAL - 2025-10-08 06:35:35 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 215.
+ 1 APPPATH\Controllers\Auth.php(215): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 215)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:35:35 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 215.
+ 1 APPPATH\Controllers\Auth.php(215): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 215)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:38:06 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 215.
+ 1 APPPATH\Controllers\Auth.php(215): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 215)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:38:07 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 215.
+ 1 APPPATH\Controllers\Auth.php(215): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 215)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:38:07 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 215.
+ 1 APPPATH\Controllers\Auth.php(215): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 215)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:38:49 --> CodeIgniter\Security\Exceptions\SecurityException: The action you requested is not allowed.
+[Method: POST, Route: course/enroll]
+in SYSTEMPATH\Security\Security.php on line 262.
+ 1 SYSTEMPATH\Security\Security.php(262): CodeIgniter\Security\Exceptions\SecurityException::forDisallowedAction()
+ 2 SYSTEMPATH\Filters\CSRF.php(52): CodeIgniter\Security\Security->verify(Object(CodeIgniter\HTTP\IncomingRequest))
+ 3 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\CSRF->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 4 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 5 SYSTEMPATH\CodeIgniter.php(479): CodeIgniter\Filters\Filters->run('course/enroll', 'before')
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:38:54 --> CodeIgniter\Security\Exceptions\SecurityException: The action you requested is not allowed.
+[Method: POST, Route: course/enroll]
+in SYSTEMPATH\Security\Security.php on line 262.
+ 1 SYSTEMPATH\Security\Security.php(262): CodeIgniter\Security\Exceptions\SecurityException::forDisallowedAction()
+ 2 SYSTEMPATH\Filters\CSRF.php(52): CodeIgniter\Security\Security->verify(Object(CodeIgniter\HTTP\IncomingRequest))
+ 3 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\CSRF->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 4 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 5 SYSTEMPATH\CodeIgniter.php(479): CodeIgniter\Filters\Filters->run('course/enroll', 'before')
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:38:57 --> CodeIgniter\Security\Exceptions\SecurityException: The action you requested is not allowed.
+[Method: POST, Route: course/enroll]
+in SYSTEMPATH\Security\Security.php on line 262.
+ 1 SYSTEMPATH\Security\Security.php(262): CodeIgniter\Security\Exceptions\SecurityException::forDisallowedAction()
+ 2 SYSTEMPATH\Filters\CSRF.php(52): CodeIgniter\Security\Security->verify(Object(CodeIgniter\HTTP\IncomingRequest))
+ 3 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\CSRF->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 4 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 5 SYSTEMPATH\CodeIgniter.php(479): CodeIgniter\Filters\Filters->run('course/enroll', 'before')
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:40:01 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 219.
+ 1 APPPATH\Controllers\Auth.php(219): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 219)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:40:02 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 219.
+ 1 APPPATH\Controllers\Auth.php(219): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 219)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
