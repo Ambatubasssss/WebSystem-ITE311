@@ -74,10 +74,98 @@
                         <?php elseif (($role ?? session('role')) === 'student'): ?>
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="card bg-primary text-white mb-3"><div class="card-body"><h6 class="card-title">Enrolled Courses</h6><p class="mb-0">--</p></div></div>
+                                <div class="card bg-primary text-white mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Enrolled Courses</h6>
+                                        <p class="mb-0"><?= count($enrolledCourses ?? []) ?> courses</p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="card bg-success text-white mb-3"><div class="card-body"><h6 class="card-title">Upcoming Deadlines</h6><p class="mb-0">--</p></div></div>
+                                <div class="card bg-success text-white mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Available Courses</h6>
+                                        <p class="mb-0"><?= count($availableCourses ?? []) ?> courses</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enrolled Courses Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-graduation-cap"></i> My Enrolled Courses</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="enrolledCoursesContainer">
+                                            <?php if (!empty($enrolledCourses)): ?>
+                                                <div class="row">
+                                                    <?php foreach ($enrolledCourses as $enrollment): ?>
+                                                    <div class="col-md-6 mb-3">
+                                                        <div class="card border-primary">
+                                                            <div class="card-body">
+                                                                <h6 class="card-title text-primary"><?= esc($enrollment['title']) ?></h6>
+                                                                <p class="card-text small"><?= esc($enrollment['description']) ?></p>
+                                                                <small class="text-muted">
+                                                                    <i class="fas fa-calendar"></i> 
+                                                                    Enrolled: <?= date('M j, Y', strtotime($enrollment['enrollment_date'])) ?>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="text-center py-4">
+                                                    <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                                                    <p class="text-muted">You haven't enrolled in any courses yet.</p>
+                                                    <p class="text-muted">Browse available courses below to get started!</p>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Available Courses Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Available Courses</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="availableCoursesContainer">
+                                            <?php if (!empty($availableCourses)): ?>
+                                                <div class="row">
+                                                    <?php foreach ($availableCourses as $course): ?>
+                                                    <div class="col-md-6 mb-3">
+                                                        <div class="card border-success">
+                                                            <div class="card-body">
+                                                                <h6 class="card-title text-success"><?= esc($course['title']) ?></h6>
+                                                                <p class="card-text small"><?= esc($course['description']) ?></p>
+                                                                <button class="btn btn-success btn-sm enroll-btn" 
+                                                                        data-course-id="<?= $course['id'] ?>"
+                                                                        data-course-title="<?= esc($course['title']) ?>">
+                                                                    <i class="fas fa-plus"></i> Enroll Now
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="text-center py-4">
+                                                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                                    <p class="text-muted">Great! You're enrolled in all available courses.</p>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <?php endif; ?>
