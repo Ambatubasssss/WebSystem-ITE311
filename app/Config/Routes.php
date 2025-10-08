@@ -25,6 +25,12 @@ $routes->get('/dashboard', 'Auth::dashboard');
 $routes->get('/admin/users', 'Admin::getUsers');
 $routes->post('/admin/roles/update/(:num)', 'Admin::updateRole/$1');
 
+// Course enrollment routes
+$routes->post('/course/enroll', 'Course::enroll');
+$routes->get('/course/available', 'Course::getAvailableCourses');
+$routes->get('/course/enrollments', 'Course::getUserEnrollments');
+$routes->get('/course/view/(:num)', 'Course::view/$1');
+
 // Unified dashboard only per Lab 5
 
 
