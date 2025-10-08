@@ -21,6 +21,10 @@ $routes->get('/dashboard', 'Auth::dashboard');
 // No separate routes needed since everything is accessible through the unified dashboard
 
 
+// Role management routes (Admin only)
+$routes->get('/admin/users', 'Admin::getUsers');
+$routes->post('/admin/roles/update/(:num)', 'Admin::updateRole/$1');
+
 // Unified dashboard only per Lab 5
 
 

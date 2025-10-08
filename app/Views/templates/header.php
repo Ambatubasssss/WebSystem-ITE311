@@ -24,41 +24,21 @@
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
                                     Manage Users
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" style="width: 500px; max-height: 400px; overflow-y: auto;">
+                                <ul class="dropdown-menu dropdown-menu-end" style="width: 600px; max-height: 500px; overflow-y: auto;">
                                     <li class="dropdown-header">
                                         <div class="alert alert-info mb-2">
-                                            <strong>Admin Access:</strong> This page is only accessible to administrators.
+                                            <strong>Admin Access:</strong> Role management for teachers and students.
                                         </div>
-                                        <h6>All Users</h6>
+                                        <h6>User Role Management</h6>
                                     </li>
-                                    <?php
-                                    $userModel = new \App\Models\UserModel();
-                                    $users = $userModel->findAll();
-                                    ?>
                                     <li class="dropdown-item-text">
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th>ID</th>
-                                                        <th>Name</th>
-                                                        <th>Email</th>
-                                                        <th>Role</th>
-                                                        <th>Created</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php foreach ($users as $user): ?>
-                                                    <tr>
-                                                        <td><?= $user['id'] ?></td>
-                                                        <td><?= esc($user['name']) ?></td>
-                                                        <td><?= esc($user['email']) ?></td>
-                                                        <td><span class="badge bg-primary"><?= ucfirst($user['role']) ?></span></td>
-                                                        <td><?= date('M j, Y', strtotime($user['created_at'])) ?></td>
-                                                    </tr>
-                                                    <?php endforeach; ?>
-                                                </tbody>
-                                            </table>
+                                        <div id="usersTableContainer">
+                                            <div class="text-center p-3">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <p class="mt-2">Loading users...</p>
+                                            </div>
                                         </div>
                                     </li>
                                 </ul>
@@ -153,5 +133,167 @@
             </div>
         </div>
     </nav>
+
+    <!-- Role Management JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load users when admin dropdown is opened
+        const manageUsersDropdown = document.querySelector('a[data-bs-toggle="dropdown"]');
+        if (manageUsersDropdown && manageUsersDropdown.textContent.includes('Manage Users')) {
+            manageUsersDropdown.addEventListener('click', function() {
+                loadUsers();
+            });
+        }
+    });
+
+    function loadUsers() {
+        fetch('<?= base_url('admin/users') ?>')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayUsers(data.users);
+                } else {
+                    document.getElementById('usersTableContainer').innerHTML = 
+                        '<div class="alert alert-danger">' + data.message + '</div>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('usersTableContainer').innerHTML = 
+                    '<div class="alert alert-danger">Error loading users: ' + error.message + '</div>';
+            });
+    }
+
+    function displayUsers(users) {
+        let html = `
+            <div class="table-responsive">
+                <table class="table table-sm table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        
+        users.forEach(user => {
+            const roleClass = getRoleClass(user.role);
+            const canEdit = user.role.toLowerCase() !== 'admin';
+            
+            html += `
+                <tr id="user-row-${user.id}">
+                    <td>${user.id}</td>
+                    <td>${escapeHtml(user.name)}</td>
+                    <td>${escapeHtml(user.email)}</td>
+                    <td><span class="badge ${roleClass}">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span></td>
+                    <td>`;
+            
+            if (canEdit) {
+                html += `
+                    <div class="btn-group" role="group">
+                        <select class="form-select form-select-sm" onchange="updateUserRole(${user.id}, this.value)" style="width: auto;">
+                            <option value="teacher" ${user.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+                            <option value="student" ${user.role === 'student' ? 'selected' : ''}>Student</option>
+                        </select>
+                    </div>`;
+            } else {
+                html += '<span class="text-muted"><i class="fas fa-lock"></i> Protected</span>';
+            }
+            
+            html += `
+                    </td>
+                </tr>`;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle"></i> 
+                    Admin roles are protected and cannot be changed.
+                </small>
+            </div>`;
+        
+        document.getElementById('usersTableContainer').innerHTML = html;
+    }
+
+    function updateUserRole(userId, newRole) {
+        if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
+            // Reset the select to original value
+            loadUsers();
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('role', newRole);
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+        fetch(`<?= base_url('admin/roles/update') ?>/${userId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showAlert('success', data.message);
+                // Update the role badge
+                const badge = document.querySelector(`#user-row-${userId} .badge`);
+                if (badge) {
+                    badge.textContent = data.newRole.charAt(0).toUpperCase() + data.newRole.slice(1);
+                    badge.className = `badge ${getRoleClass(data.newRole)}`;
+                }
+            } else {
+                showAlert('danger', data.message);
+                // Reset the select
+                loadUsers();
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error updating role: ' + error.message);
+            loadUsers();
+        });
+    }
+
+    function getRoleClass(role) {
+        switch (role.toLowerCase()) {
+            case 'admin': return 'bg-danger';
+            case 'teacher': return 'bg-success';
+            case 'student': return 'bg-primary';
+            default: return 'bg-secondary';
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function showAlert(type, message) {
+        // Create alert element
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alertDiv.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> 
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+    </script>
 
 
