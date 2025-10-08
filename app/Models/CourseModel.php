@@ -60,16 +60,24 @@ class CourseModel extends Model
      */
     public function getCoursesNotEnrolledByUser($user_id)
     {
-        $enrollmentModel = new EnrollmentModel();
+        // Get all courses
+        $allCourses = $this->findAll();
         
-        return $this->select('courses.*')
-                    ->whereNotIn('courses.id', function($builder) use ($user_id) {
-                        return $builder->select('course_id')
-                                      ->from('enrollments')
-                                      ->where('user_id', $user_id);
-                    })
-                    ->orderBy('courses.title', 'ASC')
-                    ->findAll();
+        // Get enrolled course IDs for this user
+        $enrolledCourseIds = $this->db->table('enrollments')
+                                    ->select('course_id')
+                                    ->where('user_id', $user_id)
+                                    ->get()
+                                    ->getResultArray();
+        
+        $enrolledIds = array_column($enrolledCourseIds, 'course_id');
+        
+        // Filter out enrolled courses
+        $availableCourses = array_filter($allCourses, function($course) use ($enrolledIds) {
+            return !in_array($course['id'], $enrolledIds);
+        });
+        
+        return array_values($availableCourses);
     }
 
     /**

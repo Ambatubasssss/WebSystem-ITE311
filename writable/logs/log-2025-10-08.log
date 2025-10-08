@@ -45,3 +45,53 @@ Stack trace:
 #10 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(133): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
 #11 C:\xampp\htdocs\ITE311-MALILAY\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
 #12 {main}
+CRITICAL - 2025-10-08 06:25:51 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 205.
+ 1 APPPATH\Controllers\Auth.php(205): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 205)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:25:52 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 205.
+ 1 APPPATH\Controllers\Auth.php(205): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 205)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:25:52 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 205.
+ 1 APPPATH\Controllers\Auth.php(205): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 205)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:25:52 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 205.
+ 1 APPPATH\Controllers\Auth.php(205): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 205)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-08 06:25:53 --> ErrorException: Undefined variable $user
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 205.
+ 1 APPPATH\Controllers\Auth.php(205): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $user', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 205)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

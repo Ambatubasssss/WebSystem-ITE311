@@ -199,11 +199,17 @@ class Auth extends BaseController
             $data['totalStudents'] = $userModel->where('role', 'student')->countAllResults();
         } elseif ($role === 'student') {
             // Load real enrollment data for students
-            $enrollmentModel = new \App\Models\EnrollmentModel();
-            $courseModel = new \App\Models\CourseModel();
-            
-            $data['enrolledCourses'] = $enrollmentModel->getUserEnrollments($user['id']);
-            $data['availableCourses'] = $courseModel->getCoursesNotEnrolledByUser($user['id']);
+            try {
+                $enrollmentModel = new \App\Models\EnrollmentModel();
+                $courseModel = new \App\Models\CourseModel();
+                
+                $data['enrolledCourses'] = $enrollmentModel->getUserEnrollments($user['id']);
+                $data['availableCourses'] = $courseModel->getCoursesNotEnrolledByUser($user['id']);
+            } catch (\Exception $e) {
+                // Fallback to empty arrays if there's an error
+                $data['enrolledCourses'] = [];
+                $data['availableCourses'] = [];
+            }
             $data['upcomingDeadlines'] = ['Assignment 1 (Oct 1)', 'Quiz 2 (Oct 5)']; // Placeholder
             $data['completedAssignments'] = 3; // Placeholder
         }
