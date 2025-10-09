@@ -7,6 +7,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+                    <?php if (!session()->get('logged_in')): ?>
                     <li class="nav-item">
                         <a class="nav-link text-white" href="<?= base_url(''); ?>">Home</a>
                     </li>
@@ -16,6 +17,7 @@
                     <li class="nav-item">
                         <a class="nav-link text-white" href="<?= base_url('contact'); ?>">Contact</a>
                     </li>
+                    <?php endif; ?>
                     <?php if (session()->get('logged_in')): ?>
                         <?php $role = strtolower(session('role') ?? ''); ?>
                         <?php if ($role === 'admin'): ?>
@@ -82,6 +84,29 @@
                             <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Student Dashboard</a></li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                                    My Courses
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" style="width: 450px; max-height: 400px; overflow-y: auto;">
+                                    <li class="dropdown-header">
+                                        <div class="alert alert-info mb-2">
+                                            <strong>My Courses:</strong> Browse and enroll in available courses.
+                                        </div>
+                                        <h6>Available Courses</h6>
+                                    </li>
+                                    <li class="dropdown-item-text">
+                                        <div id="myCoursesContainer">
+                                            <div class="text-center p-3">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <p class="mt-2">Loading courses...</p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
                                     My Enrollments
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" style="width: 450px; max-height: 400px; overflow-y: auto;">
@@ -132,12 +157,18 @@
         }
         
         // Load enrollments when student dropdown is opened
-        const enrollmentsDropdown = document.querySelector('a[data-bs-toggle="dropdown"]');
-        if (enrollmentsDropdown && enrollmentsDropdown.textContent.includes('My Enrollments')) {
-            enrollmentsDropdown.addEventListener('click', function() {
-                loadEnrollments();
-            });
-        }
+        const allDropdowns = document.querySelectorAll('a[data-bs-toggle="dropdown"]');
+        allDropdowns.forEach(dropdown => {
+            if (dropdown.textContent.includes('My Enrollments')) {
+                dropdown.addEventListener('click', function() {
+                    loadEnrollments();
+                });
+            } else if (dropdown.textContent.includes('My Courses')) {
+                dropdown.addEventListener('click', function() {
+                    loadMyCourses();
+                });
+            }
+        });
     });
 
     function loadUsers() {
@@ -158,20 +189,35 @@
     }
 
     function loadEnrollments() {
-        fetch('<?= base_url('course/enrollments') ?>')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    displayEnrollments(data.enrollments);
-                } else {
-                    document.getElementById('headerEnrollmentsContainer').innerHTML = 
-                        '<div class="alert alert-danger">' + data.message + '</div>';
-                }
-            })
-            .catch(error => {
+        console.log('Loading enrollments from: <?= base_url('course/enrollments') ?>');
+        
+        fetch('<?= base_url('course/enrollments') ?>', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Enrollments data:', data);
+            if (data.success) {
+                displayEnrollments(data.enrollments);
+            } else {
                 document.getElementById('headerEnrollmentsContainer').innerHTML = 
-                    '<div class="alert alert-danger">Error loading enrollments: ' + error.message + '</div>';
-            });
+                    '<div class="alert alert-danger">' + (data.message || 'Failed to load enrollments') + '</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading enrollments:', error);
+            document.getElementById('headerEnrollmentsContainer').innerHTML = 
+                '<div class="alert alert-danger">Error loading enrollments: ' + error.message + '</div>';
+        });
     }
 
     function displayUsers(users) {
@@ -272,6 +318,103 @@
         html += '</div>';
         
         document.getElementById('headerEnrollmentsContainer').innerHTML = html;
+    }
+
+    function loadMyCourses() {
+        // Load only available courses
+        fetch('<?= base_url('course/available') ?>')
+        .then(response => response.json())
+        .then(availableData => {
+            let html = '';
+            
+            // Show available courses section
+            if (availableData.success && availableData.courses.length > 0) {
+                html += `
+                    <div class="mb-3">
+                        <h6 class="text-success"><i class="fas fa-plus-circle"></i> Available Courses</h6>
+                        <div class="row">
+                `;
+                
+                availableData.courses.forEach(course => {
+                    html += `
+                        <div class="col-12 mb-2">
+                            <div class="card border-success">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title mb-1">${escapeHtml(course.title)}</h6>
+                                    <p class="card-text small mb-2">${escapeHtml(course.description)}</p>
+                                    <button class="btn btn-success btn-sm enroll-btn-header" 
+                                            data-course-id="${course.id}"
+                                            data-course-title="${escapeHtml(course.title)}">
+                                        <i class="fas fa-plus"></i> Enroll Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            } else {
+                // Show message if no available courses
+                html = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <p class="text-muted">Great! You're enrolled in all available courses.</p>
+                        <p class="text-muted">Check your enrolled courses in the "My Enrollments" dropdown.</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('myCoursesContainer').innerHTML = html;
+            
+            // Add event listeners for enroll buttons in header
+            document.querySelectorAll('.enroll-btn-header').forEach(button => {
+                button.addEventListener('click', function() {
+                    const courseId = this.dataset.courseId;
+                    const courseTitle = this.dataset.courseTitle;
+                    
+                    // Disable button and show loading
+                    this.disabled = true;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enrolling...';
+                    
+                    // Send enrollment request
+                    fetch('<?= base_url('course/enroll') ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: `course_id=${courseId}&<?= csrf_token() ?>=${typeof getCSRFToken === 'function' ? getCSRFToken() : '<?= csrf_hash() ?>'}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('success', data.message);
+                            // Refresh both dropdowns
+                            loadMyCourses();
+                            if (typeof loadEnrollments === 'function') {
+                                loadEnrollments();
+                            }
+                        } else {
+                            showAlert('danger', data.message);
+                            // Reset button
+                            this.disabled = false;
+                            this.innerHTML = '<i class="fas fa-plus"></i> Enroll';
+                        }
+                    })
+                    .catch(error => {
+                        showAlert('danger', 'An error occurred while enrolling. Please try again.');
+                        // Reset button
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-plus"></i> Enroll';
+                    });
+                });
+            });
+        })
+        .catch(error => {
+            document.getElementById('myCoursesContainer').innerHTML = 
+                '<div class="alert alert-danger">Error loading courses: ' + error.message + '</div>';
+        });
     }
 
     function updateUserRole(userId, newRole) {

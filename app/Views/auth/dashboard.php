@@ -91,8 +91,37 @@
                             </div>
                         </div>
 
-                        <!-- Enrolled Courses Section -->
+                        <!-- My Courses Navbar Section -->
                         <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0"><i class="fas fa-book"></i> My Courses</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="d-grid">
+                                                    <a href="#enrolledCourses" class="btn btn-primary btn-lg" data-bs-toggle="collapse" data-bs-target="#enrolledCourses">
+                                                        <i class="fas fa-graduation-cap"></i> View My Enrolled Courses
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="d-grid">
+                                                    <a href="#availableCourses" class="btn btn-success btn-lg" data-bs-toggle="collapse" data-bs-target="#availableCourses">
+                                                        <i class="fas fa-plus-circle"></i> Browse Available Courses
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enrolled Courses Section -->
+                        <div class="row mt-4 collapse" id="enrolledCourses">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-primary text-white">
@@ -131,7 +160,7 @@
                         </div>
 
                         <!-- Available Courses Section -->
-                        <div class="row mt-4">
+                        <div class="row mt-4 collapse" id="availableCourses">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-success text-white">
@@ -184,6 +213,15 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
     $(document).ready(function() {
+        // Handle navbar button clicks
+        $('a[data-bs-toggle="collapse"]').on('click', function() {
+            const target = $(this).data('bs-target');
+            const otherTarget = target === '#enrolledCourses' ? '#availableCourses' : '#enrolledCourses';
+            
+            // Close other section when opening one
+            $(otherTarget).collapse('hide');
+        });
+        
         // Handle enroll button clicks
         $(document).on('click', '.enroll-btn', function(e) {
             e.preventDefault();
@@ -242,6 +280,11 @@
                         // Refresh header enrollments if function exists
                         if (typeof loadEnrollments === 'function') {
                             loadEnrollments();
+                        }
+                        
+                        // Refresh header my courses if function exists
+                        if (typeof loadMyCourses === 'function') {
+                            loadMyCourses();
                         }
                         
                     } else {

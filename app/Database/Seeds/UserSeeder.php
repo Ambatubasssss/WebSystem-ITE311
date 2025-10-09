@@ -13,24 +13,24 @@ class UserSeeder extends Seeder
         $users = [
             [
                 'name'       => 'Admin User',
-                'email'      => 'admin@example.com',
-                'password'   => password_hash('Admin@123', PASSWORD_DEFAULT),
+                'email'      => 'basteadmin@gmail.com',
+                'password'   => password_hash('BasteAdmin123.', PASSWORD_DEFAULT),
                 'role'       => 'admin',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'name'       => 'Teacher User',
-                'email'      => 'teacher@example.com',
-                'password'   => password_hash('Teacher@123', PASSWORD_DEFAULT),
+                'email'      => 'basteteacher@gmail.com',
+                'password'   => password_hash('BasteTeacher123.', PASSWORD_DEFAULT),
                 'role'       => 'teacher',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'name'       => 'Student User',
-                'email'      => 'student@example.com',
-                'password'   => password_hash('Student@123', PASSWORD_DEFAULT),
+                'email'      => 'bastestudent@gmail.com',
+                'password'   => password_hash('BasteStudent123.', PASSWORD_DEFAULT),
                 'role'       => 'student',
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -39,17 +39,17 @@ class UserSeeder extends Seeder
 
         // Clear existing demo accounts first to avoid conflicts
         $this->db->table('users')->whereIn('email', [
-            'admin@example.com', 
-            'teacher@example.com', 
-            'student@example.com'
+            'basteadmin@gmail.com', 
+            'basteteacher@gmail.com', 
+            'bastestudent@gmail.com'
         ])->delete();
 
         // Insert fresh demo accounts with correct roles
         $this->db->table('users')->insertBatch($users);
         
         // Double-check roles are set correctly
-        $this->db->query("UPDATE users SET role = 'admin' WHERE email = 'admin@example.com'");
-        $this->db->query("UPDATE users SET role = 'teacher' WHERE email = 'teacher@example.com'");  
-        $this->db->query("UPDATE users SET role = 'student' WHERE email = 'student@example.com'");
+        $this->db->query("UPDATE users SET role = 'admin' WHERE email = 'basteadmin@gmail.com'");
+        $this->db->query("UPDATE users SET role = 'teacher' WHERE email = 'basteteacher@gmail.com'");  
+        $this->db->query("UPDATE users SET role = 'student' WHERE email = 'bastestudent@gmail.com'");
     }
 }
