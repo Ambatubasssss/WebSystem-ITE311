@@ -6,15 +6,17 @@
     <title>ITE311 - MALILAY</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-dark text-white">
 
     <?= $this->include('templates/header') ?>
 
     <!-- Main Content -->
-    <div class="container my-5">
+    <main>
         <?= $this->renderSection('content') ?>
-    </div>
+    </main>
 
     <!-- Footer -->
     <footer class="bg-primary text-center text-white py-3 mt-5">

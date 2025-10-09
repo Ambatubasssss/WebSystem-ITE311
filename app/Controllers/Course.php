@@ -103,7 +103,8 @@ class Course extends BaseController
                         'id' => $course['id'],
                         'title' => $course['title'],
                         'description' => $course['description']
-                    ]
+                    ],
+                    'csrf_token' => csrf_hash()
                 ]);
             } else {
                 return $this->response->setJSON([

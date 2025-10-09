@@ -202,13 +202,21 @@
                 type: 'POST',
                 data: {
                     course_id: courseId,
-                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                    '<?= csrf_token() ?>': getCSRFToken()
                 },
                 dataType: 'json',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 success: function(response) {
                     if (response.success) {
                         // Show success message
                         showAlert('success', response.message);
+                        
+                        // Update CSRF token for next request
+                        if (response.csrf_token) {
+                            updateCSRFToken(response.csrf_token);
+                        }
                         
                         // Hide the enrolled course card
                         button.closest('.col-md-6').fadeOut(500, function() {
@@ -230,6 +238,11 @@
                         
                         // Update course counts
                         updateCourseCounts();
+                        
+                        // Refresh header enrollments if function exists
+                        if (typeof loadEnrollments === 'function') {
+                            loadEnrollments();
+                        }
                         
                     } else {
                         // Show error message
@@ -313,6 +326,17 @@
                 $(this).remove();
             });
         }, 5000);
+    }
+    
+    // CSRF Token Management
+    let currentCSRFToken = '<?= csrf_hash() ?>';
+    
+    function getCSRFToken() {
+        return currentCSRFToken;
+    }
+    
+    function updateCSRFToken(newToken) {
+        currentCSRFToken = newToken;
     }
     </script>
 <?= $this->endSection() ?>

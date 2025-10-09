@@ -216,7 +216,7 @@ class Auth extends BaseController
                 JOIN courses c ON c.id = e.course_id 
                 WHERE e.user_id = ? 
                 ORDER BY e.enrollment_date DESC
-            ", [$user['id']]);
+            ", [session('userID')]);
             $enrolledCourses = $enrollmentsQuery->getResultArray();
             
             // Get enrolled course IDs

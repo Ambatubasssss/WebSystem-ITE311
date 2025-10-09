@@ -91,28 +91,14 @@
                                         </div>
                                         <h6>My Enrollments</h6>
                                     </li>
-                                    <?php
-                                    $enrollments = [
-                                        ['course' => 'History 101', 'instructor' => 'Dr. Smith', 'status' => 'Active'],
-                                        ['course' => 'Art 303', 'instructor' => 'Prof. Johnson', 'status' => 'Active']
-                                    ];
-                                    ?>
                                     <li class="dropdown-item-text">
-                                        <div class="row">
-                                            <?php foreach ($enrollments as $enrollment): ?>
-                                            <div class="col-md-6 mb-3">
-                                                <div class="card">
-                                                    <div class="card-body">
-                                                        <h6 class="card-title"><?= esc($enrollment['course']) ?></h6>
-                                                        <p class="card-text small">
-                                                            <strong>Instructor:</strong> <?= esc($enrollment['instructor']) ?><br>
-                                                            <strong>Status:</strong> <span class="badge bg-success"><?= esc($enrollment['status']) ?></span>
-                                                        </p>
-                                                        <a href="#" class="btn btn-sm btn-primary">View Course</a>
-                                                    </div>
+                                        <div id="headerEnrollmentsContainer">
+                                            <div class="text-center p-3">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
                                                 </div>
+                                                <p class="mt-2">Loading enrollments...</p>
                                             </div>
-                                            <?php endforeach; ?>
                                         </div>
                                     </li>
                                 </ul>
@@ -144,6 +130,14 @@
                 loadUsers();
             });
         }
+        
+        // Load enrollments when student dropdown is opened
+        const enrollmentsDropdown = document.querySelector('a[data-bs-toggle="dropdown"]');
+        if (enrollmentsDropdown && enrollmentsDropdown.textContent.includes('My Enrollments')) {
+            enrollmentsDropdown.addEventListener('click', function() {
+                loadEnrollments();
+            });
+        }
     });
 
     function loadUsers() {
@@ -160,6 +154,23 @@
             .catch(error => {
                 document.getElementById('usersTableContainer').innerHTML = 
                     '<div class="alert alert-danger">Error loading users: ' + error.message + '</div>';
+            });
+    }
+
+    function loadEnrollments() {
+        fetch('<?= base_url('course/enrollments') ?>')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayEnrollments(data.enrollments);
+                } else {
+                    document.getElementById('headerEnrollmentsContainer').innerHTML = 
+                        '<div class="alert alert-danger">' + data.message + '</div>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('headerEnrollmentsContainer').innerHTML = 
+                    '<div class="alert alert-danger">Error loading enrollments: ' + error.message + '</div>';
             });
     }
 
@@ -219,6 +230,48 @@
             </div>`;
         
         document.getElementById('usersTableContainer').innerHTML = html;
+    }
+
+    function displayEnrollments(enrollments) {
+        if (enrollments.length === 0) {
+            document.getElementById('headerEnrollmentsContainer').innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">You haven't enrolled in any courses yet.</p>
+                    <p class="text-muted">Visit your dashboard to browse available courses!</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="row">';
+        
+        enrollments.forEach(enrollment => {
+            const enrollmentDate = new Date(enrollment.enrollment_date).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+            
+            html += `
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">${escapeHtml(enrollment.title)}</h6>
+                            <p class="card-text small">
+                                <strong>Enrolled:</strong> ${enrollmentDate}<br>
+                                <strong>Status:</strong> <span class="badge bg-success">Active</span>
+                            </p>
+                            <a href="#" class="btn btn-sm btn-primary">View Course</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        
+        document.getElementById('headerEnrollmentsContainer').innerHTML = html;
     }
 
     function updateUserRole(userId, newRole) {
