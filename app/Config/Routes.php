@@ -31,16 +31,23 @@ $routes->get('/course/available', 'Course::getAvailableCourses');
 $routes->get('/course/enrollments', 'Course::getUserEnrollments');
 $routes->get('/course/view/(:num)', 'Course::view/$1');
 
-// Student-specific routes (for enrollments and assignments only)
-$routes->get('/student/enrollments', 'Student::enrollments');
-$routes->get('/student/assignments', 'Student::assignments');
+// Student-specific routes (protected by RoleAuth filter)
+$routes->group('student', ['filter' => 'roleauth'], function($routes) {
+    $routes->get('enrollments', 'Student::enrollments');
+    $routes->get('assignments', 'Student::assignments');
+});
 
 // Announcements route
 $routes->get('/announcements', 'Announcement::index');
 
-// Role-specific dashboard routes
-$routes->get('/teacher/dashboard', 'Teacher::dashboard');
-$routes->get('/admin/dashboard', 'Admin::dashboard');
+// Role-specific dashboard routes (protected by RoleAuth filter)
+$routes->group('teacher', ['filter' => 'roleauth'], function($routes) {
+    $routes->get('dashboard', 'Teacher::dashboard');
+});
+
+$routes->group('admin', ['filter' => 'roleauth'], function($routes) {
+    $routes->get('dashboard', 'Admin::dashboard');
+});
 
 // Unified dashboard only per Lab 5
 

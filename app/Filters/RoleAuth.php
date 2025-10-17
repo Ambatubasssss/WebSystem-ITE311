@@ -34,6 +34,9 @@ class RoleAuth implements FilterInterface
         // Get user role from session
         $userRole = strtolower(session('role') ?? '');
         $currentPath = $request->getUri()->getPath();
+        
+        // Debug logging
+        log_message('debug', "RoleAuth Filter - User Role: {$userRole}, Current Path: {$currentPath}");
 
         // Define role-based access rules
         $accessRules = [
