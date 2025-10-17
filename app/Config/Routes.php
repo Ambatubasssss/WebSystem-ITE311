@@ -21,26 +21,31 @@ $routes->get('/dashboard', 'Auth::dashboard');
 // No separate routes needed since everything is accessible through the unified dashboard
 
 
-// Role management routes (Admin only)
-$routes->get('/admin/users', 'Admin::getUsers');
-$routes->post('/admin/roles/update/(:num)', 'Admin::updateRole/$1');
-
 // Course enrollment routes
 $routes->post('/course/enroll', 'Course::enroll');
 $routes->get('/course/available', 'Course::getAvailableCourses');
 $routes->get('/course/enrollments', 'Course::getUserEnrollments');
 $routes->get('/course/view/(:num)', 'Course::view/$1');
 
-// Student-specific routes (temporarily without filter for testing)
-$routes->get('/student/enrollments', 'Student::enrollments');
-$routes->get('/student/assignments', 'Student::assignments');
+// Student-specific routes (protected by RoleAuth filter)
+$routes->group('student', ['filter' => 'roleauth'], function($routes) {
+    $routes->get('enrollments', 'Student::enrollments');
+    $routes->get('assignments', 'Student::assignments');
+});
 
-// Announcements route
+// Announcements route (accessible to all logged-in users)
 $routes->get('/announcements', 'Announcement::index');
 
-// Role-specific dashboard routes (temporarily without filter for testing)
-$routes->get('/teacher/dashboard', 'Teacher::dashboard');
-$routes->get('/admin/dashboard', 'Admin::dashboard');
+// Role-specific dashboard routes (protected by RoleAuth filter)
+$routes->group('teacher', ['filter' => 'roleauth'], function($routes) {
+    $routes->get('dashboard', 'Teacher::dashboard');
+});
+
+$routes->group('admin', ['filter' => 'roleauth'], function($routes) {
+    $routes->get('dashboard', 'Admin::dashboard');
+    $routes->get('users', 'Admin::getUsers');
+    $routes->post('roles/update/(:num)', 'Admin::updateRole/$1');
+});
 
 // Unified dashboard only per Lab 5
 

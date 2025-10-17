@@ -34,9 +34,6 @@ class RoleAuth implements FilterInterface
         // Get user role from session
         $userRole = strtolower(session('role') ?? '');
         $currentPath = $request->getUri()->getPath();
-        
-        // Debug logging
-        log_message('debug', "RoleAuth Filter - User Role: {$userRole}, Current Path: {$currentPath}");
 
         // Define role-based access rules
         $accessRules = [
@@ -50,6 +47,7 @@ class RoleAuth implements FilterInterface
         
         if (isset($accessRules[$userRole])) {
             foreach ($accessRules[$userRole] as $allowedPath) {
+                // Check if current path starts with allowed path
                 if (strpos($currentPath, $allowedPath) === 0) {
                     $hasAccess = true;
                     break;
