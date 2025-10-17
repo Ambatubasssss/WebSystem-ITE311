@@ -31,6 +31,13 @@ $routes->get('/course/available', 'Course::getAvailableCourses');
 $routes->get('/course/enrollments', 'Course::getUserEnrollments');
 $routes->get('/course/view/(:num)', 'Course::view/$1');
 
+// Student-specific routes (for enrollments and assignments only)
+$routes->get('/student/enrollments', 'Student::enrollments');
+$routes->get('/student/assignments', 'Student::assignments');
+
+// Announcements route
+$routes->get('/announcements', 'Announcement::index');
+
 // Unified dashboard only per Lab 5
 
 
