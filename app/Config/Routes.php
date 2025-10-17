@@ -36,11 +36,12 @@ $routes->group('student', ['filter' => 'roleauth'], function($routes) {
 // Announcements route (accessible to all logged-in users)
 $routes->get('/announcements', 'Announcement::index');
 
-// Role-specific dashboard routes (protected by RoleAuth filter)
+// Teacher routes (protected by RoleAuth filter)
 $routes->group('teacher', ['filter' => 'roleauth'], function($routes) {
     $routes->get('dashboard', 'Teacher::dashboard');
 });
 
+// Admin routes (protected by RoleAuth filter)
 $routes->group('admin', ['filter' => 'roleauth'], function($routes) {
     $routes->get('dashboard', 'Admin::dashboard');
     $routes->get('users', 'Admin::getUsers');

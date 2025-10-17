@@ -60,7 +60,7 @@
                     } else if (role === 'teacher') {
                         redirectUrl = '/ITE311-MALILAY/teacher/dashboard';
                     } else if (role === 'student') {
-                        redirectUrl = '/ITE311-MALILAY/student/dashboard';
+                        redirectUrl = '/ITE311-MALILAY/dashboard';
                     } else if ('<?= session()->get('logged_in') ? 'true' : 'false' ?>' === 'true') {
                         redirectUrl = '/ITE311-MALILAY/dashboard';
                     } else {

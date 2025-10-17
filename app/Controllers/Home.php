@@ -29,7 +29,7 @@ class Home extends BaseController
         } elseif ($role === 'teacher') {
             $dashboardUrl = '/ITE311-MALILAY/teacher/dashboard';
         } elseif ($role === 'student') {
-            $dashboardUrl = '/ITE311-MALILAY/student/dashboard';
+            $dashboardUrl = '/ITE311-MALILAY/dashboard';
         } elseif (session()->get('logged_in')) {
             $dashboardUrl = '/ITE311-MALILAY/dashboard';
         } else {

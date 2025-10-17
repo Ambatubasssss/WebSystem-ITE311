@@ -33,7 +33,22 @@ class RoleAuth implements FilterInterface
 
         // Get user role from session
         $userRole = strtolower(session('role') ?? '');
-        $currentPath = $request->getUri()->getPath();
+        $uri = $request->getUri();
+        $currentPath = $uri->getPath();
+        
+        // Remove base URL path if present (e.g., /ITE311-MALILAY/)
+        // Get the route path only
+        $baseURL = config('App')->baseURL;
+        $basePath = parse_url($baseURL, PHP_URL_PATH);
+        if ($basePath && strpos($currentPath, $basePath) === 0) {
+            $currentPath = substr($currentPath, strlen($basePath));
+        }
+        
+        // Normalize path (remove trailing slashes and ensure it starts with /)
+        $currentPath = '/' . trim($currentPath, '/');
+        
+        // Debug logging
+        log_message('debug', "RoleAuth Filter - User Role: '{$userRole}', Current Path: '{$currentPath}'");
 
         // Define role-based access rules
         $accessRules = [
@@ -50,6 +65,7 @@ class RoleAuth implements FilterInterface
                 // Check if current path starts with allowed path
                 if (strpos($currentPath, $allowedPath) === 0) {
                     $hasAccess = true;
+                    log_message('debug', "RoleAuth Filter - Access GRANTED for '{$userRole}' to '{$currentPath}' via '{$allowedPath}'");
                     break;
                 }
             }
@@ -57,6 +73,7 @@ class RoleAuth implements FilterInterface
 
         // If user doesn't have access, redirect with error message
         if (!$hasAccess) {
+            log_message('debug', "RoleAuth Filter - Access DENIED for '{$userRole}' to '{$currentPath}'");
             session()->setFlashdata('error', 'Access Denied: Insufficient Permissions');
             return redirect()->to('/announcements');
         }

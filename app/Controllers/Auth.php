@@ -153,6 +153,7 @@ class Auth extends BaseController
             
             // Redirect users based on their role
             $userRole = strtolower($user['role']);
+            
             switch ($userRole) {
                 case 'student':
                     return redirect()->to('/announcements');

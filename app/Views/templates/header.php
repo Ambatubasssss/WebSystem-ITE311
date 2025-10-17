@@ -128,7 +128,7 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#" onclick="return false;">Assignments</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('student/assignments') ?>">Assignments</a></li>
                         <?php else: ?>
                             <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Dashboard</a></li>
                         <?php endif; ?>
@@ -293,7 +293,7 @@
         let html = '<div class="row">';
         
         enrollments.forEach(enrollment => {
-            const enrollmentDate = new Date(enrollment.enrollment_date).toLocaleDateString('en-US', { 
+            const enrollmentDate = new Date(enrollment.created_at).toLocaleDateString('en-US', { 
                 month: 'short', 
                 day: 'numeric', 
                 year: 'numeric' 

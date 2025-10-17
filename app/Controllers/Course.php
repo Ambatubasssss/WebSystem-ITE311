@@ -81,19 +81,12 @@ class Course extends BaseController
             ]);
         }
 
-        // Prepare enrollment data
-        $enrollmentData = [
-            'user_id' => $userId,
-            'course_id' => $courseId,
-            'enrollment_date' => date('Y-m-d H:i:s')
-        ];
-
         // Insert enrollment record using direct database query
         try {
             $insertQuery = $db->query("
-                INSERT INTO enrollments (user_id, course_id, enrollment_date, created_at, updated_at) 
-                VALUES (?, ?, ?, NOW(), NOW())
-            ", [$userId, $courseId, $enrollmentData['enrollment_date']]);
+                INSERT INTO enrollments (user_id, course_id, created_at, updated_at) 
+                VALUES (?, ?, NOW(), NOW())
+            ", [$userId, $courseId]);
             
             if ($db->affectedRows() > 0) {
                 return $this->response->setJSON([

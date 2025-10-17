@@ -139,7 +139,7 @@
                                                                 <p class="card-text small"><?= esc($enrollment['description']) ?></p>
                                                                 <small class="text-muted">
                                                                     <i class="fas fa-calendar"></i> 
-                                                                    Enrolled: <?= date('M j, Y', strtotime($enrollment['enrollment_date'])) ?>
+                                                                    Enrolled: <?= date('M j, Y', strtotime($enrollment['created_at'])) ?>
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -192,6 +192,107 @@
                                                     <p class="text-muted">Great! You're enrolled in all available courses.</p>
                                                 </div>
                                             <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Enrollments Section (shown when redirected from student/enrollments) -->
+                        <?php if (session()->getFlashdata('show_enrollments') && !empty($enrollments ?? [])): ?>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0"><i class="fas fa-graduation-cap"></i> My Enrollments</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>Course</th>
+                                                        <th>Instructor</th>
+                                                        <th>Status</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($enrollments as $enrollment): ?>
+                                                        <tr>
+                                                            <td><strong><?= esc($enrollment['course']) ?></strong></td>
+                                                            <td><?= esc($enrollment['instructor']) ?></td>
+                                                            <td>
+                                                                <span class="badge bg-<?= $enrollment['status'] === 'Active' ? 'success' : 'warning' ?>">
+                                                                    <?= esc($enrollment['status']) ?>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <a href="#" class="btn btn-sm btn-outline-primary" onclick="return false;">
+                                                                    <i class="fas fa-eye"></i> View
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Assignments Section (shown when redirected from student/assignments) -->
+                        <?php if (session()->getFlashdata('show_assignments') && !empty($assignments ?? [])): ?>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h5 class="mb-0"><i class="fas fa-tasks"></i> My Assignments</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>Assignment</th>
+                                                        <th>Course</th>
+                                                        <th>Due Date</th>
+                                                        <th>Status</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($assignments as $assignment): ?>
+                                                        <tr>
+                                                            <td><strong><?= esc($assignment['title']) ?></strong></td>
+                                                            <td><?= esc($assignment['course']) ?></td>
+                                                            <td>
+                                                                <span class="text-<?= strtotime($assignment['due_date']) < time() ? 'danger' : 'dark' ?>">
+                                                                    <?= date('M d, Y', strtotime($assignment['due_date'])) ?>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-<?= $assignment['status'] === 'Completed' ? 'success' : 'warning' ?>">
+                                                                    <?= esc($assignment['status']) ?>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <a href="#" class="btn btn-sm btn-outline-primary" onclick="return false;">
+                                                                    <i class="fas fa-eye"></i> View
+                                                                </a>
+                                                                <?php if ($assignment['status'] === 'Pending'): ?>
+                                                                    <a href="#" class="btn btn-sm btn-outline-success" onclick="return false;">
+                                                                        <i class="fas fa-upload"></i> Submit
+                                                                    </a>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>

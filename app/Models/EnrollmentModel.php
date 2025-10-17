@@ -12,7 +12,7 @@ class EnrollmentModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['user_id', 'course_id', 'enrollment_date', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['user_id', 'course_id', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -30,8 +30,7 @@ class EnrollmentModel extends Model
     // Validation
     protected $validationRules      = [
         'user_id' => 'required|integer',
-        'course_id' => 'required|integer',
-        'enrollment_date' => 'required|valid_date'
+        'course_id' => 'required|integer'
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
@@ -53,11 +52,6 @@ class EnrollmentModel extends Model
      */
     public function enrollUser($data)
     {
-        // Set enrollment date if not provided
-        if (!isset($data['enrollment_date'])) {
-            $data['enrollment_date'] = date('Y-m-d H:i:s');
-        }
-
         return $this->insert($data);
     }
 
@@ -69,7 +63,7 @@ class EnrollmentModel extends Model
         return $this->select('enrollments.*, courses.title, courses.description')
                     ->join('courses', 'courses.id = enrollments.course_id')
                     ->where('enrollments.user_id', $user_id)
-                    ->orderBy('enrollments.enrollment_date', 'DESC')
+                    ->orderBy('enrollments.created_at', 'DESC')
                     ->findAll();
     }
 
@@ -101,7 +95,7 @@ class EnrollmentModel extends Model
         return $this->select('enrollments.*, users.name as user_name, users.email, courses.title as course_title')
                     ->join('users', 'users.id = enrollments.user_id')
                     ->join('courses', 'courses.id = enrollments.course_id')
-                    ->orderBy('enrollments.enrollment_date', 'DESC')
+                    ->orderBy('enrollments.created_at', 'DESC')
                     ->findAll();
     }
 }
