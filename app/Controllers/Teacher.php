@@ -6,6 +6,20 @@ use App\Controllers\BaseController;
 
 class Teacher extends BaseController
 {
+    public function dashboard()
+    {
+        if (!session()->get('logged_in') || strtolower(session('role')) !== 'teacher') {
+            session()->setFlashdata('error', 'Access denied. Teacher role required.');
+            return redirect()->to('/announcements');
+        }
+
+        $data = [
+            'title' => 'Teacher Dashboard'
+        ];
+
+        return view('teacher_dashboard', $data);
+    }
+
     public function courses()
     {
         if (!session()->get('logged_in') || strtolower(session('role')) !== 'teacher') {

@@ -6,6 +6,20 @@ use App\Controllers\BaseController;
 
 class Admin extends BaseController
 {
+    public function dashboard()
+    {
+        if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {
+            session()->setFlashdata('error', 'Access denied. Admin role required.');
+            return redirect()->to('/announcements');
+        }
+
+        $data = [
+            'title' => 'Admin Dashboard'
+        ];
+
+        return view('admin_dashboard', $data);
+    }
+
     public function users()
     {
         if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {

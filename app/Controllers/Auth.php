@@ -148,9 +148,21 @@ class Auth extends BaseController
             // Clear login attempts on successful login
             session()->remove($attemptsKey);
 
-            // Unified dashboard redirection for all roles
+            // Role-based redirection after successful login
             session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
-            return redirect()->to('/dashboard');
+            
+            // Redirect users based on their role
+            $userRole = strtolower($user['role']);
+            switch ($userRole) {
+                case 'student':
+                    return redirect()->to('/announcements');
+                case 'teacher':
+                    return redirect()->to('/teacher/dashboard');
+                case 'admin':
+                    return redirect()->to('/admin/dashboard');
+                default:
+                    return redirect()->to('/dashboard');
+            }
         }
 
         // For GET requests, just load the login view
@@ -208,32 +220,52 @@ class Auth extends BaseController
                 ['id' => 6, 'title' => 'Data Science and Analytics', 'description' => 'Explore data analysis, machine learning, and statistical modeling techniques.']
             ];
             
-            // Get enrolled courses from database
-            $db = \Config\Database::connect();
-            $enrollmentsQuery = $db->query("
-                SELECT e.*, c.title, c.description 
-                FROM enrollments e 
-                JOIN courses c ON c.id = e.course_id 
-                WHERE e.user_id = ? 
-                ORDER BY e.enrollment_date DESC
-            ", [session('userID')]);
-            $enrolledCourses = $enrollmentsQuery->getResultArray();
+            // Get enrolled courses from database (with error handling)
+            $enrolledCourses = [];
+            $availableCourses = $allCourses; // Default to all courses available
             
-            // Get enrolled course IDs
-            $enrolledCourseIds = array_column($enrolledCourses, 'course_id');
-            
-            // Filter available courses (not enrolled)
-            $availableCourses = [];
-            foreach ($allCourses as $course) {
-                if (!in_array($course['id'], $enrolledCourseIds)) {
-                    $availableCourses[] = $course;
+            try {
+                $db = \Config\Database::connect();
+                $enrollmentsQuery = $db->query("
+                    SELECT e.*, c.title, c.description 
+                    FROM enrollments e 
+                    JOIN courses c ON c.id = e.course_id 
+                    WHERE e.user_id = ? 
+                    ORDER BY e.created_at DESC
+                ", [session('userID')]);
+                $enrolledCourses = $enrollmentsQuery->getResultArray();
+                
+                // Get enrolled course IDs
+                $enrolledCourseIds = array_column($enrolledCourses, 'course_id');
+                
+                // Filter available courses (not enrolled)
+                $availableCourses = [];
+                foreach ($allCourses as $course) {
+                    if (!in_array($course['id'], $enrolledCourseIds)) {
+                        $availableCourses[] = $course;
+                    }
                 }
+            } catch (\Exception $e) {
+                // If database query fails, use empty arrays
+                log_message('error', 'Dashboard enrollment query failed: ' . $e->getMessage());
+                $enrolledCourses = [];
+                $availableCourses = $allCourses;
             }
             
             $data['enrolledCourses'] = $enrolledCourses;
             $data['availableCourses'] = $availableCourses;
             $data['upcomingDeadlines'] = ['Assignment 1 (Oct 1)', 'Quiz 2 (Oct 5)']; // Placeholder
             $data['completedAssignments'] = 3; // Placeholder
+            
+            // Add sample enrollment and assignment data
+            $data['enrollments'] = [
+                ['course' => 'History 101', 'instructor' => 'Dr. Smith', 'status' => 'Active'],
+                ['course' => 'Art 303', 'instructor' => 'Prof. Johnson', 'status' => 'Active']
+            ];
+            $data['assignments'] = [
+                ['title' => 'Assignment 1', 'course' => 'History 101', 'due_date' => '2024-10-01', 'status' => 'Pending'],
+                ['title' => 'Quiz 2', 'course' => 'Art 303', 'due_date' => '2024-10-05', 'status' => 'Completed']
+            ];
         }
 
         return view('auth/dashboard', $data);

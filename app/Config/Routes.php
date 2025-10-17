@@ -38,6 +38,10 @@ $routes->get('/student/assignments', 'Student::assignments');
 // Announcements route
 $routes->get('/announcements', 'Announcement::index');
 
+// Role-specific dashboard routes
+$routes->get('/teacher/dashboard', 'Teacher::dashboard');
+$routes->get('/admin/dashboard', 'Admin::dashboard');
+
 // Unified dashboard only per Lab 5
 
 
