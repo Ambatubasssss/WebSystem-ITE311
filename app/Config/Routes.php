@@ -31,6 +31,7 @@ $routes->get('/course/view/(:num)', 'Course::view/$1');
 $routes->group('student', ['filter' => 'roleauth'], function($routes) {
     $routes->get('enrollments', 'Student::enrollments');
     $routes->get('assignments', 'Student::assignments');
+    $routes->get('materials/(:num)', 'Student::materials/$1');
 });
 
 // Announcements route (accessible to all logged-in users)
@@ -46,7 +47,14 @@ $routes->group('admin', ['filter' => 'roleauth'], function($routes) {
     $routes->get('dashboard', 'Admin::dashboard');
     $routes->get('users', 'Admin::getUsers');
     $routes->post('roles/update/(:num)', 'Admin::updateRole/$1');
+    $routes->get('courses', 'Admin::courses');
+    $routes->get('course/(:num)/upload', 'Materials::upload/$1');
+    $routes->post('course/(:num)/upload', 'Materials::upload/$1');
 });
+
+// Materials routes
+$routes->get('/materials/delete/(:num)', 'Materials::delete/$1');
+$routes->get('/materials/download/(:num)', 'Materials::download/$1');
 
 // Unified dashboard only per Lab 5
 
