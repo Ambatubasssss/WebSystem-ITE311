@@ -50,6 +50,22 @@ class Admin extends BaseController
         return view('admin/settings', $data);
     }
 
+    public function courses()
+    {
+        if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {
+            session()->setFlashdata('error', 'Access denied. Admin role required.');
+            return redirect()->to('/dashboard');
+        }
+
+        $courseModel = new \App\Models\CourseModel();
+        $data = [
+            'title' => 'Course Management',
+            'courses' => $courseModel->findAll()
+        ];
+
+        return view('admin/courses', $data);
+    }
+
     public function getUsers()
     {
         if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {

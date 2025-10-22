@@ -29,4 +29,37 @@ class Student extends BaseController
         session()->setFlashdata('show_assignments', true);
         return redirect()->to('/dashboard');
     }
+
+    public function materials($course_id)
+    {
+        if (!session()->get('logged_in') || strtolower(session('role')) !== 'student') {
+            session()->setFlashdata('error', 'Access denied. Student role required.');
+            return redirect()->to('/dashboard');
+        }
+
+        // Check if user is enrolled in the course
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        if (!$enrollmentModel->isAlreadyEnrolled(session('user_id'), $course_id)) {
+            session()->setFlashdata('error', 'You are not enrolled in this course.');
+            return redirect()->to('/dashboard');
+        }
+
+        // Get course and materials
+        $courseModel = new \App\Models\CourseModel();
+        $materialModel = new \App\Models\MaterialModel();
+        
+        $course = $courseModel->find($course_id);
+        if (!$course) {
+            session()->setFlashdata('error', 'Course not found.');
+            return redirect()->to('/dashboard');
+        }
+
+        $data = [
+            'title' => 'Course Materials',
+            'course' => $course,
+            'materials' => $materialModel->getMaterialsByCourse($course_id)
+        ];
+
+        return view('student/course_materials', $data);
+    }
 }
