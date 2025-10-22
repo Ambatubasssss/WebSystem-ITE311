@@ -42,7 +42,7 @@
                                     <div class="card-body">
                                         <h5 class="card-title">Quick Actions</h5>
                                         <div class="d-grid gap-2">
-                                            <a href="<?= base_url('/') ?>" class="btn btn-outline-primary">Go to Homepage</a>
+                                            <a href="<?= base_url('teacher/dashboard') ?>" class="btn btn-outline-primary">Go to Dashboard</a>
                                             <a href="<?= base_url('logout') ?>" class="btn btn-outline-danger">Logout</a>
                                         </div>
                                     </div>

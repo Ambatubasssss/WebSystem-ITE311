@@ -19,9 +19,12 @@
                     </li>
                     <?php endif; ?>
                     <?php if (session()->get('logged_in')): ?>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="<?= base_url('/'); ?>">Home</a>
+                        </li>
                         <?php $role = strtolower(session('role') ?? ''); ?>
                         <?php if ($role === 'admin'): ?>
-                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Admin Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('admin/dashboard'); ?>">Admin Dashboard</a></li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
                                     Manage Users
@@ -47,7 +50,7 @@
                             </li>
                             <li class="nav-item"><a class="nav-link text-white" href="#" onclick="return false;">Settings</a></li>
                         <?php elseif ($role === 'teacher'): ?>
-                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Teacher Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('teacher/dashboard'); ?>">Teacher Dashboard</a></li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
                                     My Courses

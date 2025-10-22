@@ -49,12 +49,28 @@ class RoleAuth implements FilterInterface
         
         // Debug logging
         log_message('debug', "RoleAuth Filter - User Role: '{$userRole}', Current Path: '{$currentPath}'");
+        
+        // Special cases: allow access to role-specific paths
+        if ($userRole === 'teacher' && strpos($currentPath, '/teacher') === 0) {
+            log_message('debug', "RoleAuth Filter - Teacher access granted to: '{$currentPath}'");
+            return; // Allow access
+        }
+        
+        if ($userRole === 'admin' && strpos($currentPath, '/admin') === 0) {
+            log_message('debug', "RoleAuth Filter - Admin access granted to: '{$currentPath}'");
+            return; // Allow access
+        }
+        
+        if ($userRole === 'student' && strpos($currentPath, '/student') === 0) {
+            log_message('debug', "RoleAuth Filter - Student access granted to: '{$currentPath}'");
+            return; // Allow access
+        }
 
         // Define role-based access rules
         $accessRules = [
-            'admin' => ['/admin', '/announcements'],
-            'teacher' => ['/teacher', '/announcements'],
-            'student' => ['/student', '/announcements']
+            'admin' => ['/admin', '/announcements', '/materials'],
+            'teacher' => ['/teacher', '/announcements', '/materials'],
+            'student' => ['/student', '/announcements', '/materials']
         ];
 
         // Check if user has access to the current path

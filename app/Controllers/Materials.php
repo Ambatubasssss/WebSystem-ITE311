@@ -17,6 +17,9 @@ class Materials extends BaseController
         $this->materialModel = new MaterialModel();
         $this->courseModel = new CourseModel();
         $this->enrollmentModel = new EnrollmentModel();
+        
+        // Load helpers
+        helper('form');
     }
 
     /**
@@ -25,8 +28,9 @@ class Materials extends BaseController
     public function upload($course_id)
     {
         // Check if user is admin/teacher
-        if (session('role') !== 'admin' && session('role') !== 'teacher') {
-            return redirect()->to('/')->with('error', 'Access denied. Admin/Teacher privileges required.');
+        if (strtolower(session('role')) !== 'admin' && strtolower(session('role')) !== 'teacher') {
+            session()->setFlashdata('error', 'Access denied. Admin/Teacher privileges required.');
+            return redirect()->to('/announcements');
         }
 
         // Get course details
@@ -116,8 +120,9 @@ class Materials extends BaseController
     public function delete($material_id)
     {
         // Check if user is admin/teacher
-        if (session('role') !== 'admin' && session('role') !== 'teacher') {
-            return redirect()->to('/')->with('error', 'Access denied.');
+        if (strtolower(session('role')) !== 'admin' && strtolower(session('role')) !== 'teacher') {
+            session()->setFlashdata('error', 'Access denied.');
+            return redirect()->to('/announcements');
         }
 
         $material = $this->materialModel->find($material_id);

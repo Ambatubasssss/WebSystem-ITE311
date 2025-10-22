@@ -13,8 +13,24 @@ class Teacher extends BaseController
             return redirect()->to('/announcements');
         }
 
+        // Load models
+        $courseModel = new \App\Models\CourseModel();
+        $materialModel = new \App\Models\MaterialModel();
+
+        // Get all courses
+        $courses = $courseModel->findAll();
+        
+        // Get material counts for each course
+        $coursesWithMaterials = [];
+        foreach ($courses as $course) {
+            $materialCount = $materialModel->where('course_id', $course['id'])->countAllResults();
+            $course['material_count'] = $materialCount;
+            $coursesWithMaterials[] = $course;
+        }
+
         $data = [
-            'title' => 'Teacher Dashboard'
+            'title' => 'Teacher Dashboard',
+            'courses' => $coursesWithMaterials
         ];
 
         return view('teacher_dashboard', $data);

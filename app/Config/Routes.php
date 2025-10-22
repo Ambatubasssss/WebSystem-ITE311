@@ -5,7 +5,7 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('/', 'Home::index');
+$routes->get('/', 'Auth::dashboard');
 $routes->get('about', 'Home::about');
 $routes->get('contact', 'Home::contact');
 
@@ -40,6 +40,8 @@ $routes->get('/announcements', 'Announcement::index');
 // Teacher routes (protected by RoleAuth filter)
 $routes->group('teacher', ['filter' => 'roleauth'], function($routes) {
     $routes->get('dashboard', 'Teacher::dashboard');
+    $routes->get('course/(:num)/upload', 'Materials::upload/$1');
+    $routes->post('course/(:num)/upload', 'Materials::upload/$1');
 });
 
 // Admin routes (protected by RoleAuth filter)
