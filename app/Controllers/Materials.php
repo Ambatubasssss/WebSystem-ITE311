@@ -28,15 +28,17 @@ class Materials extends BaseController
     public function upload($course_id)
     {
         // Check if user is admin/teacher
-        if (strtolower(session('role')) !== 'admin' && strtolower(session('role')) !== 'teacher') {
+        $userRole = strtolower(session('role') ?? '');
+        if ($userRole !== 'admin' && $userRole !== 'teacher') {
             session()->setFlashdata('error', 'Access denied. Admin/Teacher privileges required.');
-            return redirect()->to('/announcements');
+            return redirect()->to('/dashboard');
         }
 
         // Get course details
         $course = $this->courseModel->find($course_id);
         if (!$course) {
-            return redirect()->to('/admin/courses')->with('error', 'Course not found.');
+            $redirectPath = ($userRole === 'admin') ? '/admin/courses' : '/teacher/dashboard';
+            return redirect()->to($redirectPath)->with('error', 'Course not found.');
         }
 
         if ($this->request->getMethod() === 'post') {
@@ -99,12 +101,20 @@ class Materials extends BaseController
                     'file_type' => $file->getClientExtension()
                 ];
 
-                if ($this->materialModel->insertMaterial($materialData)) {
+                // Log the data being inserted for debugging
+                log_message('info', 'Attempting to insert material: ' . json_encode($materialData));
+
+                $insertResult = $this->materialModel->insertMaterial($materialData);
+                
+                if ($insertResult) {
+                    log_message('info', 'Material inserted successfully with ID: ' . $insertResult);
                     return redirect()->back()->with('success', 'Material uploaded successfully.');
                 } else {
                     // Delete uploaded file if database insert fails
                     unlink($uploadPath . $newName);
-                    return redirect()->back()->with('error', 'Failed to save material information.');
+                    $errors = $this->materialModel->errors();
+                    log_message('error', 'Failed to insert material: ' . json_encode($errors));
+                    return redirect()->back()->with('error', 'Failed to save material information: ' . implode(', ', $errors));
                 }
             } else {
                 return redirect()->back()->with('error', 'File upload failed: ' . $file->getErrorString());
@@ -120,9 +130,10 @@ class Materials extends BaseController
     public function delete($material_id)
     {
         // Check if user is admin/teacher
-        if (strtolower(session('role')) !== 'admin' && strtolower(session('role')) !== 'teacher') {
+        $userRole = strtolower(session('role') ?? '');
+        if ($userRole !== 'admin' && $userRole !== 'teacher') {
             session()->setFlashdata('error', 'Access denied.');
-            return redirect()->to('/announcements');
+            return redirect()->to('/dashboard');
         }
 
         $material = $this->materialModel->find($material_id);

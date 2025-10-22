@@ -11,7 +11,11 @@
                         Upload Material for: <?= esc($course['title']) ?>
                     </h3>
                     <div class="card-tools">
-                        <a href="<?= base_url('admin/courses') ?>" class="btn btn-secondary btn-sm">
+                        <?php 
+                        $userRole = strtolower(session('role') ?? '');
+                        $backUrl = ($userRole === 'admin') ? 'admin/courses' : 'teacher/dashboard';
+                        ?>
+                        <a href="<?= base_url($backUrl) ?>" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left mr-1"></i> Back to Courses
                         </a>
                     </div>
@@ -43,7 +47,11 @@
                                         </div>
                                     <?php endif; ?>
 
-                                    <?= form_open_multipart(base_url("admin/course/{$course['id']}/upload")) ?>
+                                    <?php 
+                                    $userRole = strtolower(session('role') ?? '');
+                                    $formAction = ($userRole === 'admin') ? "admin/course/{$course['id']}/upload" : "teacher/course/{$course['id']}/upload";
+                                    ?>
+                                    <?= form_open_multipart(base_url($formAction)) ?>
                                         <div class="form-group">
                                             <label for="material_file">Select File</label>
                                             <div class="custom-file">
