@@ -129,6 +129,35 @@
                         <?php else: ?>
                             <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Dashboard</a></li>
                         <?php endif; ?>
+                        
+                        <!-- Notifications Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white position-relative" href="#" role="button" data-bs-toggle="dropdown" id="notificationsDropdown">
+                                <i class="fas fa-bell"></i>
+                                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="notificationBadge" style="display: none;">0</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                                <li class="dropdown-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">Notifications</h6>
+                                        <button class="btn btn-sm btn-outline-primary" id="refreshNotifications">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                                <li class="dropdown-item-text">
+                                    <div id="notificationsContainer">
+                                        <div class="text-center p-3">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <p class="mt-2">Loading notifications...</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link text-white" href="<?= base_url('logout'); ?>">Logout</a>
                         </li>
@@ -486,6 +515,210 @@
                 alertDiv.remove();
             }
         }, 5000);
+    }
+
+    // Notification System JavaScript (Vanilla JS + jQuery fallback)
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, checking for jQuery...');
+        
+        // Check if user is logged in before loading notifications
+        <?php if (session()->get('logged_in')): ?>
+        // Load notifications when page loads
+        loadNotifications();
+        <?php else: ?>
+        // User not logged in, show empty state
+        const container = document.getElementById('notificationsContainer');
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center p-3">
+                    <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">Please login to see notifications</p>
+                </div>
+            `;
+        }
+        <?php endif; ?>
+        
+        // Refresh notifications every 60 seconds (only if logged in)
+        <?php if (session()->get('logged_in')): ?>
+        setInterval(loadNotifications, 60000);
+        <?php endif; ?>
+        
+        // Manual refresh button
+        const refreshBtn = document.getElementById('refreshNotifications');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                loadNotifications();
+            });
+        }
+        
+        // Timeout for loading state (10 seconds)
+        setTimeout(function() {
+            const container = document.getElementById('notificationsContainer');
+            if (container && container.innerHTML.includes('Loading notifications')) {
+                container.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Loading timeout. Please try refreshing.
+                    </div>
+                `;
+            }
+        }, 10000);
+    });
+
+    function loadNotifications() {
+        console.log('Loading notifications...');
+        
+        // Use vanilla JavaScript fetch API
+        fetch('<?= base_url('notifications') ?>', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Notifications response:', data);
+            if (data.success) {
+                updateNotificationBadge(data.unread_count);
+                updateNotificationsList(data.notifications);
+            } else {
+                console.error('Failed to load notifications:', data.message);
+                const container = document.getElementById('notificationsContainer');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            ${data.message || 'Failed to load notifications'}
+                        </div>
+                    `;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            const container = document.getElementById('notificationsContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Failed to load notifications: ${error.message}
+                    </div>
+                `;
+            }
+        });
+    }
+
+    function updateNotificationBadge(count) {
+        const badge = document.getElementById('notificationBadge');
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+
+    function updateNotificationsList(notifications) {
+        const container = document.getElementById('notificationsContainer');
+        
+        console.log('Updating notifications list:', notifications);
+        
+        if (!container) return;
+        
+        if (!notifications || notifications.length === 0) {
+            container.innerHTML = `
+                <div class="text-center p-3">
+                    <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">No notifications</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        notifications.forEach(function(notification) {
+            const alertClass = notification.is_read ? 'alert-light' : 'alert-info';
+            const readClass = notification.is_read ? 'text-muted' : 'fw-bold';
+            
+            html += `
+                <div class="alert ${alertClass} mb-2 notification-item" data-id="${notification.id}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <p class="mb-1 ${readClass}">${escapeHtml(notification.message)}</p>
+                            <small class="text-muted">${notification.time_ago}</small>
+                        </div>
+                        ${!notification.is_read ? `
+                            <button class="btn btn-sm btn-outline-success mark-read-btn" data-id="${notification.id}">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+        // Bind mark as read events
+        const markReadButtons = container.querySelectorAll('.mark-read-btn');
+        console.log('Found mark as read buttons:', markReadButtons.length);
+        markReadButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const notificationId = this.getAttribute('data-id');
+                console.log('Mark as read button clicked for notification:', notificationId);
+                markAsRead(notificationId);
+            });
+        });
+    }
+
+    function markAsRead(notificationId) {
+        console.log('Marking notification as read:', notificationId);
+        fetch(`<?= base_url('notifications/mark_read') ?>/${notificationId}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '<?= csrf_hash() ?>'
+            }
+        })
+        .then(response => {
+            console.log('Mark as read response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Mark as read response data:', data);
+            if (data && data.success) {
+                // Remove the notification from the list
+                const notificationElement = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
+                if (notificationElement) {
+                    notificationElement.remove();
+                }
+                
+                // Update badge count
+                updateNotificationBadge(data.unread_count || 0);
+                
+                // Show success message
+                showAlert('success', 'Notification marked as read');
+            } else {
+                const errorMessage = (data && data.message) ? data.message : 'Unknown error occurred';
+                console.error('Mark as read failed:', errorMessage);
+                showAlert('danger', 'Failed to mark notification as read: ' + errorMessage);
+            }
+        })
+        .catch(error => {
+            console.error('Mark as read error:', error);
+            showAlert('danger', 'Failed to mark notification as read');
+        });
     }
     </script>
 

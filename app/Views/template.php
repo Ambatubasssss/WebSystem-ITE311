@@ -23,6 +23,14 @@
         <p class="mb-0">&copy; <?= date('Y') ?> LMS-MALILAY - All Rights Reserved</p>
     </footer>
 
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- jQuery fallback -->
+    <script>
+        if (typeof jQuery === 'undefined') {
+            document.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"><\/script>');
+        }
+    </script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

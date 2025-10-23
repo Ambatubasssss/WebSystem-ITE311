@@ -62,6 +62,23 @@
                                 <div class="card bg-info text-white mb-3"><div class="card-body"><h6 class="card-title">Recent Activity</h6><p class="mb-0">--</p></div></div>
                             </div>
                         </div>
+                        
+                        <!-- Test Notification Button (for Lab 8) -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Lab 8: Notification Testing</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <button class="btn btn-warning" id="createTestNotification">
+                                            <i class="fas fa-bell"></i> Create Test Notification
+                                        </button>
+                                        <small class="text-muted d-block mt-2">Click to create a test notification for testing the notification system.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <?php elseif (($role ?? session('role')) === 'teacher'): ?>
                         <div class="row">
                             <div class="col-md-6">
@@ -481,6 +498,40 @@
     
     function updateCSRFToken(newToken) {
         currentCSRFToken = newToken;
+    }
+    
+    // Test jQuery loading
+    console.log('Dashboard: jQuery available?', typeof $ !== 'undefined');
+    
+    // Test Notification Button (Lab 8) - Using vanilla JS
+    const testBtn = document.getElementById('createTestNotification');
+    if (testBtn) {
+        testBtn.addEventListener('click', function() {
+            fetch('<?= base_url('notifications/create_test') ?>', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', 'Test notification created successfully!');
+                    // Refresh notifications
+                    if (typeof loadNotifications === 'function') {
+                        loadNotifications();
+                    }
+                } else {
+                    showAlert('danger', 'Failed to create test notification: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Test notification error:', error);
+                showAlert('danger', 'Failed to create test notification');
+            });
+        });
     }
     </script>
 <?= $this->endSection() ?>

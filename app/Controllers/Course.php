@@ -89,6 +89,11 @@ class Course extends BaseController
             ", [$userId, $courseId]);
             
             if ($db->affectedRows() > 0) {
+                // Create notification for successful enrollment
+                $notificationModel = new \App\Models\NotificationModel();
+                $notificationMessage = "You have been enrolled in " . $course['title'] . "!";
+                $notificationModel->createNotification($userId, $notificationMessage);
+                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Successfully enrolled in ' . $course['title'] . '!',

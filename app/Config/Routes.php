@@ -60,6 +60,11 @@ $routes->get('/materials/download/(:num)', 'Materials::download/$1');
 $routes->get('/materials/view/(:num)', 'Materials::view/$1');
 $routes->get('/materials/viewfile/(:num)', 'Materials::viewFile/$1');
 
+// Notification routes
+$routes->get('/notifications', 'Notifications::get');
+$routes->post('/notifications/mark_read/(:num)', 'Notifications::markAsRead/$1');
+$routes->post('/notifications/create_test', 'Notifications::createTestNotification');
+
 // Unified dashboard only per Lab 5
 
 

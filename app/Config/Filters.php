@@ -74,7 +74,7 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
-            'csrf' => ['except' => ['test-upload', 'debug-upload']],
+            'csrf' => ['except' => ['test-upload', 'debug-upload', 'notifications*']],
             'invalidchars',
         ],
         'after' => [
