@@ -199,8 +199,8 @@
                         </div>
                         <?php endif; ?>
 
-                        <!-- Enrollments Section (shown when redirected from student/enrollments) -->
-                        <?php if (session()->getFlashdata('show_enrollments') && !empty($enrollments ?? [])): ?>
+                        <!-- Enrollments Section (always shown for students) -->
+                        <?php if (strtolower(session('role')) === 'student' && !empty($enrollments ?? [])): ?>
                         <div class="row mt-4">
                             <div class="col-12">
                                 <div class="card">
@@ -229,8 +229,8 @@
                                                                 </span>
                                                             </td>
                                                             <td>
-                                                                <a href="#" class="btn btn-sm btn-outline-primary" onclick="return false;">
-                                                                    <i class="fas fa-eye"></i> View
+                                                                <a href="<?= base_url("materials/view/{$enrollment['course_id']}") ?>" class="btn btn-sm btn-outline-primary">
+                                                                    <i class="fas fa-book"></i> Materials
                                                                 </a>
                                                             </td>
                                                         </tr>

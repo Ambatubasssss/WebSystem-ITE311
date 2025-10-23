@@ -258,11 +258,16 @@ class Auth extends BaseController
             $data['upcomingDeadlines'] = ['Assignment 1 (Oct 1)', 'Quiz 2 (Oct 5)']; // Placeholder
             $data['completedAssignments'] = 3; // Placeholder
             
-            // Add sample enrollment and assignment data
-            $data['enrollments'] = [
-                ['course' => 'History 101', 'instructor' => 'Dr. Smith', 'status' => 'Active'],
-                ['course' => 'Art 303', 'instructor' => 'Prof. Johnson', 'status' => 'Active']
-            ];
+            // Format enrollments for display
+            $data['enrollments'] = [];
+            foreach ($enrolledCourses as $course) {
+                $data['enrollments'][] = [
+                    'course' => $course['title'],
+                    'instructor' => 'Instructor', // You can add instructor info if needed
+                    'status' => 'Active',
+                    'course_id' => $course['course_id']
+                ];
+            }
             $data['assignments'] = [
                 ['title' => 'Assignment 1', 'course' => 'History 101', 'due_date' => '2024-10-01', 'status' => 'Pending'],
                 ['title' => 'Quiz 2', 'course' => 'Art 303', 'due_date' => '2024-10-05', 'status' => 'Completed']

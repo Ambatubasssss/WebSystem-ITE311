@@ -9,9 +9,6 @@
                 <ul class="navbar-nav ms-auto">
                     <?php if (!session()->get('logged_in')): ?>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="<?= base_url(''); ?>">Home</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link text-white" href="<?= base_url('about'); ?>">About</a>
                     </li>
                     <li class="nav-item">
@@ -19,9 +16,6 @@
                     </li>
                     <?php endif; ?>
                     <?php if (session()->get('logged_in')): ?>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="<?= base_url('/'); ?>">Home</a>
-                        </li>
                         <?php $role = strtolower(session('role') ?? ''); ?>
                         <?php if ($role === 'admin'): ?>
                             <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('admin/dashboard'); ?>">Admin Dashboard</a></li>

@@ -52,6 +52,7 @@
                                     $formAction = ($userRole === 'admin') ? "admin/course/{$course['id']}/upload" : "teacher/course/{$course['id']}/upload";
                                     ?>
                                     <?= form_open_multipart(base_url($formAction)) ?>
+                                        <?= csrf_field() ?>
                                         <div class="form-group">
                                             <label for="material_file">Select File</label>
                                             <div class="custom-file">
@@ -96,10 +97,15 @@
                                     <h5 class="card-title mb-0">Course Materials</h5>
                                 </div>
                                 <div class="card-body">
+                                    <?php 
+                                    // Debug: Show materials count
+                                    echo '<!-- Debug: Materials count = ' . count($materials) . ' -->';
+                                    ?>
                                     <?php if (empty($materials)): ?>
                                         <div class="text-center py-4">
                                             <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
                                             <p class="text-muted">No materials uploaded yet.</p>
+                                            <p class="text-muted">Debug: Materials array is empty</p>
                                         </div>
                                     <?php else: ?>
                                         <div class="table-responsive">
@@ -126,12 +132,16 @@
                                                                 </span>
                                                             </td>
                                                             <td>
-                                                                <?= $this->formatBytes($material['file_size']) ?>
+                                                                <?= formatBytes($material['file_size']) ?>
                                                             </td>
                                                             <td>
                                                                 <?= date('M d, Y H:i', strtotime($material['created_at'])) ?>
                                                             </td>
                                                             <td>
+                                                                <a href="<?= base_url("materials/viewfile/{$material['id']}") ?>" 
+                                                                   class="btn btn-sm btn-info mr-1" title="View" target="_blank">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </a>
                                                                 <a href="<?= base_url("materials/download/{$material['id']}") ?>" 
                                                                    class="btn btn-sm btn-success mr-1" title="Download">
                                                                     <i class="fas fa-download"></i>

@@ -49,7 +49,7 @@
                                                    class="btn btn-sm btn-primary mr-1" title="Manage Materials">
                                                     <i class="fas fa-upload"></i> Materials
                                                 </a>
-                                                <a href="<?= base_url("student/materials/{$course['id']}") ?>" 
+                                                <a href="<?= base_url("materials/view/{$course['id']}") ?>" 
                                                    class="btn btn-sm btn-info" title="View as Student">
                                                     <i class="fas fa-eye"></i> View
                                                 </a>

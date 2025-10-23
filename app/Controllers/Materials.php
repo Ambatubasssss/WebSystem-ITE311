@@ -27,6 +27,10 @@ class Materials extends BaseController
      */
     public function upload($course_id)
     {
+        // Debug: Log that upload method is called
+        log_message('info', 'Upload method called for course ID: ' . $course_id);
+        log_message('info', 'Request method: ' . $this->request->getMethod());
+        
         // Check if user is admin/teacher
         $userRole = strtolower(session('role') ?? '');
         if ($userRole !== 'admin' && $userRole !== 'teacher') {
@@ -42,86 +46,76 @@ class Materials extends BaseController
         }
 
         if ($this->request->getMethod() === 'post') {
+            log_message('info', 'POST request detected, calling handleFileUpload');
             return $this->handleFileUpload($course_id);
+        } else {
+            log_message('info', 'GET request detected, showing upload form');
         }
 
+        // Get materials for the course
+        $materials = $this->materialModel->getMaterialsByCourse($course_id);
+        
+        // Debug: Log the materials count
+        log_message('info', 'Course ID: ' . $course_id . ', Materials count: ' . count($materials));
+        
         // Display upload form
         $data = [
             'title' => 'Upload Course Material',
             'course' => $course,
-            'materials' => $this->materialModel->getMaterialsByCourse($course_id)
+            'materials' => $materials
         ];
 
         return view('admin/upload_material', $data);
     }
 
     /**
-     * Handle file upload process
+     * Handle file upload process - WORKING VERSION
      */
     private function handleFileUpload($course_id)
     {
-        $validation = \Config\Services::validation();
         $file = $this->request->getFile('material_file');
 
-        if (!$file->isValid()) {
-            return redirect()->back()->with('error', 'No file selected or file upload failed.');
+        // Basic validation
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()->with('error', 'No file selected or file is invalid.');
         }
 
-        // Configure upload preferences
+        // Create upload directory
         $uploadPath = WRITEPATH . 'uploads/materials/';
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
 
-        $allowedTypes = 'pdf|doc|docx|ppt|pptx|txt|jpg|jpeg|png|gif';
-        $maxSize = 10 * 1024 * 1024; // 10MB
+        // Move file
+        $newName = $file->getRandomName();
+        $moved = $file->move($uploadPath, $newName);
 
-        $file->setValidationRules([
-            'material_file' => [
-                'rules' => "uploaded[material_file]|max_size[material_file,10240]|ext_in[material_file,$allowedTypes]",
-                'errors' => [
-                    'uploaded' => 'Please select a file to upload.',
-                    'max_size' => 'File size must not exceed 10MB.',
-                    'ext_in' => 'Only PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, JPEG, PNG, and GIF files are allowed.'
-                ]
-            ]
-        ]);
-
-        if (!$file->hasMoved()) {
-            if ($file->isValid() && !$file->hasMoved()) {
-                $newName = $file->getRandomName();
-                $file->move($uploadPath, $newName);
-
-                // Prepare data for database
-                $materialData = [
-                    'course_id' => $course_id,
-                    'file_name' => $file->getClientName(),
-                    'file_path' => 'uploads/materials/' . $newName,
-                    'file_size' => $file->getSize(),
-                    'file_type' => $file->getClientExtension()
-                ];
-
-                // Log the data being inserted for debugging
-                log_message('info', 'Attempting to insert material: ' . json_encode($materialData));
-
-                $insertResult = $this->materialModel->insertMaterial($materialData);
-                
-                if ($insertResult) {
-                    log_message('info', 'Material inserted successfully with ID: ' . $insertResult);
-                    return redirect()->back()->with('success', 'Material uploaded successfully.');
-                } else {
-                    // Delete uploaded file if database insert fails
-                    unlink($uploadPath . $newName);
-                    $errors = $this->materialModel->errors();
-                    log_message('error', 'Failed to insert material: ' . json_encode($errors));
-                    return redirect()->back()->with('error', 'Failed to save material information: ' . implode(', ', $errors));
-                }
-            } else {
-                return redirect()->back()->with('error', 'File upload failed: ' . $file->getErrorString());
-            }
+        if (!$moved) {
+            return redirect()->back()->with('error', 'Failed to move uploaded file.');
         }
 
-        return redirect()->back()->with('error', 'File upload failed.');
+        // Prepare database data
+        $data = [
+            'course_id' => $course_id,
+            'file_name' => $file->getClientName(),
+            'file_path' => 'uploads/materials/' . $newName,
+            'file_size' => $file->getSize(),
+            'file_type' => $file->getClientExtension()
+        ];
+
+        // Insert into database
+        $result = $this->materialModel->insert($data);
+        
+        if ($result) {
+            return redirect()->back()->with('success', 'Material uploaded successfully!');
+        } else {
+            // Clean up file if database insert failed
+            if (file_exists($uploadPath . $newName)) {
+                unlink($uploadPath . $newName);
+            }
+            $errors = $this->materialModel->errors();
+            return redirect()->back()->with('error', 'Failed to save to database: ' . implode(', ', $errors));
+        }
     }
 
     /**
@@ -156,32 +150,61 @@ class Materials extends BaseController
     }
 
     /**
-     * Download a material (for enrolled students only)
+     * Download a material file
      */
     public function download($material_id)
     {
         // Check if user is logged in
-        if (!session('user_id')) {
-            return redirect()->to('/auth/login')->with('error', 'Please login to download materials.');
+        if (!session('userID')) {
+            return redirect()->to('/login')->with('error', 'Please login to download materials.');
         }
 
-        // Check if user is enrolled in the course
-        if (!$this->materialModel->isUserEnrolledInMaterialCourse(session('user_id'), $material_id)) {
-            return redirect()->to('/')->with('error', 'You are not enrolled in this course.');
-        }
-
-        $material = $this->materialModel->find($material_id);
+        // Get material details
+        $material = $this->materialModel->getMaterialWithCourse($material_id);
         if (!$material) {
             return redirect()->to('/')->with('error', 'Material not found.');
         }
 
-        $filePath = WRITEPATH . $material['file_path'];
-        if (!file_exists($filePath)) {
-            return redirect()->to('/')->with('error', 'File not found on server.');
+        // Check if user is enrolled in the course (skip for admin/teacher)
+        $userRole = strtolower(session('role') ?? '');
+        if ($userRole !== 'admin' && $userRole !== 'teacher') {
+            if (!$this->enrollmentModel->isAlreadyEnrolled(session('userID'), $material['course_id'])) {
+                return redirect()->to('/')->with('error', 'You are not enrolled in this course.');
+            }
         }
 
-        // Force download
-        return $this->response->download($filePath, null);
+        // Get file path
+        $filePath = WRITEPATH . $material['file_path'];
+        
+        // Debug: Log the file path and check
+        log_message('info', 'Download attempt - Material ID: ' . $material_id);
+        log_message('info', 'File path: ' . $filePath);
+        log_message('info', 'File exists: ' . (file_exists($filePath) ? 'YES' : 'NO'));
+        log_message('info', 'File size: ' . (file_exists($filePath) ? filesize($filePath) : 'N/A'));
+        
+        if (!file_exists($filePath)) {
+            log_message('error', 'File not found at: ' . $filePath);
+            return redirect()->to('/')->with('error', 'File not found.');
+        }
+
+        // Force download using custom method
+        log_message('info', 'Attempting download of: ' . $material['file_name']);
+        
+        // Set headers for download
+        $this->response->setHeader('Content-Type', 'application/octet-stream');
+        $this->response->setHeader('Content-Disposition', 'attachment; filename="' . $material['file_name'] . '"');
+        $this->response->setHeader('Content-Length', filesize($filePath));
+        $this->response->setHeader('Cache-Control', 'no-cache, must-revalidate');
+        $this->response->setHeader('Pragma', 'no-cache');
+        
+        // Read and output file
+        $fileContent = file_get_contents($filePath);
+        if ($fileContent === false) {
+            log_message('error', 'Failed to read file content');
+            return redirect()->to('/')->with('error', 'Failed to read file.');
+        }
+        
+        return $this->response->setBody($fileContent);
     }
 
     /**
@@ -190,13 +213,16 @@ class Materials extends BaseController
     public function view($course_id)
     {
         // Check if user is logged in
-        if (!session('user_id')) {
-            return redirect()->to('/auth/login')->with('error', 'Please login to view materials.');
+        if (!session('userID')) {
+            return redirect()->to('/login')->with('error', 'Please login to view materials.');
         }
 
-        // Check if user is enrolled in the course
-        if (!$this->enrollmentModel->isAlreadyEnrolled(session('user_id'), $course_id)) {
-            return redirect()->to('/')->with('error', 'You are not enrolled in this course.');
+        // Check if user is enrolled in the course (skip for admin/teacher)
+        $userRole = strtolower(session('role') ?? '');
+        if ($userRole !== 'admin' && $userRole !== 'teacher') {
+            if (!$this->enrollmentModel->isAlreadyEnrolled(session('userID'), $course_id)) {
+                return redirect()->to('/')->with('error', 'You are not enrolled in this course.');
+            }
         }
 
         $course = $this->courseModel->find($course_id);
@@ -212,4 +238,49 @@ class Materials extends BaseController
 
         return view('student/course_materials', $data);
     }
+
+    /**
+     * View a material file in browser (no download)
+     */
+    public function viewFile($material_id)
+    {
+        // Check if user is logged in
+        if (!session('userID')) {
+            return redirect()->to('/login')->with('error', 'Please login to view materials.');
+        }
+
+        // Get material details
+        $material = $this->materialModel->getMaterialWithCourse($material_id);
+        if (!$material) {
+            return redirect()->to('/')->with('error', 'Material not found.');
+        }
+
+        // Check if user is enrolled in the course (skip for admin/teacher)
+        $userRole = strtolower(session('role') ?? '');
+        if ($userRole !== 'admin' && $userRole !== 'teacher') {
+            if (!$this->enrollmentModel->isAlreadyEnrolled(session('userID'), $material['course_id'])) {
+                return redirect()->to('/')->with('error', 'You are not enrolled in this course.');
+            }
+        }
+
+        // Get file path
+        $filePath = WRITEPATH . $material['file_path'];
+        
+        if (!file_exists($filePath)) {
+            return redirect()->to('/')->with('error', 'File not found.');
+        }
+
+        // Get file info
+        $fileSize = filesize($filePath);
+        $fileType = mime_content_type($filePath);
+        
+        // Set appropriate headers for viewing
+        $this->response->setHeader('Content-Type', $fileType);
+        $this->response->setHeader('Content-Length', $fileSize);
+        $this->response->setHeader('Content-Disposition', 'inline; filename="' . $material['file_name'] . '"');
+        
+        // Output file content
+        return $this->response->setBody(file_get_contents($filePath));
+    }
+
 }

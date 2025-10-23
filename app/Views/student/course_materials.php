@@ -11,7 +11,16 @@
                         Course Materials: <?= esc($course['title']) ?>
                     </h3>
                     <div class="card-tools">
-                        <a href="<?= base_url('student/dashboard') ?>" class="btn btn-secondary btn-sm">
+                        <?php 
+                        $userRole = strtolower(session('role') ?? '');
+                        $backUrl = 'dashboard';
+                        if ($userRole === 'admin') {
+                            $backUrl = 'admin/dashboard';
+                        } elseif ($userRole === 'teacher') {
+                            $backUrl = 'teacher/dashboard';
+                        }
+                        ?>
+                        <a href="<?= base_url($backUrl) ?>" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
                         </a>
                     </div>
@@ -75,7 +84,7 @@
                                                                     <?= strtoupper($material['file_type']) ?>
                                                                 </span>
                                                                 <span class="ml-2">
-                                                                    <?= $this->formatBytes($material['file_size']) ?>
+                                                                    <?= formatBytes($material['file_size']) ?>
                                                                 </span>
                                                             </p>
                                                             <p class="card-text text-muted small mb-3">
@@ -86,11 +95,18 @@
                                                     </div>
                                                 </div>
                                                 <div class="card-footer bg-transparent">
-                                                    <a href="<?= base_url("materials/download/{$material['id']}") ?>" 
-                                                       class="btn btn-primary btn-sm btn-block">
-                                                        <i class="fas fa-download mr-1"></i>
-                                                        Download
-                                                    </a>
+                                                    <div class="btn-group w-100" role="group">
+                                                        <a href="<?= base_url("materials/viewfile/{$material['id']}") ?>" 
+                                                           class="btn btn-info btn-sm" target="_blank">
+                                                            <i class="fas fa-eye mr-1"></i>
+                                                            View
+                                                        </a>
+                                                        <a href="<?= base_url("materials/download/{$material['id']}") ?>" 
+                                                           class="btn btn-primary btn-sm">
+                                                            <i class="fas fa-download mr-1"></i>
+                                                            Download
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

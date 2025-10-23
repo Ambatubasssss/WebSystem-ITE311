@@ -5,7 +5,7 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('/', 'Auth::dashboard');
+$routes->get('/', 'Home::index');
 $routes->get('about', 'Home::about');
 $routes->get('contact', 'Home::contact');
 
@@ -57,6 +57,8 @@ $routes->group('admin', ['filter' => 'roleauth'], function($routes) {
 // Materials routes
 $routes->get('/materials/delete/(:num)', 'Materials::delete/$1');
 $routes->get('/materials/download/(:num)', 'Materials::download/$1');
+$routes->get('/materials/view/(:num)', 'Materials::view/$1');
+$routes->get('/materials/viewfile/(:num)', 'Materials::viewFile/$1');
 
 // Unified dashboard only per Lab 5
 

@@ -207,7 +207,7 @@
                                                                                         <a href="<?= base_url("teacher/course/{$course['id']}/upload") ?>" class="btn btn-sm btn-primary" title="Upload Materials">
                                                                                             <i class="fas fa-upload"></i>
                                                                                         </a>
-                                                                                        <a href="<?= base_url("student/materials/{$course['id']}") ?>" class="btn btn-sm btn-info" title="View Materials">
+                                                                                        <a href="<?= base_url("materials/view/{$course['id']}") ?>" class="btn btn-sm btn-info" title="View Materials">
                                                                                             <i class="fas fa-eye"></i>
                                                                                         </a>
                                                                                         <a href="<?= base_url('admin/courses') ?>" class="btn btn-sm btn-secondary" title="Manage Course">
