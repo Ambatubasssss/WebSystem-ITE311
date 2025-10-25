@@ -44,6 +44,8 @@ $routes->group('teacher', ['filter' => 'roleauth'], function($routes) {
     $routes->post('course/(:num)/upload', 'Materials::upload/$1');
 });
 
+// Test upload route removed
+
 // Admin routes (protected by RoleAuth filter)
 $routes->group('admin', ['filter' => 'roleauth'], function($routes) {
     $routes->get('dashboard', 'Admin::dashboard');

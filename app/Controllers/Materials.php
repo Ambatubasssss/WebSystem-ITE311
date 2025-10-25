@@ -27,12 +27,16 @@ class Materials extends BaseController
      */
     public function upload($course_id)
     {
-        // Debug: Log that upload method is called
-        log_message('info', 'Upload method called for course ID: ' . $course_id);
-        log_message('info', 'Request method: ' . $this->request->getMethod());
+        // Handle POST request - Process file upload (using strtolower to handle case-insensitive comparison)
+        if (strtolower($this->request->getMethod()) === 'post') {
+            return $this->handleFileUpload($course_id);
+        }
+        
+        // Handle GET request - Show upload form
         
         // Check if user is admin/teacher
         $userRole = strtolower(session('role') ?? '');
+        
         if ($userRole !== 'admin' && $userRole !== 'teacher') {
             session()->setFlashdata('error', 'Access denied. Admin/Teacher privileges required.');
             return redirect()->to('/dashboard');
@@ -45,18 +49,8 @@ class Materials extends BaseController
             return redirect()->to($redirectPath)->with('error', 'Course not found.');
         }
 
-        if ($this->request->getMethod() === 'post') {
-            log_message('info', 'POST request detected, calling handleFileUpload');
-            return $this->handleFileUpload($course_id);
-        } else {
-            log_message('info', 'GET request detected, showing upload form');
-        }
-
         // Get materials for the course
         $materials = $this->materialModel->getMaterialsByCourse($course_id);
-        
-        // Debug: Log the materials count
-        log_message('info', 'Course ID: ' . $course_id . ', Materials count: ' . count($materials));
         
         // Display upload form
         $data = [
@@ -69,52 +63,66 @@ class Materials extends BaseController
     }
 
     /**
-     * Handle file upload process - WORKING VERSION
+     * Handle file upload process
      */
     private function handleFileUpload($course_id)
     {
-        $file = $this->request->getFile('material_file');
-
-        // Basic validation
-        if (!$file || !$file->isValid()) {
-            return redirect()->back()->with('error', 'No file selected or file is invalid.');
+        // Validate file upload
+        if (!isset($_FILES['material_file']) || $_FILES['material_file']['error'] !== UPLOAD_ERR_OK) {
+            return redirect()->back()->with('error', 'File upload failed. Please try again.');
         }
-
-        // Create upload directory
+        
+        // Setup upload directory
         $uploadPath = WRITEPATH . 'uploads/materials/';
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
 
-        // Move file
-        $newName = $file->getRandomName();
-        $moved = $file->move($uploadPath, $newName);
-
-        if (!$moved) {
+        // Generate unique filename
+        $fileName = 'upload_' . time() . '_' . $_FILES['material_file']['name'];
+        $targetPath = $uploadPath . $fileName;
+        
+        // Move uploaded file
+        if (!move_uploaded_file($_FILES['material_file']['tmp_name'], $targetPath)) {
             return redirect()->back()->with('error', 'Failed to move uploaded file.');
         }
 
-        // Prepare database data
-        $data = [
-            'course_id' => $course_id,
-            'file_name' => $file->getClientName(),
-            'file_path' => 'uploads/materials/' . $newName,
-            'file_size' => $file->getSize(),
-            'file_type' => $file->getClientExtension()
-        ];
-
         // Insert into database
-        $result = $this->materialModel->insert($data);
-        
-        if ($result) {
-            return redirect()->back()->with('success', 'Material uploaded successfully!');
-        } else {
-            // Clean up file if database insert failed
-            if (file_exists($uploadPath . $newName)) {
-                unlink($uploadPath . $newName);
+        try {
+            $db = \Config\Database::connect();
+            $builder = $db->table('materials');
+            
+            $data = [
+                'course_id' => $course_id,
+                'file_name' => $_FILES['material_file']['name'],
+                'file_path' => 'uploads/materials/' . $fileName,
+                'file_size' => $_FILES['material_file']['size'],
+                'file_type' => pathinfo($_FILES['material_file']['name'], PATHINFO_EXTENSION),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $result = $builder->insert($data);
+            
+            if ($result) {
+                // Get user role for redirect
+                $userRole = strtolower(session('role') ?? '');
+                $redirectPath = ($userRole === 'admin') ? '/admin/courses' : '/teacher/dashboard';
+                
+                return redirect()->to($redirectPath)->with('success', 'Material uploaded successfully!');
+            } else {
+                // Delete uploaded file if database insert fails
+                unlink($targetPath);
+                return redirect()->back()->with('error', 'Failed to save material to database.');
             }
-            $errors = $this->materialModel->errors();
-            return redirect()->back()->with('error', 'Failed to save to database: ' . implode(', ', $errors));
+            
+        } catch (\Exception $e) {
+            // Delete uploaded file if exception occurs
+            if (file_exists($targetPath)) {
+                unlink($targetPath);
+            }
+            log_message('error', 'Material upload exception: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
 

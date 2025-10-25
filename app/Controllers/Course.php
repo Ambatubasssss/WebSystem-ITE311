@@ -51,25 +51,16 @@ class Course extends BaseController
             ]);
         }
 
-        // Define available courses (matching the hardcoded ones in Auth controller)
-        $availableCourses = [
-            1 => ['id' => 1, 'title' => 'Introduction to Programming', 'description' => 'Learn the fundamentals of programming with hands-on exercises and real-world projects.'],
-            2 => ['id' => 2, 'title' => 'Web Development Basics', 'description' => 'Master HTML, CSS, and JavaScript to build responsive and interactive websites.'],
-            3 => ['id' => 3, 'title' => 'Database Management', 'description' => 'Learn SQL, database design, and data management best practices.'],
-            4 => ['id' => 4, 'title' => 'Mobile App Development', 'description' => 'Create mobile applications using modern frameworks and development tools.'],
-            5 => ['id' => 5, 'title' => 'Cybersecurity Fundamentals', 'description' => 'Understand security threats, vulnerabilities, and protection strategies.'],
-            6 => ['id' => 6, 'title' => 'Data Science and Analytics', 'description' => 'Explore data analysis, machine learning, and statistical modeling techniques.']
-        ];
+        // Get course from database
+        $course = $this->courseModel->find($courseId);
         
         // Check if course exists
-        if (!isset($availableCourses[$courseId])) {
+        if (!$course) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Course not found.'
             ]);
         }
-        
-        $course = $availableCourses[$courseId];
 
         // Check if user is already enrolled using direct database query
         $db = \Config\Database::connect();

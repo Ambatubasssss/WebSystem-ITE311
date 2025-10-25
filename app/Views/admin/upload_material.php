@@ -51,22 +51,24 @@
                                     $userRole = strtolower(session('role') ?? '');
                                     $formAction = ($userRole === 'admin') ? "admin/course/{$course['id']}/upload" : "teacher/course/{$course['id']}/upload";
                                     ?>
-                                    <?= form_open_multipart(base_url($formAction)) ?>
-                                        <?= csrf_field() ?>
+                                    <form action="<?= base_url($formAction) ?>" method="post" enctype="multipart/form-data" id="uploadForm">
                                         <div class="form-group">
-                                            <label for="material_file">Select File</label>
-                                            <div class="custom-file">
-                                                <input type="file" class="custom-file-input" id="material_file" name="material_file" required>
-                                                <label class="custom-file-label" for="material_file">Choose file...</label>
-                                            </div>
+                                            <label for="material_file">Select File:</label>
+                                            <input type="file" 
+                                                   class="form-control-file" 
+                                                   id="material_file" 
+                                                   name="material_file" 
+                                                   accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" 
+                                                   required>
                                             <small class="form-text text-muted">
-                                                Allowed types: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, JPEG, PNG, GIF (Max: 10MB)
+                                                Allowed formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT (Max: 10MB)
                                             </small>
                                         </div>
+                                        
                                         <button type="submit" class="btn btn-primary">
                                             <i class="fas fa-upload mr-1"></i> Upload Material
                                         </button>
-                                    <?= form_close() ?>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -97,15 +99,10 @@
                                     <h5 class="card-title mb-0">Course Materials</h5>
                                 </div>
                                 <div class="card-body">
-                                    <?php 
-                                    // Debug: Show materials count
-                                    echo '<!-- Debug: Materials count = ' . count($materials) . ' -->';
-                                    ?>
                                     <?php if (empty($materials)): ?>
                                         <div class="text-center py-4">
                                             <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
                                             <p class="text-muted">No materials uploaded yet.</p>
-                                            <p class="text-muted">Debug: Materials array is empty</p>
                                         </div>
                                     <?php else: ?>
                                         <div class="table-responsive">
@@ -169,11 +166,18 @@
     </div>
 </div>
 
-<script>
-// Update file input label when file is selected
-document.querySelector('#material_file').addEventListener('change', function(e) {
-    const fileName = e.target.files[0]?.name || 'Choose file...';
-    document.querySelector('.custom-file-label').textContent = fileName;
-});
-</script>
+<?php
+// Helper function to format bytes
+if (!function_exists('formatBytes')) {
+    function formatBytes($bytes, $precision = 2) {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        $bytes /= (1 << (10 * $pow));
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+}
+?>
+
 <?= $this->endSection() ?>

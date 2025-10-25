@@ -211,22 +211,18 @@ class Auth extends BaseController
             $data['pendingAssignments'] = 5; // Placeholder
             $data['totalStudents'] = $userModel->where('role', 'student')->countAllResults();
         } elseif ($role === 'student') {
-            // Define all available courses
-            $allCourses = [
-                ['id' => 1, 'title' => 'Introduction to Programming', 'description' => 'Learn the fundamentals of programming with hands-on exercises and real-world projects.'],
-                ['id' => 2, 'title' => 'Web Development Basics', 'description' => 'Master HTML, CSS, and JavaScript to build responsive and interactive websites.'],
-                ['id' => 3, 'title' => 'Database Management', 'description' => 'Learn SQL, database design, and data management best practices.'],
-                ['id' => 4, 'title' => 'Mobile App Development', 'description' => 'Create mobile applications using modern frameworks and development tools.'],
-                ['id' => 5, 'title' => 'Cybersecurity Fundamentals', 'description' => 'Understand security threats, vulnerabilities, and protection strategies.'],
-                ['id' => 6, 'title' => 'Data Science and Analytics', 'description' => 'Explore data analysis, machine learning, and statistical modeling techniques.']
-            ];
-            
             // Get enrolled courses from database (with error handling)
             $enrolledCourses = [];
-            $availableCourses = $allCourses; // Default to all courses available
+            $availableCourses = [];
             
             try {
                 $db = \Config\Database::connect();
+                
+                // Get all courses from database
+                $allCoursesQuery = $db->query("SELECT id, title, description FROM courses ORDER BY id");
+                $allCourses = $allCoursesQuery->getResultArray();
+                
+                // Get enrolled courses
                 $enrollmentsQuery = $db->query("
                     SELECT e.*, c.title, c.description 
                     FROM enrollments e 
@@ -240,7 +236,6 @@ class Auth extends BaseController
                 $enrolledCourseIds = array_column($enrolledCourses, 'course_id');
                 
                 // Filter available courses (not enrolled)
-                $availableCourses = [];
                 foreach ($allCourses as $course) {
                     if (!in_array($course['id'], $enrolledCourseIds)) {
                         $availableCourses[] = $course;
@@ -250,7 +245,7 @@ class Auth extends BaseController
                 // If database query fails, use empty arrays
                 log_message('error', 'Dashboard enrollment query failed: ' . $e->getMessage());
                 $enrolledCourses = [];
-                $availableCourses = $allCourses;
+                $availableCourses = [];
             }
             
             $data['enrolledCourses'] = $enrolledCourses;

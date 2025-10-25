@@ -154,10 +154,14 @@
                                                             <div class="card-body">
                                                                 <h6 class="card-title text-primary"><?= esc($enrollment['title']) ?></h6>
                                                                 <p class="card-text small"><?= esc($enrollment['description']) ?></p>
-                                                                <small class="text-muted">
+                                                                <small class="text-muted d-block mb-2">
                                                                     <i class="fas fa-calendar"></i> 
                                                                     Enrolled: <?= date('M j, Y', strtotime($enrollment['created_at'])) ?>
                                                                 </small>
+                                                                <a href="<?= base_url('materials/view/' . $enrollment['course_id']) ?>" 
+                                                                   class="btn btn-primary btn-sm">
+                                                                    <i class="fas fa-file-alt"></i> View Materials
+                                                                </a>
                                                             </div>
                                                         </div>
                                                     </div>
