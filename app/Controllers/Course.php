@@ -30,18 +30,25 @@ class Course extends BaseController
             ]);
         }
 
-        // Check if user is a student (only students can enroll)
         $userRole = strtolower(session('role') ?? '');
-        if ($userRole !== 'student') {
+        
+        // Get course_id and optional student_id from POST request
+        $courseId = $this->request->getPost('course_id');
+        $studentId = $this->request->getPost('student_id'); // For teachers enrolling students
+        
+        // Determine the user ID to enroll
+        if ($userRole === 'teacher' && !empty($studentId)) {
+            // Teacher is enrolling a student
+            $userId = $studentId;
+        } elseif ($userRole === 'student') {
+            // Student is enrolling themselves
+            $userId = session('userID');
+        } else {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Only students can enroll in courses.'
+                'message' => 'Invalid enrollment request.'
             ]);
         }
-
-        // Get course_id from POST request
-        $courseId = $this->request->getPost('course_id');
-        $userId = session('userID');
 
         // Validate course_id
         if (empty($courseId) || !is_numeric($courseId)) {
@@ -82,12 +89,24 @@ class Course extends BaseController
             if ($db->affectedRows() > 0) {
                 // Create notification for successful enrollment
                 $notificationModel = new \App\Models\NotificationModel();
-                $notificationMessage = "You have been enrolled in " . $course['title'] . "!";
+                if ($userRole === 'teacher') {
+                    // Get student name for notification
+                    $userModel = new \App\Models\UserModel();
+                    $student = $userModel->find($userId);
+                    $studentName = $student ? $student['name'] : 'Student';
+                    $notificationMessage = "You have been enrolled in " . $course['title'] . " by your teacher!";
+                } else {
+                    $notificationMessage = "You have been enrolled in " . $course['title'] . "!";
+                }
                 $notificationModel->createNotification($userId, $notificationMessage);
+                
+                $successMessage = ($userRole === 'teacher') 
+                    ? 'Successfully enrolled student in ' . $course['title'] . '!'
+                    : 'Successfully enrolled in ' . $course['title'] . '!';
                 
                 return $this->response->setJSON([
                     'success' => true,
-                    'message' => 'Successfully enrolled in ' . $course['title'] . '!',
+                    'message' => $successMessage,
                     'course' => [
                         'id' => $course['id'],
                         'title' => $course['title'],
@@ -176,5 +195,74 @@ class Course extends BaseController
         ];
 
         return view('course/view', $data);
+    }
+
+    /**
+     * Get all students (for teacher enrollment)
+     */
+    public function getStudents()
+    {
+        // Check if user is logged in and is a teacher
+        if (!session()->get('logged_in')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'You must be logged in.'
+            ]);
+        }
+
+        $userRole = strtolower(session('role') ?? '');
+        if ($userRole !== 'teacher' && $userRole !== 'admin') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Access denied. Teacher/Admin privileges required.'
+            ]);
+        }
+
+        $userModel = new \App\Models\UserModel();
+        $students = $userModel->where('role', 'student')->findAll();
+
+        return $this->response->setJSON([
+            'success' => true,
+            'students' => $students
+        ]);
+    }
+
+    /**
+     * Get students enrolled in a specific course
+     */
+    public function getCourseStudents($courseId)
+    {
+        // Check if user is logged in and is a teacher/admin
+        if (!session()->get('logged_in')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'You must be logged in.'
+            ]);
+        }
+
+        $userRole = strtolower(session('role') ?? '');
+        if ($userRole !== 'teacher' && $userRole !== 'admin') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Access denied. Teacher/Admin privileges required.'
+            ]);
+        }
+
+        $db = \Config\Database::connect();
+        $query = $db->query("
+            SELECT e.*, u.id as user_id, u.name, u.email, c.title as course_title
+            FROM enrollments e
+            JOIN users u ON u.id = e.user_id
+            JOIN courses c ON c.id = e.course_id
+            WHERE e.course_id = ? AND u.role = 'student'
+            ORDER BY e.created_at DESC
+        ", [$courseId]);
+
+        $enrolledStudents = $query->getResultArray();
+
+        return $this->response->setJSON([
+            'success' => true,
+            'students' => $enrolledStudents
+        ]);
     }
 }

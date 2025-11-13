@@ -23,14 +23,8 @@ class Home extends BaseController
         $role = strtolower(session('role') ?? '');
         $dashboardUrl = '/ITE311-MALILAY/';
 
-        // Redirect to appropriate dashboard based on role
-        if ($role === 'admin') {
-            $dashboardUrl = '/ITE311-MALILAY/admin/dashboard';
-        } elseif ($role === 'teacher') {
-            $dashboardUrl = '/ITE311-MALILAY/teacher/dashboard';
-        } elseif ($role === 'student') {
-            $dashboardUrl = '/ITE311-MALILAY/dashboard';
-        } elseif (session()->get('logged_in')) {
+        // Redirect to unified dashboard
+        if (session()->get('logged_in')) {
             $dashboardUrl = '/ITE311-MALILAY/dashboard';
         } else {
             $dashboardUrl = '/ITE311-MALILAY/login';

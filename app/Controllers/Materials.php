@@ -45,21 +45,12 @@ class Materials extends BaseController
         // Get course details
         $course = $this->courseModel->find($course_id);
         if (!$course) {
-            $redirectPath = ($userRole === 'admin') ? '/admin/courses' : '/teacher/dashboard';
+            $redirectPath = ($userRole === 'admin') ? '/dashboard?section=courses' : '/dashboard?section=my-courses';
             return redirect()->to($redirectPath)->with('error', 'Course not found.');
         }
 
-        // Get materials for the course
-        $materials = $this->materialModel->getMaterialsByCourse($course_id);
-        
-        // Display upload form
-        $data = [
-            'title' => 'Upload Course Material',
-            'course' => $course,
-            'materials' => $materials
-        ];
-
-        return view('admin/upload_material', $data);
+        // Redirect to unified dashboard with upload section
+        return redirect()->to('/dashboard?section=upload&course_id=' . $course_id);
     }
 
     /**
@@ -107,7 +98,7 @@ class Materials extends BaseController
             if ($result) {
                 // Get user role for redirect
                 $userRole = strtolower(session('role') ?? '');
-                $redirectPath = ($userRole === 'admin') ? '/admin/courses' : '/teacher/dashboard';
+                $redirectPath = ($userRole === 'admin') ? '/dashboard?section=upload&course_id=' . $course_id : '/dashboard?section=upload&course_id=' . $course_id;
                 
                 return redirect()->to($redirectPath)->with('success', 'Material uploaded successfully!');
             } else {
@@ -151,9 +142,15 @@ class Materials extends BaseController
 
         // Delete from database
         if ($this->materialModel->delete($material_id)) {
-            return redirect()->back()->with('success', 'Material deleted successfully.');
+            // Get course_id from material to redirect back to upload section
+            $courseId = $material['course_id'];
+            $userRole = strtolower(session('role') ?? '');
+            $redirectPath = '/dashboard?section=upload&course_id=' . $courseId;
+            return redirect()->to($redirectPath)->with('success', 'Material deleted successfully.');
         } else {
-            return redirect()->back()->with('error', 'Failed to delete material.');
+            $courseId = $material['course_id'];
+            $redirectPath = '/dashboard?section=upload&course_id=' . $courseId;
+            return redirect()->to($redirectPath)->with('error', 'Failed to delete material.');
         }
     }
 
@@ -170,14 +167,14 @@ class Materials extends BaseController
         // Get material details
         $material = $this->materialModel->getMaterialWithCourse($material_id);
         if (!$material) {
-            return redirect()->to('/')->with('error', 'Material not found.');
+            return redirect()->to('/dashboard')->with('error', 'Material not found.');
         }
 
         // Check if user is enrolled in the course (skip for admin/teacher)
         $userRole = strtolower(session('role') ?? '');
         if ($userRole !== 'admin' && $userRole !== 'teacher') {
             if (!$this->enrollmentModel->isAlreadyEnrolled(session('userID'), $material['course_id'])) {
-                return redirect()->to('/')->with('error', 'You are not enrolled in this course.');
+                return redirect()->to('/dashboard')->with('error', 'You are not enrolled in this course.');
             }
         }
 
@@ -192,7 +189,7 @@ class Materials extends BaseController
         
         if (!file_exists($filePath)) {
             log_message('error', 'File not found at: ' . $filePath);
-            return redirect()->to('/')->with('error', 'File not found.');
+            return redirect()->to('/dashboard')->with('error', 'File not found.');
         }
 
         // Force download using custom method
@@ -209,7 +206,7 @@ class Materials extends BaseController
         $fileContent = file_get_contents($filePath);
         if ($fileContent === false) {
             log_message('error', 'Failed to read file content');
-            return redirect()->to('/')->with('error', 'Failed to read file.');
+            return redirect()->to('/dashboard')->with('error', 'Failed to read file.');
         }
         
         return $this->response->setBody($fileContent);
@@ -229,22 +226,17 @@ class Materials extends BaseController
         $userRole = strtolower(session('role') ?? '');
         if ($userRole !== 'admin' && $userRole !== 'teacher') {
             if (!$this->enrollmentModel->isAlreadyEnrolled(session('userID'), $course_id)) {
-                return redirect()->to('/')->with('error', 'You are not enrolled in this course.');
+                return redirect()->to('/dashboard')->with('error', 'You are not enrolled in this course.');
             }
         }
 
         $course = $this->courseModel->find($course_id);
         if (!$course) {
-            return redirect()->to('/')->with('error', 'Course not found.');
+            return redirect()->to('/dashboard')->with('error', 'Course not found.');
         }
 
-        $data = [
-            'title' => 'Course Materials',
-            'course' => $course,
-            'materials' => $this->materialModel->getMaterialsByCourse($course_id)
-        ];
-
-        return view('student/course_materials', $data);
+        // Redirect to unified dashboard with materials section
+        return redirect()->to('/dashboard?section=materials&course_id=' . $course_id);
     }
 
     /**
@@ -260,14 +252,14 @@ class Materials extends BaseController
         // Get material details
         $material = $this->materialModel->getMaterialWithCourse($material_id);
         if (!$material) {
-            return redirect()->to('/')->with('error', 'Material not found.');
+            return redirect()->to('/dashboard')->with('error', 'Material not found.');
         }
 
         // Check if user is enrolled in the course (skip for admin/teacher)
         $userRole = strtolower(session('role') ?? '');
         if ($userRole !== 'admin' && $userRole !== 'teacher') {
             if (!$this->enrollmentModel->isAlreadyEnrolled(session('userID'), $material['course_id'])) {
-                return redirect()->to('/')->with('error', 'You are not enrolled in this course.');
+                return redirect()->to('/dashboard')->with('error', 'You are not enrolled in this course.');
             }
         }
 
@@ -275,7 +267,7 @@ class Materials extends BaseController
         $filePath = WRITEPATH . $material['file_path'];
         
         if (!file_exists($filePath)) {
-            return redirect()->to('/')->with('error', 'File not found.');
+            return redirect()->to('/dashboard')->with('error', 'File not found.');
         }
 
         // Get file info

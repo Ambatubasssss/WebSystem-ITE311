@@ -13,9 +13,8 @@ class Student extends BaseController
             return redirect()->to('/dashboard');
         }
 
-        // Redirect to unified dashboard with enrollment data
-        session()->setFlashdata('show_enrollments', true);
-        return redirect()->to('/dashboard');
+        // Redirect to unified dashboard with enrollments section
+        return redirect()->to('/dashboard?section=enrollments');
     }
 
     public function assignments()
@@ -25,9 +24,8 @@ class Student extends BaseController
             return redirect()->to('/dashboard');
         }
 
-        // Redirect to unified dashboard with assignment data
-        session()->setFlashdata('show_assignments', true);
-        return redirect()->to('/dashboard');
+        // Redirect to unified dashboard with assignments section
+        return redirect()->to('/dashboard?section=assignments');
     }
 
     public function materials($course_id)
@@ -44,22 +42,7 @@ class Student extends BaseController
             return redirect()->to('/dashboard');
         }
 
-        // Get course and materials
-        $courseModel = new \App\Models\CourseModel();
-        $materialModel = new \App\Models\MaterialModel();
-        
-        $course = $courseModel->find($course_id);
-        if (!$course) {
-            session()->setFlashdata('error', 'Course not found.');
-            return redirect()->to('/dashboard');
-        }
-
-        $data = [
-            'title' => 'Course Materials',
-            'course' => $course,
-            'materials' => $materialModel->getMaterialsByCourse($course_id)
-        ];
-
-        return view('student/course_materials', $data);
+        // Redirect to unified dashboard with materials section
+        return redirect()->to('/dashboard?section=materials&course_id=' . $course_id);
     }
 }

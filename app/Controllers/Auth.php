@@ -148,22 +148,9 @@ class Auth extends BaseController
             // Clear login attempts on successful login
             session()->remove($attemptsKey);
 
-            // Role-based redirection after successful login
+            // Redirect to dashboard after successful login
             session()->setFlashdata('success', 'Welcome back, ' . $user['name'] . '!');
-            
-            // Redirect users based on their role
-            $userRole = strtolower($user['role']);
-            
-            switch ($userRole) {
-                case 'student':
-                    return redirect()->to('/announcements');
-                case 'teacher':
-                    return redirect()->to('/teacher/dashboard');
-                case 'admin':
-                    return redirect()->to('/admin/dashboard');
-                default:
-                    return redirect()->to('/dashboard');
-            }
+            return redirect()->to('/dashboard');
         }
 
         // For GET requests, just load the login view
@@ -189,10 +176,12 @@ class Auth extends BaseController
 
         $userModel = new \App\Models\UserModel();
         $role = strtolower(session('role') ?? '');
+        $section = $this->request->getGet('section') ?? 'overview';
         
         // Fetch role-specific data from database
         $data = [
             'role' => $role,
+            'section' => $section,
             'user' => [
                 'id' => session('userID'),
                 'name' => session('name'),
@@ -201,15 +190,145 @@ class Auth extends BaseController
             ],
         ];
 
-        // Role-specific data fetching
+        // Load models
+        $courseModel = new \App\Models\CourseModel();
+        $materialModel = new \App\Models\MaterialModel();
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $assignmentModel = new \App\Models\AssignmentModel();
+        $assignmentSubmissionModel = new \App\Models\AssignmentSubmissionModel();
+        $academicYearModel = new \App\Models\AcademicYearModel();
+        $semesterModel = new \App\Models\SemesterModel();
+        $yearLevelModel = new \App\Models\YearLevelModel();
+        
+        // Get current academic year and semester
+        $currentAcademicYear = $academicYearModel->where('is_active', 1)->first();
+        $currentSemester = null;
+        if ($currentAcademicYear) {
+            $currentSemester = $semesterModel->where('academic_year_id', $currentAcademicYear['id'])
+                                            ->where('is_active', 1)
+                                            ->first();
+        }
+        $data['currentAcademicYear'] = $currentAcademicYear;
+        $data['currentSemester'] = $currentSemester;
+        
+        // Get student's year level if they are a student
+        if ($role === 'student') {
+            $userData = $userModel->find(session('userID'));
+            if ($userData && isset($userData['year_level_id']) && $userData['year_level_id']) {
+                $data['studentYearLevel'] = $yearLevelModel->find($userData['year_level_id']);
+            }
+        }
+
+        // Role-specific data fetching based on section
         if ($role === 'admin') {
             $data['totalUsers'] = $userModel->countAllResults();
-            $data['totalCourses'] = 0; // Placeholder - would need courses table
             $data['recentUsers'] = $userModel->orderBy('created_at', 'DESC')->limit(5)->findAll();
+            
+            // Section-specific data
+            if ($section === 'users') {
+                $data['allUsers'] = $userModel->findAll();
+            } elseif ($section === 'courses') {
+                $data['courses'] = $courseModel->findAll();
+                // Get material counts for each course
+                foreach ($data['courses'] as &$course) {
+                    $course['material_count'] = $materialModel->where('course_id', $course['id'])->countAllResults();
+                }
+            } elseif ($section === 'academic-years') {
+                $academicYearModel = new \App\Models\AcademicYearModel();
+                $data['academicYears'] = $academicYearModel->orderBy('year_start', 'DESC')->findAll();
+            } elseif ($section === 'semesters') {
+                $semesterModel = new \App\Models\SemesterModel();
+                $academicYearModel = new \App\Models\AcademicYearModel();
+                $data['semesters'] = $semesterModel->orderBy('created_at', 'DESC')->findAll();
+                $data['academicYears'] = $academicYearModel->findAll();
+                // Join academic year info for each semester
+                foreach ($data['semesters'] as &$semester) {
+                    $semester['academic_year'] = $academicYearModel->find($semester['academic_year_id']);
+                }
+            } elseif ($section === 'year-levels') {
+                $yearLevelModel = new \App\Models\YearLevelModel();
+                $data['yearLevels'] = $yearLevelModel->orderBy('level', 'ASC')->findAll();
+            } elseif ($section === 'assign-year-level') {
+                $userModel = new \App\Models\UserModel();
+                $yearLevelModel = new \App\Models\YearLevelModel();
+                $data['students'] = $userModel->where('role', 'student')->findAll();
+                $data['yearLevels'] = $yearLevelModel->orderBy('level', 'ASC')->findAll();
+                // Get year level info for each student
+                foreach ($data['students'] as &$student) {
+                    if ($student['year_level_id']) {
+                        $student['year_level'] = $yearLevelModel->find($student['year_level_id']);
+                    }
+                }
+            }
         } elseif ($role === 'teacher') {
-            $data['myCourses'] = ['Math 101', 'Science 202']; // Placeholder
-            $data['pendingAssignments'] = 5; // Placeholder
             $data['totalStudents'] = $userModel->where('role', 'student')->countAllResults();
+            
+            // Section-specific data
+            if ($section === 'my-courses') {
+                $courses = $courseModel->findAll();
+                $coursesWithMaterials = [];
+                foreach ($courses as $course) {
+                    $materialCount = $materialModel->where('course_id', $course['id'])->countAllResults();
+                    $course['material_count'] = $materialCount;
+                    $coursesWithMaterials[] = $course;
+                }
+                $data['courses'] = $coursesWithMaterials;
+            } elseif ($section === 'upload') {
+                // Get course ID from query if provided
+                $courseId = $this->request->getGet('course_id');
+                if ($courseId) {
+                    $course = $courseModel->find($courseId);
+                    if ($course) {
+                        $data['course'] = $course;
+                        $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
+                    }
+                } else {
+                    // Show all courses for selection
+                    $data['courses'] = $courseModel->findAll();
+                }
+            } elseif ($section === 'enroll-students') {
+                // Get all courses and students for enrollment management
+                $data['courses'] = $courseModel->findAll();
+                $data['students'] = $userModel->where('role', 'student')->findAll();
+                
+                // Get course ID from query if provided to show enrolled students
+                $courseId = $this->request->getGet('course_id');
+                if ($courseId) {
+                    $data['selectedCourse'] = $courseModel->find($courseId);
+                    // Get enrolled students for this course
+                    $db = \Config\Database::connect();
+                    $enrolledQuery = $db->query("
+                        SELECT e.*, u.id as user_id, u.name, u.email
+                        FROM enrollments e
+                        JOIN users u ON u.id = e.user_id
+                        WHERE e.course_id = ? AND u.role = 'student'
+                        ORDER BY e.created_at DESC
+                    ", [$courseId]);
+                    $data['enrolledStudents'] = $enrolledQuery->getResultArray();
+                }
+            } elseif ($section === 'create-assignment') {
+                // Get all courses for assignment creation
+                $data['courses'] = $courseModel->findAll();
+            } elseif ($section === 'assignments') {
+                // Get course ID from query if provided
+                $courseId = $this->request->getGet('course_id');
+                if ($courseId) {
+                    $data['course'] = $courseModel->find($courseId);
+                    $data['assignments'] = $assignmentModel->getAssignmentsByCourse($courseId);
+                } else {
+                    // Show all courses for selection
+                    $data['courses'] = $courseModel->findAll();
+                }
+            } elseif ($section === 'view-assignment') {
+                // Get assignment ID from query
+                $assignmentId = $this->request->getGet('assignment_id');
+                if ($assignmentId) {
+                    $data['assignment'] = $assignmentModel->getAssignmentWithDetails($assignmentId);
+                    if ($data['assignment']) {
+                        $data['submissions'] = $assignmentSubmissionModel->getSubmissionsByAssignment($assignmentId);
+                    }
+                }
+            }
         } elseif ($role === 'student') {
             // Get enrolled courses from database (with error handling)
             $enrolledCourses = [];
@@ -224,7 +343,7 @@ class Auth extends BaseController
                 
                 // Get enrolled courses
                 $enrollmentsQuery = $db->query("
-                    SELECT e.*, c.title, c.description 
+                    SELECT e.*, c.title, c.description, c.id as course_id
                     FROM enrollments e 
                     JOIN courses c ON c.id = e.course_id 
                     WHERE e.user_id = ? 
@@ -250,23 +369,63 @@ class Auth extends BaseController
             
             $data['enrolledCourses'] = $enrolledCourses;
             $data['availableCourses'] = $availableCourses;
-            $data['upcomingDeadlines'] = ['Assignment 1 (Oct 1)', 'Quiz 2 (Oct 5)']; // Placeholder
-            $data['completedAssignments'] = 3; // Placeholder
             
             // Format enrollments for display
             $data['enrollments'] = [];
             foreach ($enrolledCourses as $course) {
                 $data['enrollments'][] = [
                     'course' => $course['title'],
-                    'instructor' => 'Instructor', // You can add instructor info if needed
+                    'instructor' => 'Instructor',
                     'status' => 'Active',
                     'course_id' => $course['course_id']
                 ];
             }
-            $data['assignments'] = [
-                ['title' => 'Assignment 1', 'course' => 'History 101', 'due_date' => '2024-10-01', 'status' => 'Pending'],
-                ['title' => 'Quiz 2', 'course' => 'Art 303', 'due_date' => '2024-10-05', 'status' => 'Completed']
-            ];
+            
+            // Section-specific data
+            if ($section === 'enrollments') {
+                // Already loaded above
+            } elseif ($section === 'assignments') {
+                // Get assignments for enrolled courses
+                $data['assignments'] = $assignmentModel->getAssignmentsForEnrolledCourses(session('userID'));
+                // Check submission status for each assignment
+                foreach ($data['assignments'] as &$assignment) {
+                    $assignment['has_submitted'] = $assignmentSubmissionModel->hasUserSubmitted(session('userID'), $assignment['id']);
+                    if ($assignment['has_submitted']) {
+                        $assignment['submission'] = $assignmentSubmissionModel->getSubmissionByUserAndAssignment(session('userID'), $assignment['id']);
+                    }
+                }
+            } elseif ($section === 'view-assignment') {
+                // Get assignment ID from query
+                $assignmentId = $this->request->getGet('assignment_id');
+                if ($assignmentId) {
+                    $assignment = $assignmentModel->getAssignmentWithDetails($assignmentId);
+                    if ($assignment) {
+                        // Check if student is enrolled
+                        if ($enrollmentModel->isAlreadyEnrolled(session('userID'), $assignment['course_id'])) {
+                            $data['assignment'] = $assignment;
+                            $data['submission'] = $assignmentSubmissionModel->getSubmissionByUserAndAssignment(session('userID'), $assignmentId);
+                            $data['has_submitted'] = $data['submission'] !== null;
+                        } else {
+                            session()->setFlashdata('error', 'You are not enrolled in this course.');
+                        }
+                    }
+                }
+            } elseif ($section === 'materials') {
+                // Get course ID from query
+                $courseId = $this->request->getGet('course_id');
+                if ($courseId) {
+                    // Check if user is enrolled
+                    if ($enrollmentModel->isAlreadyEnrolled(session('userID'), $courseId)) {
+                        $course = $courseModel->find($courseId);
+                        if ($course) {
+                            $data['course'] = $course;
+                            $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
+                        }
+                    } else {
+                        session()->setFlashdata('error', 'You are not enrolled in this course.');
+                    }
+                }
+            }
         }
 
         return view('auth/dashboard', $data);
