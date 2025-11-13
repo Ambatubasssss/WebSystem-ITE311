@@ -20,117 +20,33 @@
                     <?php endif; ?>
                     <?php if (session()->get('logged_in')): ?>
                         <?php $role = strtolower(session('role') ?? ''); ?>
+                        <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>"><i class="fas fa-home"></i> Dashboard</a></li>
+                        
+                        <!-- Dynamic Role-Based Navigation -->
                         <?php if ($role === 'admin'): ?>
-                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('admin/dashboard'); ?>">Admin Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard?section=users'); ?>"><i class="fas fa-users"></i> Manage Users</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard?section=courses'); ?>"><i class="fas fa-graduation-cap"></i> Course Management</a></li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                                    Manage Users
+                                    <i class="fas fa-calendar-alt"></i> Academic Management
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" style="width: 600px; max-height: 500px; overflow-y: auto;">
-                                    <li class="dropdown-header">
-                                        <div class="alert alert-info mb-2">
-                                            <strong>Admin Access:</strong> Role management for teachers and students.
-                                        </div>
-                                        <h6>User Role Management</h6>
-                                    </li>
-                                    <li class="dropdown-item-text">
-                                        <div id="usersTableContainer">
-                                            <div class="text-center p-3">
-                                                <div class="spinner-border text-primary" role="status">
-                                                    <span class="visually-hidden">Loading...</span>
-                                                </div>
-                                                <p class="mt-2">Loading users...</p>
-                                            </div>
-                                        </div>
-                                    </li>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="<?= base_url('dashboard?section=academic-years'); ?>"><i class="fas fa-calendar-alt"></i> Academic Years</a></li>
+                                    <li><a class="dropdown-item" href="<?= base_url('dashboard?section=semesters'); ?>"><i class="fas fa-calendar"></i> Semesters</a></li>
+                                    <li><a class="dropdown-item" href="<?= base_url('dashboard?section=year-levels'); ?>"><i class="fas fa-user-graduate"></i> Year Levels</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="<?= base_url('dashboard?section=assign-year-level'); ?>"><i class="fas fa-user-tag"></i> Assign Year Level</a></li>
                                 </ul>
                             </li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#" onclick="return false;">Settings</a></li>
                         <?php elseif ($role === 'teacher'): ?>
-                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('teacher/dashboard'); ?>">Teacher Dashboard</a></li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                                    My Courses
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" style="width: 450px; max-height: 400px; overflow-y: auto;">
-                                    <li class="dropdown-header">
-                                        <div class="alert alert-success mb-2">
-                                            <strong>Teacher Access:</strong> This page is only accessible to teachers.
-                                        </div>
-                                        <h6>My Courses</h6>
-                                    </li>
-                                    <?php
-                                    $courses = ['Math 101', 'Science 202', 'Physics 301'];
-                                    ?>
-                                    <li class="dropdown-item-text">
-                                        <div class="row">
-                                            <?php foreach ($courses as $course): ?>
-                                            <div class="col-md-6 mb-3">
-                                                <div class="card">
-                                                    <div class="card-body">
-                                                        <h6 class="card-title"><?= esc($course) ?></h6>
-                                                        <p class="card-text small">Course description and details.</p>
-                                                        <a href="#" class="btn btn-sm btn-primary">Manage Course</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="nav-item"><a class="nav-link text-white" href="#" onclick="return false;">Grades</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard?section=my-courses'); ?>"><i class="fas fa-book"></i> My Courses</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard?section=enroll-students'); ?>"><i class="fas fa-user-plus"></i> Enroll Students</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard?section=assignments'); ?>"><i class="fas fa-tasks"></i> Assignments</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard?section=create-assignment'); ?>"><i class="fas fa-plus-circle"></i> Create Assignment</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard?section=upload'); ?>"><i class="fas fa-upload"></i> Upload Materials</a></li>
                         <?php elseif ($role === 'student'): ?>
-                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Student Dashboard</a></li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                                    My Courses
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" style="width: 450px; max-height: 400px; overflow-y: auto;">
-                                    <li class="dropdown-header">
-                                        <div class="alert alert-info mb-2">
-                                            <strong>My Courses:</strong> Browse and enroll in available courses.
-                                        </div>
-                                        <h6>Available Courses</h6>
-                                    </li>
-                                    <li class="dropdown-item-text">
-                                        <div id="myCoursesContainer">
-                                            <div class="text-center p-3">
-                                                <div class="spinner-border text-primary" role="status">
-                                                    <span class="visually-hidden">Loading...</span>
-                                                </div>
-                                                <p class="mt-2">Loading courses...</p>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                                    My Enrollments
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" style="width: 450px; max-height: 400px; overflow-y: auto;">
-                                    <li class="dropdown-header">
-                                        <div class="alert alert-primary mb-2">
-                                            <strong>Student Access:</strong> This page is only accessible to students.
-                                        </div>
-                                        <h6>My Enrollments</h6>
-                                    </li>
-                                    <li class="dropdown-item-text">
-                                        <div id="headerEnrollmentsContainer">
-                                            <div class="text-center p-3">
-                                                <div class="spinner-border text-primary" role="status">
-                                                    <span class="visually-hidden">Loading...</span>
-                                                </div>
-                                                <p class="mt-2">Loading enrollments...</p>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('student/assignments') ?>">Assignments</a></li>
-                        <?php else: ?>
-                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard'); ?>">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard?section=enrollments'); ?>"><i class="fas fa-graduation-cap"></i> My Enrollments</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="<?= base_url('dashboard?section=assignments'); ?>"><i class="fas fa-tasks"></i> Assignments</a></li>
                         <?php endif; ?>
                         
                         <!-- Notifications Dropdown -->
@@ -162,7 +78,7 @@
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="<?= base_url('logout'); ?>">Logout</a>
+                            <a class="nav-link text-white" href="<?= base_url('logout'); ?>"><i class="fas fa-sign-out-alt"></i> Logout</a>
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
@@ -207,13 +123,19 @@
                 if (data.success) {
                     displayUsers(data.users);
                 } else {
-                    document.getElementById('usersTableContainer').innerHTML = 
-                        '<div class="alert alert-danger">' + data.message + '</div>';
+                    const container = document.getElementById('usersTableContainer');
+                    if (container) {
+                        container.innerHTML = 
+                            '<div class="alert alert-danger">' + data.message + '</div>';
+                    }
                 }
             })
             .catch(error => {
-                document.getElementById('usersTableContainer').innerHTML = 
-                    '<div class="alert alert-danger">Error loading users: ' + error.message + '</div>';
+                const container = document.getElementById('usersTableContainer');
+                if (container) {
+                    container.innerHTML = 
+                        '<div class="alert alert-danger">Error loading users: ' + error.message + '</div>';
+                }
             });
     }
 
