@@ -26,19 +26,18 @@ $routes->post('/course/enroll', 'Course::enroll');
 $routes->get('/course/available', 'Course::getAvailableCourses');
 $routes->get('/course/enrollments', 'Course::getUserEnrollments');
 $routes->get('/course/view/(:num)', 'Course::view/$1');
+$routes->get('/course/students', 'Course::getStudents');
+$routes->get('/course/(:num)/students', 'Course::getCourseStudents/$1');
 
-// Student-specific routes (protected by RoleAuth filter)
-$routes->group('student', ['filter' => 'roleauth'], function($routes) {
+// Student-specific routes
+$routes->group('student', function($routes) {
     $routes->get('enrollments', 'Student::enrollments');
     $routes->get('assignments', 'Student::assignments');
     $routes->get('materials/(:num)', 'Student::materials/$1');
 });
 
-// Announcements route (accessible to all logged-in users)
-$routes->get('/announcements', 'Announcement::index');
-
-// Teacher routes (protected by RoleAuth filter)
-$routes->group('teacher', ['filter' => 'roleauth'], function($routes) {
+// Teacher routes
+$routes->group('teacher', function($routes) {
     $routes->get('dashboard', 'Teacher::dashboard');
     $routes->get('course/(:num)/upload', 'Materials::upload/$1');
     $routes->post('course/(:num)/upload', 'Materials::upload/$1');
@@ -46,14 +45,26 @@ $routes->group('teacher', ['filter' => 'roleauth'], function($routes) {
 
 // Test upload route removed
 
-// Admin routes (protected by RoleAuth filter)
-$routes->group('admin', ['filter' => 'roleauth'], function($routes) {
+// Admin routes
+$routes->group('admin', function($routes) {
     $routes->get('dashboard', 'Admin::dashboard');
     $routes->get('users', 'Admin::getUsers');
     $routes->post('roles/update/(:num)', 'Admin::updateRole/$1');
     $routes->get('courses', 'Admin::courses');
     $routes->get('course/(:num)/upload', 'Materials::upload/$1');
     $routes->post('course/(:num)/upload', 'Materials::upload/$1');
+    
+    // Academic management routes
+    $routes->post('academic-year/create', 'Admin::createAcademicYear');
+    $routes->post('academic-year/update/(:num)', 'Admin::updateAcademicYear/$1');
+    $routes->get('academic-year/delete/(:num)', 'Admin::deleteAcademicYear/$1');
+    $routes->post('semester/create', 'Admin::createSemester');
+    $routes->post('semester/update/(:num)', 'Admin::updateSemester/$1');
+    $routes->get('semester/delete/(:num)', 'Admin::deleteSemester/$1');
+    $routes->post('year-level/create', 'Admin::createYearLevel');
+    $routes->post('year-level/update/(:num)', 'Admin::updateYearLevel/$1');
+    $routes->get('year-level/delete/(:num)', 'Admin::deleteYearLevel/$1');
+    $routes->post('assign-year-level', 'Admin::assignYearLevel');
 });
 
 // Materials routes
@@ -61,6 +72,15 @@ $routes->get('/materials/delete/(:num)', 'Materials::delete/$1');
 $routes->get('/materials/download/(:num)', 'Materials::download/$1');
 $routes->get('/materials/view/(:num)', 'Materials::view/$1');
 $routes->get('/materials/viewfile/(:num)', 'Materials::viewFile/$1');
+
+// Assignment routes
+$routes->post('/assignment/create', 'Assignment::create');
+$routes->get('/assignment/view/(:num)', 'Assignment::view/$1');
+$routes->post('/assignment/submit', 'Assignment::submit');
+$routes->post('/assignment/grade', 'Assignment::grade');
+$routes->get('/assignment/delete/(:num)', 'Assignment::delete/$1');
+$routes->get('/assignment/submission/download/(:num)', 'Assignment::downloadSubmission/$1');
+$routes->get('/assignment/submission/view/(:num)', 'Assignment::viewSubmission/$1');
 
 // Notification routes
 $routes->get('/notifications', 'Notifications::get');
