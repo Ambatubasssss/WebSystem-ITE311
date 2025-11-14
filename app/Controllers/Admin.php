@@ -243,6 +243,7 @@ class Admin extends BaseController
         $semesterModel = new \App\Models\SemesterModel();
         
         $name = $this->request->getPost('name');
+        $semester = $this->request->getPost('semester');
         $term = $this->request->getPost('term');
         $academicYearId = $this->request->getPost('academic_year_id');
         $startDate = $this->request->getPost('start_date');
@@ -250,8 +251,8 @@ class Admin extends BaseController
         $isActive = $this->request->getPost('is_active') ? 1 : 0;
 
         // Validate
-        if (empty($name) || empty($term) || empty($academicYearId)) {
-            session()->setFlashdata('error', 'Name, term, and academic year are required.');
+        if (empty($name) || empty($semester) || empty($term) || empty($academicYearId)) {
+            session()->setFlashdata('error', 'Name, semester, term, and academic year are required.');
             return redirect()->to('/dashboard?section=semesters');
         }
 
@@ -262,6 +263,7 @@ class Admin extends BaseController
 
         $data = [
             'name' => $name,
+            'semester' => $semester,
             'term' => $term,
             'academic_year_id' => $academicYearId,
             'start_date' => $startDate ?: null,
@@ -288,14 +290,15 @@ class Admin extends BaseController
         }
 
         $semesterModel = new \App\Models\SemesterModel();
-        $semester = $semesterModel->find($id);
+        $semesterRecord = $semesterModel->find($id);
 
-        if (!$semester) {
+        if (!$semesterRecord) {
             session()->setFlashdata('error', 'Semester not found.');
             return redirect()->to('/dashboard?section=semesters');
         }
 
         $name = $this->request->getPost('name');
+        $semester = $this->request->getPost('semester');
         $term = $this->request->getPost('term');
         $academicYearId = $this->request->getPost('academic_year_id');
         $startDate = $this->request->getPost('start_date');
@@ -309,6 +312,7 @@ class Admin extends BaseController
 
         $data = [
             'name' => $name,
+            'semester' => $semester,
             'term' => $term,
             'academic_year_id' => $academicYearId,
             'start_date' => $startDate ?: null,

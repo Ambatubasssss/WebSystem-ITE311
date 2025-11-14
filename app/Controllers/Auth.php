@@ -259,6 +259,29 @@ class Auth extends BaseController
                         $student['year_level'] = $yearLevelModel->find($student['year_level_id']);
                     }
                 }
+            } elseif ($section === 'upload') {
+                // Get course ID from query if provided
+                $courseId = $this->request->getGet('course_id');
+                if ($courseId) {
+                    $course = $courseModel->find($courseId);
+                    if ($course) {
+                        $data['course'] = $course;
+                        $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
+                    }
+                } else {
+                    // Show all courses for selection
+                    $data['courses'] = $courseModel->findAll();
+                }
+            } elseif ($section === 'materials') {
+                // Get course ID from query
+                $courseId = $this->request->getGet('course_id');
+                if ($courseId) {
+                    $course = $courseModel->find($courseId);
+                    if ($course) {
+                        $data['course'] = $course;
+                        $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
+                    }
+                }
             }
         } elseif ($role === 'teacher') {
             $data['totalStudents'] = $userModel->where('role', 'student')->countAllResults();

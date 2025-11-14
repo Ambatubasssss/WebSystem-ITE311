@@ -19,10 +19,17 @@ class CreateSemestersTable extends Migration
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
             ],
-            'term' => [
-                'type'       => 'ENUM',
-                'constraint' => ['1st', '2nd', 'Summer'],
+            'semester' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 10,
                 'default'    => '1st',
+                'comment'    => '1st Semester or 2nd Semester within the academic year',
+            ],
+            'term' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 10,
+                'default'    => '1st',
+                'comment'    => 'Term within the semester. 3rd term means whole semester (spans both 1st and 2nd term)',
             ],
             'academic_year_id' => [
                 'type'       => 'INT',

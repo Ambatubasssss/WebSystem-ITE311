@@ -50,7 +50,7 @@
                                                     <h6 class="mb-1"><i class="fas fa-calendar"></i> Semester & Term</h6>
                                                     <p class="mb-0">
                                                         <?php if (isset($currentSemester) && $currentSemester): ?>
-                                                            <strong><?= esc($currentSemester['name']) ?> - <?= esc($currentSemester['term']) ?> Term</strong>
+                                                            <strong><?= esc($currentSemester['semester'] ?? 'N/A') ?> Semester - <?= esc($currentSemester['term']) ?> Term</strong>
                                                         <?php else: ?>
                                                             <span class="text-warning">Not Set</span>
                                                         <?php endif; ?>
@@ -561,16 +561,23 @@
                                     <form action="<?= base_url('admin/semester/create') ?>" method="post">
                                         <?= csrf_field() ?>
                                         <div class="row">
-                                            <div class="col-md-4 mb-3">
+                                            <div class="col-md-3 mb-3">
                                                 <label for="name" class="form-label">Semester Name <span class="text-danger">*</span></label>
                                                 <input type="text" class="form-control" id="name" name="name" required placeholder="e.g., First Semester">
                                             </div>
-                                            <div class="col-md-4 mb-3">
+                                            <div class="col-md-3 mb-3">
+                                                <label for="semester" class="form-label">Semester <span class="text-danger">*</span></label>
+                                                <select class="form-select" id="semester" name="semester" required>
+                                                    <option value="1st">1st Semester</option>
+                                                    <option value="2nd">2nd Semester</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 mb-3">
                                                 <label for="term" class="form-label">Term <span class="text-danger">*</span></label>
                                                 <select class="form-select" id="term" name="term" required>
                                                     <option value="1st">1st Term</option>
                                                     <option value="2nd">2nd Term</option>
-                                                    <option value="Summer">Summer</option>
+                                                    <option value="3rd">3rd (Whole Semester)</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-4 mb-3">
@@ -623,6 +630,7 @@
                                                     <tr>
                                                         <th>ID</th>
                                                         <th>Name</th>
+                                                        <th>Semester</th>
                                                         <th>Term</th>
                                                         <th>Academic Year</th>
                                                         <th>Start Date</th>
@@ -636,7 +644,8 @@
                                                     <tr>
                                                         <td><?= $sem['id'] ?></td>
                                                         <td><strong><?= esc($sem['name']) ?></strong></td>
-                                                        <td><span class="badge bg-info"><?= esc($sem['term']) ?></span></td>
+                                                        <td><span class="badge bg-primary"><?= esc($sem['semester'] ?? 'N/A') ?> Semester</span></td>
+                                                        <td><span class="badge bg-info"><?= esc($sem['term']) ?> Term</span></td>
                                                         <td>
                                                             <?php if (isset($sem['academic_year'])): ?>
                                                                 <?= esc($sem['academic_year']['year_start']) ?> - <?= esc($sem['academic_year']['year_end']) ?>
@@ -680,11 +689,18 @@
                                                                             <input type="text" class="form-control" id="name_edit<?= $sem['id'] ?>" name="name" value="<?= esc($sem['name']) ?>" required>
                                                                         </div>
                                                                         <div class="mb-3">
+                                                                            <label for="semester_edit<?= $sem['id'] ?>" class="form-label">Semester <span class="text-danger">*</span></label>
+                                                                            <select class="form-select" id="semester_edit<?= $sem['id'] ?>" name="semester" required>
+                                                                                <option value="1st" <?= ($sem['semester'] ?? '1st') === '1st' ? 'selected' : '' ?>>1st Semester</option>
+                                                                                <option value="2nd" <?= ($sem['semester'] ?? '1st') === '2nd' ? 'selected' : '' ?>>2nd Semester</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="mb-3">
                                                                             <label for="term_edit<?= $sem['id'] ?>" class="form-label">Term <span class="text-danger">*</span></label>
                                                                             <select class="form-select" id="term_edit<?= $sem['id'] ?>" name="term" required>
                                                                                 <option value="1st" <?= $sem['term'] === '1st' ? 'selected' : '' ?>>1st Term</option>
                                                                                 <option value="2nd" <?= $sem['term'] === '2nd' ? 'selected' : '' ?>>2nd Term</option>
-                                                                                <option value="Summer" <?= $sem['term'] === 'Summer' ? 'selected' : '' ?>>Summer</option>
+                                                                                <option value="3rd" <?= $sem['term'] === '3rd' ? 'selected' : '' ?>>3rd (Whole Semester)</option>
                                                                             </select>
                                                                         </div>
                                                                         <div class="mb-3">
@@ -1025,6 +1041,7 @@
                                                 $formAction = ($userRole === 'admin') ? "admin/course/{$course['id']}/upload" : "teacher/course/{$course['id']}/upload";
                                                 ?>
                                                 <form action="<?= base_url($formAction) ?>" method="post" enctype="multipart/form-data" id="uploadForm">
+                                                    <?= csrf_field() ?>
                                                     <div class="mb-3">
                                                         <label for="material_file" class="form-label">Select File:</label>
                                                         <input type="file" 
@@ -1773,8 +1790,8 @@
             </div>
         <?php endif; ?>
 
-        <!-- Student: Course Materials Section -->
-        <?php if ($userRole === 'student' && $currentSection === 'materials' && isset($course)): ?>
+        <!-- Admin/Teacher/Student: Course Materials Section -->
+        <?php if (($userRole === 'admin' || $userRole === 'teacher' || $userRole === 'student') && $currentSection === 'materials' && isset($course)): ?>
             <div class="row">
                 <div class="col-12">
                     <div class="card shadow">
@@ -1782,7 +1799,7 @@
                             <h3 class="mb-0">
                                 <i class="fas fa-book"></i> Course Materials: <?= esc($course['title']) ?>
                             </h3>
-                            <a href="<?= base_url('dashboard') ?>" class="btn btn-sm btn-light mt-2">
+                            <a href="<?= base_url('dashboard?section=' . ($userRole === 'admin' ? 'courses' : ($userRole === 'teacher' ? 'my-courses' : ''))) ?>" class="btn btn-sm btn-light mt-2">
                                 <i class="fas fa-arrow-left"></i> Back to Dashboard
                             </a>
                         </div>

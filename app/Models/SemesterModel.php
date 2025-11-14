@@ -12,7 +12,7 @@ class SemesterModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['name', 'term', 'academic_year_id', 'start_date', 'end_date', 'is_active', 'created_at', 'updated_at'];
+        protected $allowedFields    = ['name', 'semester', 'term', 'academic_year_id', 'start_date', 'end_date', 'is_active', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

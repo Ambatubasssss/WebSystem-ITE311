@@ -1,0 +1,70 @@
+ERROR - 2025-11-14 12:12:54 --> mysqli_sql_exception: Unknown column 'semester' in 'field list' in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `semeste...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `semeste...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `semeste...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `semeste...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(1025): CodeIgniter\Model->doUpdate(Array, Array)
+#6 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(860): CodeIgniter\BaseModel->update(Array, Array)
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Admin.php(324): CodeIgniter\Model->update('2', Array)
+#8 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Admin->updateSemester('2')
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin))
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\xampp\htdocs\ITE311-MALILAY\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 {main}
+CRITICAL - 2025-11-14 12:12:54 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'semester' in 'field list'
+[Method: POST, Route: admin/semester/update/2]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `semesters` SET `name` = :name:, `semester` = :semester:, `term` = :term:, `academic_year_id` = :academic_year_id:, `start_date` = :start_date:, `end_date` = :end_date:, `is_active` = :is_active:, `updated_at` = :updated_at:
+WHERE `semesters`.`id` IN :semesters.id:', [...], false)
+ 2 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 3 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 4 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 5 APPPATH\Controllers\Admin.php(324): CodeIgniter\Model->update('2', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin->updateSemester('2')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-11-14 12:12:54 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'semester' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `semesters` SET `name` = \'Second Semester\', `semester` = \'1st\', `term` = \'2nd\', `academic_year_id` = \'1\', `start_date` = \'2025-01-01\', `end_date` = \'2025-05-31\', `is_active` = 1, `updated_at` = \'2025-11-14 12:12:54\'
+WHERE `semesters`.`id` IN (\'2\')')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `semesters` SET `name` = \'Second Semester\', `semester` = \'1st\', `term` = \'2nd\', `academic_year_id` = \'1\', `start_date` = \'2025-01-01\', `end_date` = \'2025-05-31\', `is_active` = 1, `updated_at` = \'2025-11-14 12:12:54\'
+WHERE `semesters`.`id` IN (\'2\')')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `semesters` SET `name` = :name:, `semester` = :semester:, `term` = :term:, `academic_year_id` = :academic_year_id:, `start_date` = :start_date:, `end_date` = :end_date:, `is_active` = :is_active:, `updated_at` = :updated_at:
+WHERE `semesters`.`id` IN :semesters.id:', [...], false)
+ 4 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 5 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 6 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 7 APPPATH\Controllers\Admin.php(324): CodeIgniter\Model->update('2', [...])
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin->updateSemester('2')
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-11-14 12:12:54 --> [Caused by] mysqli_sql_exception: Unknown column 'semester' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('UPDATE `semesters` SET `name` = \'Second Semester\', `semester` = \'1st\', `term` = \'2nd\', `academic_year_id` = \'1\', `start_date` = \'2025-01-01\', `end_date` = \'2025-05-31\', `is_active` = 1, `updated_at` = \'2025-11-14 12:12:54\'
+WHERE `semesters`.`id` IN (\'2\')', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `semesters` SET `name` = \'Second Semester\', `semester` = \'1st\', `term` = \'2nd\', `academic_year_id` = \'1\', `start_date` = \'2025-01-01\', `end_date` = \'2025-05-31\', `is_active` = 1, `updated_at` = \'2025-11-14 12:12:54\'
+WHERE `semesters`.`id` IN (\'2\')')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `semesters` SET `name` = \'Second Semester\', `semester` = \'1st\', `term` = \'2nd\', `academic_year_id` = \'1\', `start_date` = \'2025-01-01\', `end_date` = \'2025-05-31\', `is_active` = 1, `updated_at` = \'2025-11-14 12:12:54\'
+WHERE `semesters`.`id` IN (\'2\')')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query('UPDATE `semesters` SET `name` = :name:, `semester` = :semester:, `term` = :term:, `academic_year_id` = :academic_year_id:, `start_date` = :start_date:, `end_date` = :end_date:, `is_active` = :is_active:, `updated_at` = :updated_at:
+WHERE `semesters`.`id` IN :semesters.id:', [...], false)
+ 5 SYSTEMPATH\Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+ 6 SYSTEMPATH\BaseModel.php(1025): CodeIgniter\Model->doUpdate([...], [...])
+ 7 SYSTEMPATH\Model.php(860): CodeIgniter\BaseModel->update([...], [...])
+ 8 APPPATH\Controllers\Admin.php(324): CodeIgniter\Model->update('2', [...])
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin->updateSemester('2')
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(87): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
