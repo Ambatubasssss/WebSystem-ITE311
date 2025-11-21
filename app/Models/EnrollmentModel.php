@@ -12,7 +12,7 @@ class EnrollmentModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['user_id', 'course_id', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['user_id', 'course_id', 'enrollment_date', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -52,6 +52,12 @@ class EnrollmentModel extends Model
      */
     public function enrollUser($data)
     {
+        // Set enrollment_date to current datetime if not provided
+        // This matches the migration field requirement
+        if (!isset($data['enrollment_date'])) {
+            $data['enrollment_date'] = date('Y-m-d H:i:s');
+        }
+        
         return $this->insert($data);
     }
 

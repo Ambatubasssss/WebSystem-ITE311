@@ -69,24 +69,24 @@ class Course extends BaseController
             ]);
         }
 
-        // Check if user is already enrolled using direct database query
-        $db = \Config\Database::connect();
-        $enrollmentQuery = $db->query("SELECT * FROM enrollments WHERE user_id = ? AND course_id = ?", [$userId, $courseId]);
-        if ($enrollmentQuery->getNumRows() > 0) {
+        // Check if user is already enrolled using model method
+        if ($this->enrollmentModel->isAlreadyEnrolled($userId, $courseId)) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'You are already enrolled in this course.'
             ]);
         }
 
-        // Insert enrollment record using direct database query
+        // Insert enrollment record using model method
         try {
-            $insertQuery = $db->query("
-                INSERT INTO enrollments (user_id, course_id, created_at, updated_at) 
-                VALUES (?, ?, NOW(), NOW())
-            ", [$userId, $courseId]);
+            $enrollmentData = [
+                'user_id' => $userId,
+                'course_id' => $courseId
+            ];
             
-            if ($db->affectedRows() > 0) {
+            $result = $this->enrollmentModel->enrollUser($enrollmentData);
+            
+            if ($result) {
                 // Create notification for successful enrollment
                 $notificationModel = new \App\Models\NotificationModel();
                 if ($userRole === 'teacher') {
