@@ -241,29 +241,53 @@
                                                 <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Available Courses</h5>
                                             </div>
                                             <div class="card-body">
-                                                <div id="availableCoursesContainer">
+                                                <!-- Search Form (Step 4) -->
+                                                <div class="row mb-4">
+                                                    <div class="col-md-12">
+                                                        <form id="searchForm" class="d-flex">
+                                                            <input type="text" 
+                                                                   id="searchInput" 
+                                                                   class="form-control" 
+                                                                   placeholder="Search courses..." 
+                                                                   name="search_term">
+                                                            <button class="btn btn-outline-primary ms-2" type="submit">
+                                                                <i class="fas fa-search"></i> Search
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Courses Container (Step 6) - Left aligned below search -->
+                                                <div id="coursesContainer" class="row">
                                                     <?php if (!empty($availableCourses)): ?>
-                                                        <div class="row">
-                                                            <?php foreach ($availableCourses as $course): ?>
-                                                            <div class="col-md-6 mb-3">
-                                                                <div class="card border-success">
-                                                                    <div class="card-body">
-                                                                        <h6 class="card-title text-success"><?= esc($course['title']) ?></h6>
-                                                                        <p class="card-text small"><?= esc($course['description']) ?></p>
-                                                                        <button class="btn btn-success btn-sm enroll-btn" 
-                                                                                data-course-id="<?= $course['id'] ?>"
-                                                                                data-course-title="<?= esc($course['title']) ?>">
-                                                                            <i class="fas fa-plus"></i> Enroll Now
-                                                                        </button>
+                                                        <?php foreach ($availableCourses as $course): ?>
+                                                        <div class="col-md-12 mb-3">
+                                                            <div class="card course-card">
+                                                                <div class="card-body">
+                                                                    <div class="row">
+                                                                        <div class="col-md-8">
+                                                                            <h5 class="card-title"><?= esc($course['title']) ?></h5>
+                                                                            <p class="card-text"><?= esc($course['description']) ?></p>
+                                                                        </div>
+                                                                        <div class="col-md-4 text-end">
+                                                                            <a href="<?= base_url("course/view/{$course['id']}") ?>" class="btn btn-primary btn-sm mb-2 d-block">View Course</a>
+                                                                            <button class="btn btn-success btn-sm enroll-btn w-100" 
+                                                                                    data-course-id="<?= $course['id'] ?>"
+                                                                                    data-course-title="<?= esc($course['title']) ?>">
+                                                                                <i class="fas fa-plus"></i> Enroll Now
+                                                                            </button>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <?php endforeach; ?>
                                                         </div>
+                                                        <?php endforeach; ?>
                                                     <?php else: ?>
-                                                        <div class="text-center py-4">
-                                                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                                                            <p class="text-muted">Great! You're enrolled in all available courses.</p>
+                                                        <div class="col-12">
+                                                            <div class="text-center py-4">
+                                                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                                                <p class="text-muted">Great! You're enrolled in all available courses.</p>
+                                                            </div>
                                                         </div>
                                                     <?php endif; ?>
                                                 </div>
@@ -2100,5 +2124,62 @@
             default: return 'bg-secondary';
         }
     }
+
+    // Step 5: Implement Client-Side Filtering with jQuery
+    $(document).ready(function() {
+        // 1. Add jQuery script for instant client-side filtering
+        $('#searchInput').on('keyup', function() {
+            const searchTerm = $(this).val().toLowerCase();
+            
+            $('.course-card').each(function() {
+                const cardText = $(this).text().toLowerCase();
+                $(this).toggle(cardText.includes(searchTerm));
+            });
+        });
+
+        // 2. Server-side search with AJAX
+        $('#searchForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const searchTerm = $('#searchInput').val();
+            
+            $.get('<?= base_url('courses/search') ?>', { search_term: searchTerm })
+                .done(function(data) {
+                    if (data.success && data.courses.length > 0) {
+                        let html = '';
+                        $.each(data.courses, function(index, course) {
+                            html += `
+                                <div class="col-md-12 mb-3">
+                                    <div class="card course-card">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <h5 class="card-title">${course.title}</h5>
+                                                    <p class="card-text">${course.description}</p>
+                                                </div>
+                                                <div class="col-md-4 text-end">
+                                                    <a href="<?= base_url('course/view') ?>/${course.id}" class="btn btn-primary btn-sm mb-2 d-block">View Course</a>
+                                                    <button class="btn btn-success btn-sm enroll-btn w-100" 
+                                                            data-course-id="${course.id}"
+                                                            data-course-title="${course.title}">
+                                                        <i class="fas fa-plus"></i> Enroll Now
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        $('#coursesContainer').html(html);
+                    } else {
+                        $('#coursesContainer').html('<div class="col-12"><div class="alert alert-info"><i class="fas fa-info-circle"></i> No courses found.</div></div>');
+                    }
+                })
+                .fail(function() {
+                    $('#coursesContainer').html('<div class="col-12"><div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error loading search results.</div></div>');
+                });
+        });
+    });
     </script>
 <?= $this->endSection() ?>

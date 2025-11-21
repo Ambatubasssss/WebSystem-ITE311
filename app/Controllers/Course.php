@@ -265,4 +265,52 @@ class Course extends BaseController
             'students' => $enrolledStudents
         ]);
     }
+
+    /**
+     * Search courses by title or description
+     * Supports both AJAX (JSON) and regular (view) requests
+     */
+    public function search()
+    {
+        // Get search term from GET or POST request
+        $searchTerm = $this->request->getGet('search_term') ?? $this->request->getPost('search_term') ?? '';
+        
+        // Security: Sanitize search term to prevent SQL injection
+        $searchTerm = trim($searchTerm);
+        
+        // Create a new model instance for this query to avoid modifying the shared instance
+        $searchModel = new CourseModel();
+        
+        // Build query using CodeIgniter's Query Builder
+        if (!empty($searchTerm)) {
+            // Use LIKE queries for searching in title and description
+            $searchModel->groupStart()
+                        ->like('title', $searchTerm)
+                        ->orLike('description', $searchTerm)
+                        ->groupEnd();
+        }
+        
+        // Get all matching courses
+        $courses = $searchModel->orderBy('title', 'ASC')->findAll();
+        
+        // Check if request is AJAX
+        if ($this->request->isAJAX()) {
+            // Return JSON response for AJAX requests
+            return $this->response->setJSON([
+                'success' => true,
+                'courses' => $courses,
+                'count' => count($courses),
+                'search_term' => $searchTerm
+            ]);
+        }
+        
+        // For regular requests, render view (if search_results view exists)
+        $data = [
+            'courses' => $courses,
+            'searchTerm' => $searchTerm
+        ];
+        
+        // Redirect to dashboard with search results
+        return redirect()->to('/dashboard?section=enrollments&search=' . urlencode($searchTerm));
+    }
 }

@@ -29,6 +29,10 @@ $routes->get('/course/view/(:num)', 'Course::view/$1');
 $routes->get('/course/students', 'Course::getStudents');
 $routes->get('/course/(:num)/students', 'Course::getCourseStudents/$1');
 
+// Course search routes (Lab 9)
+$routes->get('/courses/search', 'Course::search');
+$routes->post('/courses/search', 'Course::search');
+
 // Student-specific routes
 $routes->group('student', function($routes) {
     $routes->get('enrollments', 'Student::enrollments');
