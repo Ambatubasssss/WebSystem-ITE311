@@ -11,48 +11,64 @@ class Auth extends BaseController
     {
         // Check if form was submitted (POST request)
         if ($this->request->getMethod() === 'POST') {
-            // Get form data
+            // Set validation rules
+            $validation = \Config\Services::validation();
+            $validation->setRules([
+                'name' => [
+                    'label' => 'Name',
+                    'rules' => 'required|min_length[3]|max_length[100]|alpha_numeric_space',
+                    'errors' => [
+                        'required' => 'The {field} field is required.',
+                        'min_length' => 'The {field} must be at least {param} characters long.',
+                        'max_length' => 'The {field} cannot exceed {param} characters.',
+                        'alpha_numeric_space' => 'The {field} can only contain letters, numbers, and spaces.'
+                    ]
+                ],
+                'email' => [
+                    'label' => 'Email',
+                    'rules' => 'required|valid_email|max_length[255]|is_unique[users.email]',
+                    'errors' => [
+                        'required' => 'The {field} field is required.',
+                        'valid_email' => 'Please provide a valid email address.',
+                        'max_length' => 'The {field} cannot exceed {param} characters.',
+                        'is_unique' => 'This email address is already registered.'
+                    ]
+                ],
+                'password' => [
+                    'label' => 'Password',
+                    'rules' => 'required|min_length[8]|regex_match[/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/]',
+                    'errors' => [
+                        'required' => 'The {field} field is required.',
+                        'min_length' => 'The {field} must be at least {param} characters long.',
+                        'regex_match' => 'The {field} must contain at least one uppercase letter, one lowercase letter, one number, and one special character.'
+                    ]
+                ],
+                'password_confirm' => [
+                    'label' => 'Password Confirmation',
+                    'rules' => 'required|matches[password]',
+                    'errors' => [
+                        'required' => 'Please confirm your password.',
+                        'matches' => 'The password confirmation does not match.'
+                    ]
+                ]
+            ]);
+
+            // Run validation
+            if (!$validation->withRequest($this->request)->run()) {
+                // Validation failed
+                $errors = $validation->getErrors();
+                session()->setFlashdata('error', implode('<br>', $errors));
+                return view('auth/register', ['validation' => $validation]);
+            }
+
+            // Get validated and sanitized form data
             $name = $this->request->getPost('name');
             $email = $this->request->getPost('email');
             $password = $this->request->getPost('password');
-            $password_confirm = $this->request->getPost('password_confirm');
 
-            // Simple validation
-            if (empty($name) || empty($email) || empty($password) || empty($password_confirm)) {
-                session()->setFlashdata('error', 'All fields are required.');
-                return view('auth/register');
-            }
-
-            if ($password !== $password_confirm) {
-                session()->setFlashdata('error', 'Passwords do not match.');
-                return view('auth/register');
-            }
-
-            // Enhanced password validation
-            if (strlen($password) < 8) {
-                session()->setFlashdata('error', 'Password must be at least 8 characters.');
-                return view('auth/register');
-            }
-
-            if (!preg_match('/[A-Z]/', $password)) {
-                session()->setFlashdata('error', 'Password must contain at least one uppercase letter.');
-                return view('auth/register');
-            }
-
-            if (!preg_match('/[a-z]/', $password)) {
-                session()->setFlashdata('error', 'Password must contain at least one lowercase letter.');
-                return view('auth/register');
-            }
-
-            if (!preg_match('/[0-9]/', $password)) {
-                session()->setFlashdata('error', 'Password must contain at least one number.');
-                return view('auth/register');
-            }
-
-            if (!preg_match('/[^A-Za-z0-9]/', $password)) {
-                session()->setFlashdata('error', 'Password must contain at least one special character.');
-                return view('auth/register');
-            }
+            // Additional sanitization
+            $name = trim($name);
+            $email = trim(strtolower($email));
 
             // Hash the password
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -67,8 +83,6 @@ class Auth extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
-
-
 
             try {
                 $result = $userModel->insert($userData);
@@ -104,15 +118,40 @@ class Auth extends BaseController
                 session()->setFlashdata('error', 'Too many login attempts. Please try again later.');
                 return view('auth/login');
             }
-            // Get form data
-            $email = $this->request->getPost('email');
-            $password = $this->request->getPost('password');
 
-            // Simple validation
-            if (empty($email) || empty($password)) {
-                session()->setFlashdata('error', 'Email and password are required.');
-                return view('auth/login');
+            // Set validation rules
+            $validation = \Config\Services::validation();
+            $validation->setRules([
+                'email' => [
+                    'label' => 'Email',
+                    'rules' => 'required|valid_email|max_length[255]',
+                    'errors' => [
+                        'required' => 'The {field} field is required.',
+                        'valid_email' => 'Please provide a valid email address.',
+                        'max_length' => 'The {field} cannot exceed {param} characters.'
+                    ]
+                ],
+                'password' => [
+                    'label' => 'Password',
+                    'rules' => 'required|min_length[1]',
+                    'errors' => [
+                        'required' => 'The {field} field is required.',
+                        'min_length' => 'The {field} is required.'
+                    ]
+                ]
+            ]);
+
+            // Run validation
+            if (!$validation->withRequest($this->request)->run()) {
+                // Validation failed
+                $errors = $validation->getErrors();
+                session()->setFlashdata('error', implode('<br>', $errors));
+                return view('auth/login', ['validation' => $validation]);
             }
+
+            // Get validated and sanitized form data
+            $email = trim(strtolower($this->request->getPost('email')));
+            $password = $this->request->getPost('password');
 
             // Check database for user
             $userModel = new \App\Models\UserModel();
@@ -144,6 +183,9 @@ class Auth extends BaseController
             ];
             
             session()->set($sessionData);
+            
+            // Regenerate session ID to prevent session fixation attacks
+            session()->regenerate(true);
             
             // Clear login attempts on successful login
             session()->remove($attemptsKey);
@@ -177,6 +219,28 @@ class Auth extends BaseController
         $userModel = new \App\Models\UserModel();
         $role = strtolower(session('role') ?? '');
         $section = $this->request->getGet('section') ?? 'overview';
+        
+        // Authorization: Validate section access based on user role
+        $adminSections = ['users', 'courses', 'academic-years', 'semesters', 'year-levels', 'assign-year-level', 'upload', 'materials'];
+        $teacherSections = ['my-courses', 'upload', 'enroll-students', 'create-assignment', 'assignments', 'view-assignment', 'materials'];
+        $studentSections = ['enrollments', 'assignments', 'view-assignment', 'materials'];
+        
+        // Check if user is trying to access unauthorized section
+        if ($section !== 'overview') {
+            $authorized = false;
+            if ($role === 'admin' && in_array($section, $adminSections)) {
+                $authorized = true;
+            } elseif ($role === 'teacher' && in_array($section, $teacherSections)) {
+                $authorized = true;
+            } elseif ($role === 'student' && in_array($section, $studentSections)) {
+                $authorized = true;
+            }
+            
+            if (!$authorized) {
+                session()->setFlashdata('error', 'Access denied. You do not have permission to access this section.');
+                $section = 'overview'; // Reset to overview
+            }
+        }
         
         // Fetch role-specific data from database
         $data = [
