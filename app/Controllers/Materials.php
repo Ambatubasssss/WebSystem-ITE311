@@ -54,13 +54,16 @@ class Materials extends BaseController
     }
 
     /**
-     * Handle file upload process
+     * Handle file upload process using CodeIgniter's File Uploading Library
      */
     private function handleFileUpload($course_id)
     {
-        // Validate file upload
-        if (!isset($_FILES['material_file']) || $_FILES['material_file']['error'] !== UPLOAD_ERR_OK) {
-            return redirect()->back()->with('error', 'File upload failed. Please try again.');
+        // Get the uploaded file using CodeIgniter's File Uploading Library
+        $file = $this->request->getFile('material_file');
+        
+        // Check if file was uploaded
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()->with('error', 'File upload failed. Please select a valid file.');
         }
         
         // Setup upload directory
@@ -69,48 +72,103 @@ class Materials extends BaseController
             mkdir($uploadPath, 0755, true);
         }
 
-        // Generate unique filename
-        $fileName = 'upload_' . time() . '_' . $_FILES['material_file']['name'];
-        $targetPath = $uploadPath . $fileName;
+        // Define allowed file types and MIME types for security
+        $allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'];
+        $allowedMimeTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'text/plain'
+        ];
         
-        // Move uploaded file
-        if (!move_uploaded_file($_FILES['material_file']['tmp_name'], $targetPath)) {
-            return redirect()->back()->with('error', 'Failed to move uploaded file.');
+        // Get file extension and validate
+        $originalName = $file->getName();
+        $extension = strtolower($file->getClientExtension());
+        
+        // Security: Validate file extension
+        if (!in_array($extension, $allowedExtensions)) {
+            return redirect()->back()->with('error', 'Invalid file type. Allowed formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT');
         }
-
-        // Insert into database
+        
+        // Security: Validate MIME type to prevent file type spoofing
+        $mimeType = $file->getClientMimeType();
+        if (!in_array($mimeType, $allowedMimeTypes)) {
+            return redirect()->back()->with('error', 'Invalid file type detected. Please upload a valid document.');
+        }
+        
+        // Security: Validate file size (10MB = 10485760 bytes)
+        $maxSize = 10 * 1024 * 1024; // 10MB in bytes
+        if ($file->getSize() > $maxSize) {
+            return redirect()->back()->with('error', 'File size exceeds the maximum limit of 10MB.');
+        }
+        
+        // Security: Sanitize filename to prevent path traversal attacks
+        $sanitizedOriginalName = basename($originalName); // Remove any path components
+        $sanitizedOriginalName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $sanitizedOriginalName); // Remove special characters
+        $sanitizedOriginalName = preg_replace('/_{2,}/', '_', $sanitizedOriginalName); // Replace multiple underscores
+        
+        // Generate unique filename with timestamp to prevent overwrites
+        $uniqueFileName = 'upload_' . time() . '_' . uniqid() . '_' . $sanitizedOriginalName;
+        
+        // Configure CodeIgniter's Upload Library
+        $config = [
+            'upload_path'   => $uploadPath,
+            'allowed_types' => implode('|', $allowedExtensions),
+            'max_size'      => 10240, // 10MB in KB
+            'file_name'     => $uniqueFileName,
+            'overwrite'     => false
+        ];
+        
+        // Load and configure the Upload Library
+        $upload = \Config\Services::upload();
+        $upload->initialize($config);
+        
+        // Perform the upload using CodeIgniter's library
+        if (!$upload->doUpload('material_file')) {
+            $errors = $upload->getErrors();
+            $errorMessage = !empty($errors) ? implode(', ', $errors) : 'File upload failed. Please try again.';
+            return redirect()->back()->with('error', $errorMessage);
+        }
+        
+        // Get upload data
+        $uploadData = $upload->data();
+        
+        // Insert into database using model method
         try {
-            $db = \Config\Database::connect();
-            $builder = $db->table('materials');
-            
             $data = [
                 'course_id' => $course_id,
-                'file_name' => $_FILES['material_file']['name'],
-                'file_path' => 'uploads/materials/' . $fileName,
-                'file_size' => $_FILES['material_file']['size'],
-                'file_type' => pathinfo($_FILES['material_file']['name'], PATHINFO_EXTENSION),
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                'file_name' => $sanitizedOriginalName, // Store original sanitized name
+                'file_path' => 'uploads/materials/' . $uploadData['file_name'],
+                'file_size' => $uploadData['file_size'],
+                'file_type' => $extension
             ];
             
-            $result = $builder->insert($data);
+            $result = $this->materialModel->insertMaterial($data);
             
             if ($result) {
                 // Get user role for redirect
                 $userRole = strtolower(session('role') ?? '');
-                $redirectPath = ($userRole === 'admin') ? '/dashboard?section=upload&course_id=' . $course_id : '/dashboard?section=upload&course_id=' . $course_id;
+                $redirectPath = '/dashboard?section=upload&course_id=' . $course_id;
                 
                 return redirect()->to($redirectPath)->with('success', 'Material uploaded successfully!');
             } else {
                 // Delete uploaded file if database insert fails
-                unlink($targetPath);
+                $filePath = $uploadPath . $uploadData['file_name'];
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
                 return redirect()->back()->with('error', 'Failed to save material to database.');
             }
             
         } catch (\Exception $e) {
             // Delete uploaded file if exception occurs
-            if (file_exists($targetPath)) {
-                unlink($targetPath);
+            $filePath = $uploadPath . $uploadData['file_name'];
+            if (file_exists($filePath)) {
+                unlink($filePath);
             }
             log_message('error', 'Material upload exception: ' . $e->getMessage());
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
