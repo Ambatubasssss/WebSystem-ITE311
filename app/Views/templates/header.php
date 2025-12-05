@@ -77,6 +77,17 @@
                             </ul>
                         </li>
                         
+                        <!-- Settings Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="<?= base_url('dashboard?section=settings'); ?>"><i class="fas fa-user-edit"></i> Edit Personal Info</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url('dashboard?section=settings&tab=password'); ?>"><i class="fas fa-key"></i> Update Password</a></li>
+                            </ul>
+                        </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link text-white" href="<?= base_url('logout'); ?>"><i class="fas fa-sign-out-alt"></i> Logout</a>
                         </li>

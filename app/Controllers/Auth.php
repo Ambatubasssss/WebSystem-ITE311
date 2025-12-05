@@ -221,9 +221,9 @@ class Auth extends BaseController
         $section = $this->request->getGet('section') ?? 'overview';
         
         // Authorization: Validate section access based on user role
-        $adminSections = ['users', 'courses', 'academic-years', 'semesters', 'year-levels', 'assign-year-level', 'upload', 'materials'];
-        $teacherSections = ['my-courses', 'upload', 'enroll-students', 'create-assignment', 'assignments', 'view-assignment', 'materials'];
-        $studentSections = ['enrollments', 'assignments', 'view-assignment', 'materials'];
+        $adminSections = ['users', 'courses', 'academic-years', 'semesters', 'year-levels', 'assign-year-level', 'upload', 'materials', 'settings'];
+        $teacherSections = ['my-courses', 'upload', 'enroll-students', 'create-assignment', 'assignments', 'view-assignment', 'materials', 'settings'];
+        $studentSections = ['enrollments', 'assignments', 'view-assignment', 'materials', 'settings'];
         
         // Check if user is trying to access unauthorized section
         if ($section !== 'overview') {
@@ -515,6 +515,205 @@ class Auth extends BaseController
             }
         }
 
+        // Load user data for settings section
+        if ($section === 'settings') {
+            $currentUser = $userModel->find(session('userID'));
+            $data['currentUser'] = $currentUser;
+            $data['settingsTab'] = $this->request->getGet('tab') ?? 'profile';
+        }
+
         return view('auth/dashboard', $data);
+    }
+
+    public function updateProfile()
+    {
+        if (!session()->get('logged_in')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'You must be logged in to update your profile.'
+            ]);
+        }
+
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'name' => [
+                'label' => 'Name',
+                'rules' => 'required|min_length[3]|max_length[100]|alpha_numeric_space',
+                'errors' => [
+                    'required' => 'The {field} field is required.',
+                    'min_length' => 'The {field} must be at least {param} characters long.',
+                    'max_length' => 'The {field} cannot exceed {param} characters.',
+                    'alpha_numeric_space' => 'The {field} can only contain letters, numbers, and spaces.'
+                ]
+            ],
+            'email' => [
+                'label' => 'Email',
+                'rules' => 'required|valid_email|max_length[255]',
+                'errors' => [
+                    'required' => 'The {field} field is required.',
+                    'valid_email' => 'Please provide a valid email address.',
+                    'max_length' => 'The {field} cannot exceed {param} characters.'
+                ]
+            ]
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            $errors = $validation->getErrors();
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => implode('<br>', $errors),
+                'errors' => $errors
+            ]);
+        }
+
+        $userId = session('userID');
+        $name = trim($this->request->getPost('name'));
+        $email = trim(strtolower($this->request->getPost('email')));
+
+        $userModel = new \App\Models\UserModel();
+        $currentUser = $userModel->find($userId);
+
+        if (!$currentUser) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User not found.'
+            ]);
+        }
+
+        // Check if email is already taken by another user
+        $existingUser = $userModel->where('email', $email)->where('id !=', $userId)->first();
+        if ($existingUser) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'This email address is already registered to another user.'
+            ]);
+        }
+
+        $updateData = [
+            'name' => $name,
+            'email' => $email,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        try {
+            if ($userModel->update($userId, $updateData)) {
+                // Update session data
+                session()->set([
+                    'name' => $name,
+                    'email' => $email
+                ]);
+
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Profile updated successfully!'
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update profile.'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error updating profile: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function updatePassword()
+    {
+        if (!session()->get('logged_in')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'You must be logged in to update your password.'
+            ]);
+        }
+
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'current_password' => [
+                'label' => 'Current Password',
+                'rules' => 'required',
+                'errors' => [
+                    'required' => 'The {field} field is required.'
+                ]
+            ],
+            'new_password' => [
+                'label' => 'New Password',
+                'rules' => 'required|min_length[8]|regex_match[/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/]',
+                'errors' => [
+                    'required' => 'The {field} field is required.',
+                    'min_length' => 'The {field} must be at least {param} characters long.',
+                    'regex_match' => 'The {field} must contain at least one uppercase letter, one lowercase letter, one number, and one special character.'
+                ]
+            ],
+            'confirm_password' => [
+                'label' => 'Confirm Password',
+                'rules' => 'required|matches[new_password]',
+                'errors' => [
+                    'required' => 'Please confirm your new password.',
+                    'matches' => 'The password confirmation does not match.'
+                ]
+            ]
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            $errors = $validation->getErrors();
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => implode('<br>', $errors),
+                'errors' => $errors
+            ]);
+        }
+
+        $userId = session('userID');
+        $currentPassword = $this->request->getPost('current_password');
+        $newPassword = $this->request->getPost('new_password');
+
+        $userModel = new \App\Models\UserModel();
+        $user = $userModel->find($userId);
+
+        if (!$user) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User not found.'
+            ]);
+        }
+
+        // Verify current password
+        if (!password_verify($currentPassword, $user['password'])) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Current password is incorrect.'
+            ]);
+        }
+
+        // Hash new password
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        $updateData = [
+            'password' => $hashedPassword,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        try {
+            if ($userModel->update($userId, $updateData)) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Password updated successfully!'
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update password.'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error updating password: ' . $e->getMessage()
+            ]);
+        }
     }
 }

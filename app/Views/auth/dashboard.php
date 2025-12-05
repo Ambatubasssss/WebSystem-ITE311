@@ -314,6 +314,55 @@
                             </a>
                         </div>
                         <div class="card-body">
+                            <!-- Add User Form -->
+                            <div class="mb-4">
+                                <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#addUserForm" aria-expanded="false" aria-controls="addUserForm">
+                                    <i class="fas fa-plus"></i> Add New User
+                                </button>
+                                <div class="collapse" id="addUserForm">
+                                    <div class="card card-body bg-light">
+                                        <h5 class="mb-3"><i class="fas fa-user-plus"></i> Create New User</h5>
+                                        <form id="createUserForm" onsubmit="createUser(event)">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="user_name" class="form-label">Name <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="user_name" name="name" required minlength="3" maxlength="100" placeholder="Enter full name">
+                                                    <div class="form-text">Minimum 3 characters, letters, numbers, and spaces only</div>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="user_email" class="form-label">Email <span class="text-danger">*</span></label>
+                                                    <input type="email" class="form-control" id="user_email" name="email" required maxlength="255" placeholder="Enter email address">
+                                                    <div class="form-text">Must be a valid and unique email address</div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="user_role" class="form-label">Role <span class="text-danger">*</span></label>
+                                                    <select class="form-select" id="user_role" name="role" required>
+                                                        <option value="">Select a role</option>
+                                                        <option value="admin">Admin</option>
+                                                        <option value="teacher">Teacher</option>
+                                                        <option value="student">Student</option>
+                                                    </select>
+                                                    <div class="form-text">Select the role for the new user</div>
+                                                </div>
+                                            </div>
+                                            <div class="alert alert-info mb-3">
+                                                <i class="fas fa-info-circle"></i> <strong>Note:</strong> The password will be automatically generated as <strong>BasteLMS123.</strong> for all new users. Please inform the user to change their password after first login.
+                                            </div>
+                                            <div class="mb-3">
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="fas fa-save"></i> Create User
+                                                </button>
+                                                <button type="reset" class="btn btn-secondary" onclick="$('#addUserForm').collapse('hide')">
+                                                    <i class="fas fa-times"></i> Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div id="usersTableContainer">
                                 <div class="table-responsive">
                                     <table class="table table-striped">
@@ -1913,6 +1962,163 @@
                 </div>
             </div>
         <?php endif; ?>
+
+        <!-- Settings Section (All Roles) -->
+        <?php if ($currentSection === 'settings'): ?>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="mb-0"><i class="fas fa-cog"></i> Settings</h3>
+                            <a href="<?= base_url('dashboard') ?>" class="btn btn-sm btn-light mt-2">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <?php 
+                            $settingsTab = $settingsTab ?? 'profile';
+                            $currentUser = $currentUser ?? null;
+                            ?>
+                            
+                            <!-- Settings Tabs -->
+                            <ul class="nav nav-tabs mb-4" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link <?= $settingsTab === 'profile' ? 'active' : '' ?>" 
+                                            id="profile-tab" 
+                                            data-bs-toggle="tab" 
+                                            data-bs-target="#profile" 
+                                            type="button" 
+                                            role="tab">
+                                        <i class="fas fa-user-edit"></i> Edit Personal Info
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link <?= $settingsTab === 'password' ? 'active' : '' ?>" 
+                                            id="password-tab" 
+                                            data-bs-toggle="tab" 
+                                            data-bs-target="#password" 
+                                            type="button" 
+                                            role="tab">
+                                        <i class="fas fa-key"></i> Update Password
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Tab Content -->
+                            <div class="tab-content">
+                                <!-- Edit Personal Info Tab -->
+                                <div class="tab-pane fade <?= $settingsTab === 'profile' ? 'show active' : '' ?>" 
+                                     id="profile" 
+                                     role="tabpanel">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-user-edit"></i> Edit Personal Information</h5>
+                                            <p class="text-muted">Update your name and email address.</p>
+                                            
+                                            <form id="updateProfileForm" onsubmit="updateProfile(event)">
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="profile_name" class="form-label">Name <span class="text-danger">*</span></label>
+                                                        <input type="text" 
+                                                               class="form-control" 
+                                                               id="profile_name" 
+                                                               name="name" 
+                                                               required 
+                                                               minlength="3" 
+                                                               maxlength="100" 
+                                                               value="<?= esc($currentUser['name'] ?? session('name')) ?>"
+                                                               placeholder="Enter your full name">
+                                                        <div class="form-text">Minimum 3 characters, letters, numbers, and spaces only</div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="profile_email" class="form-label">Email <span class="text-danger">*</span></label>
+                                                        <input type="email" 
+                                                               class="form-control" 
+                                                               id="profile_email" 
+                                                               name="email" 
+                                                               required 
+                                                               maxlength="255" 
+                                                               value="<?= esc($currentUser['email'] ?? session('email')) ?>"
+                                                               placeholder="Enter your email address">
+                                                        <div class="form-text">Must be a valid and unique email address</div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-save"></i> Update Profile
+                                                    </button>
+                                                    <button type="reset" class="btn btn-secondary">
+                                                        <i class="fas fa-undo"></i> Reset
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Update Password Tab -->
+                                <div class="tab-pane fade <?= $settingsTab === 'password' ? 'show active' : '' ?>" 
+                                     id="password" 
+                                     role="tabpanel">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-key"></i> Update Password</h5>
+                                            <p class="text-muted">Change your account password. Make sure to use a strong password.</p>
+                                            
+                                            <form id="updatePasswordForm" onsubmit="updatePassword(event)">
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="current_password" class="form-label">Current Password <span class="text-danger">*</span></label>
+                                                        <input type="password" 
+                                                               class="form-control" 
+                                                               id="current_password" 
+                                                               name="current_password" 
+                                                               required 
+                                                               placeholder="Enter your current password">
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="new_password" class="form-label">New Password <span class="text-danger">*</span></label>
+                                                        <input type="password" 
+                                                               class="form-control" 
+                                                               id="new_password" 
+                                                               name="new_password" 
+                                                               required 
+                                                               minlength="8" 
+                                                               placeholder="Enter new password">
+                                                        <div class="form-text">Minimum 8 characters with uppercase, lowercase, number, and special character</div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="confirm_password" class="form-label">Confirm New Password <span class="text-danger">*</span></label>
+                                                        <input type="password" 
+                                                               class="form-control" 
+                                                               id="confirm_password" 
+                                                               name="confirm_password" 
+                                                               required 
+                                                               minlength="8" 
+                                                               placeholder="Confirm new password">
+                                                        <div class="form-text">Must match the new password above</div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-save"></i> Update Password
+                                                    </button>
+                                                    <button type="reset" class="btn btn-secondary">
+                                                        <i class="fas fa-undo"></i> Reset
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Helper function for formatting bytes -->
@@ -2123,6 +2329,141 @@
             case 'student': return 'bg-primary';
             default: return 'bg-secondary';
         }
+    }
+
+    // Update profile function
+    function updateProfile(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const formData = new FormData(form);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        
+        fetch('<?= base_url('profile/update') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Reload the page to refresh session data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert('danger', data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error updating profile: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    // Update password function
+    function updatePassword(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const formData = new FormData(form);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        
+        fetch('<?= base_url('password/update') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Reset form
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            } else {
+                showAlert('danger', data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error updating password: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    // Create user function (for admin)
+    function createUser(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const formData = new FormData(form);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+        
+        fetch('<?= base_url('admin/users/create') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Reset form and collapse it
+                form.reset();
+                $('#addUserForm').collapse('hide');
+                // Reload the page to refresh the user list
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert('danger', data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error creating user: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
     }
 
     // Step 5: Implement Client-Side Filtering with jQuery

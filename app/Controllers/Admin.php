@@ -63,6 +63,110 @@ class Admin extends BaseController
         ]);
     }
 
+    public function createUser()
+    {
+        if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Access denied. Admin role required.'
+            ]);
+        }
+
+        // Set validation rules
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'name' => [
+                'label' => 'Name',
+                'rules' => 'required|min_length[3]|max_length[100]|alpha_numeric_space',
+                'errors' => [
+                    'required' => 'The {field} field is required.',
+                    'min_length' => 'The {field} must be at least {param} characters long.',
+                    'max_length' => 'The {field} cannot exceed {param} characters.',
+                    'alpha_numeric_space' => 'The {field} can only contain letters, numbers, and spaces.'
+                ]
+            ],
+            'email' => [
+                'label' => 'Email',
+                'rules' => 'required|valid_email|max_length[255]|is_unique[users.email]',
+                'errors' => [
+                    'required' => 'The {field} field is required.',
+                    'valid_email' => 'Please provide a valid email address.',
+                    'max_length' => 'The {field} cannot exceed {param} characters.',
+                    'is_unique' => 'This email address is already registered.'
+                ]
+            ],
+            'role' => [
+                'label' => 'Role',
+                'rules' => 'required|in_list[admin,teacher,student]',
+                'errors' => [
+                    'required' => 'The {field} field is required.',
+                    'in_list' => 'Invalid role selected. Please select admin, teacher, or student.'
+                ]
+            ]
+        ]);
+
+        // Run validation
+        if (!$validation->withRequest($this->request)->run()) {
+            $errors = $validation->getErrors();
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => implode('<br>', $errors),
+                'errors' => $errors
+            ]);
+        }
+
+        // Get validated and sanitized form data
+        $name = trim($this->request->getPost('name'));
+        $email = trim(strtolower($this->request->getPost('email')));
+        $role = $this->request->getPost('role');
+
+        // Auto-generate password
+        $password = 'BasteLMS123.';
+        
+        // Hash the password
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        // Save user data to database
+        $userModel = new \App\Models\UserModel();
+        $userData = [
+            'name' => $name,
+            'email' => $email,
+            'password' => $hashedPassword,
+            'role' => $role,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        try {
+            $result = $userModel->insert($userData);
+            
+            if ($result) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'User created successfully! Default password: BasteLMS123.',
+                    'user' => [
+                        'id' => $result,
+                        'name' => $name,
+                        'email' => $email,
+                        'role' => $role
+                    ],
+                    'password' => $password
+                ]);
+            } else {
+                $errors = $userModel->errors();
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to create user. ' . json_encode($errors)
+                ]);
+            }
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to create user: ' . $e->getMessage()
+            ]);
+        }
+    }
+
     public function updateRole($userId)
     {
         if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {

@@ -16,6 +16,8 @@ $routes->get('/login', 'Auth::login');
 $routes->post('/login', 'Auth::login');
 $routes->get('/logout', 'Auth::logout');
 $routes->get('/dashboard', 'Auth::dashboard');
+$routes->post('/profile/update', 'Auth::updateProfile');
+$routes->post('/password/update', 'Auth::updatePassword');
 
 // All role-specific content is now handled in header.php navigation dropdowns
 // No separate routes needed since everything is accessible through the unified dashboard
@@ -53,6 +55,7 @@ $routes->group('teacher', function($routes) {
 $routes->group('admin', function($routes) {
     $routes->get('dashboard', 'Admin::dashboard');
     $routes->get('users', 'Admin::getUsers');
+    $routes->post('users/create', 'Admin::createUser');
     $routes->post('roles/update/(:num)', 'Admin::updateRole/$1');
     $routes->get('courses', 'Admin::courses');
     $routes->get('course/(:num)/upload', 'Materials::upload/$1');
