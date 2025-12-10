@@ -2512,6 +2512,13 @@
                 form.reset();
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
+                
+                // If logout is required (password changed), redirect to login after a short delay
+                if (data.logout_required) {
+                    setTimeout(() => {
+                        window.location.href = '<?= base_url('login') ?>';
+                    }, 2000); // 2 second delay to show the success message
+                }
             } else {
                 showAlert('danger', data.message);
                 submitBtn.disabled = false;

@@ -707,9 +707,13 @@ class Auth extends BaseController
 
         try {
             if ($userModel->update($userId, $updateData)) {
+                // Destroy session to force re-login with new password
+                session()->destroy();
+                
                 return $this->response->setJSON([
                     'success' => true,
-                    'message' => 'Password updated successfully!'
+                    'message' => 'Password updated successfully! You will be logged out. Please login again with your new password.',
+                    'logout_required' => true
                 ]);
             } else {
                 return $this->response->setJSON([
