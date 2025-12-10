@@ -57,6 +57,8 @@ $routes->group('admin', function($routes) {
     $routes->get('users', 'Admin::getUsers');
     $routes->post('users/create', 'Admin::createUser');
     $routes->post('roles/update/(:num)', 'Admin::updateRole/$1');
+    $routes->post('users/activate/(:num)', 'Admin::activateUser/$1');
+    $routes->post('users/deactivate/(:num)', 'Admin::deactivateUser/$1');
     $routes->get('courses', 'Admin::courses');
     $routes->get('course/(:num)/upload', 'Materials::upload/$1');
     $routes->post('course/(:num)/upload', 'Materials::upload/$1');

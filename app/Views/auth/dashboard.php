@@ -372,12 +372,16 @@
                                                 <th>Name</th>
                                                 <th>Email</th>
                                                 <th>Role</th>
+                                                <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (!empty($allUsers)): ?>
                                                 <?php foreach ($allUsers as $user): ?>
+                                                <?php 
+                                                    $isActive = isset($user['is_active']) ? (int)$user['is_active'] : 1;
+                                                ?>
                                                 <tr id="user-row-<?= $user['id'] ?>">
                                                     <td><?= $user['id'] ?></td>
                                                     <td><?= esc($user['name']) ?></td>
@@ -388,11 +392,27 @@
                                                         </span>
                                                     </td>
                                                     <td>
+                                                        <span class="badge <?= $isActive ? 'bg-success' : 'bg-secondary' ?>" id="status-badge-<?= $user['id'] ?>">
+                                                            <?= $isActive ? 'Active' : 'Deactivated' ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
                                                         <?php if (strtolower($user['role']) !== 'admin'): ?>
-                                                            <select class="form-select form-select-sm" onchange="updateUserRole(<?= $user['id'] ?>, this.value)" style="width: auto; display: inline-block;">
-                                                                <option value="teacher" <?= $user['role'] === 'teacher' ? 'selected' : '' ?>>Teacher</option>
-                                                                <option value="student" <?= $user['role'] === 'student' ? 'selected' : '' ?>>Student</option>
-                                                            </select>
+                                                            <div class="btn-group" role="group">
+                                                                <select class="form-select form-select-sm" onchange="updateUserRole(<?= $user['id'] ?>, this.value)" style="width: auto; display: inline-block;">
+                                                                    <option value="teacher" <?= $user['role'] === 'teacher' ? 'selected' : '' ?>>Teacher</option>
+                                                                    <option value="student" <?= $user['role'] === 'student' ? 'selected' : '' ?>>Student</option>
+                                                                </select>
+                                                                <?php if ($isActive): ?>
+                                                                    <button class="btn btn-sm btn-warning ms-2" onclick="deactivateUser(<?= $user['id'] ?>)" title="Deactivate User">
+                                                                        <i class="fas fa-ban"></i> Deactivate
+                                                                    </button>
+                                                                <?php else: ?>
+                                                                    <button class="btn btn-sm btn-success ms-2" onclick="activateUser(<?= $user['id'] ?>)" title="Activate User">
+                                                                        <i class="fas fa-check"></i> Activate
+                                                                    </button>
+                                                                <?php endif; ?>
+                                                            </div>
                                                         <?php else: ?>
                                                             <span class="text-muted"><i class="fas fa-lock"></i> Protected</span>
                                                         <?php endif; ?>
@@ -401,7 +421,7 @@
                                                 <?php endforeach; ?>
                                             <?php else: ?>
                                                 <tr>
-                                                    <td colspan="5" class="text-center">No users found</td>
+                                                    <td colspan="6" class="text-center">No users found</td>
                                                 </tr>
                                             <?php endif; ?>
                                         </tbody>
@@ -2329,6 +2349,92 @@
             case 'student': return 'bg-primary';
             default: return 'bg-secondary';
         }
+    }
+
+    // Activate user function
+    function activateUser(userId) {
+        if (!confirm('Are you sure you want to activate this user?')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+        fetch(`<?= base_url('admin/users/activate') ?>/${userId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                // Update status badge
+                const statusBadge = document.querySelector(`#status-badge-${userId}`);
+                if (statusBadge) {
+                    statusBadge.textContent = 'Active';
+                    statusBadge.className = 'badge bg-success';
+                }
+                // Update button
+                const actionCell = document.querySelector(`#user-row-${userId} td:last-child`);
+                if (actionCell) {
+                    const btnGroup = actionCell.querySelector('.btn-group');
+                    if (btnGroup) {
+                        const activateBtn = btnGroup.querySelector('.btn-success');
+                        if (activateBtn) {
+                            activateBtn.outerHTML = `<button class="btn btn-sm btn-warning ms-2" onclick="deactivateUser(${userId})" title="Deactivate User"><i class="fas fa-ban"></i> Deactivate</button>`;
+                        }
+                    }
+                }
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error activating user: ' + error.message);
+        });
+    }
+
+    // Deactivate user function
+    function deactivateUser(userId) {
+        if (!confirm('Are you sure you want to deactivate this user? The account will remain in the database but will be inactive.')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+        fetch(`<?= base_url('admin/users/deactivate') ?>/${userId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                // Update status badge
+                const statusBadge = document.querySelector(`#status-badge-${userId}`);
+                if (statusBadge) {
+                    statusBadge.textContent = 'Deactivated';
+                    statusBadge.className = 'badge bg-secondary';
+                }
+                // Update button
+                const actionCell = document.querySelector(`#user-row-${userId} td:last-child`);
+                if (actionCell) {
+                    const btnGroup = actionCell.querySelector('.btn-group');
+                    if (btnGroup) {
+                        const deactivateBtn = btnGroup.querySelector('.btn-warning');
+                        if (deactivateBtn) {
+                            deactivateBtn.outerHTML = `<button class="btn btn-sm btn-success ms-2" onclick="activateUser(${userId})" title="Activate User"><i class="fas fa-check"></i> Activate</button>`;
+                        }
+                    }
+                }
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error deactivating user: ' + error.message);
+        });
     }
 
     // Update profile function

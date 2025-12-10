@@ -192,6 +192,7 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -200,6 +201,9 @@
         users.forEach(user => {
             const roleClass = getRoleClass(user.role);
             const canEdit = user.role.toLowerCase() !== 'admin';
+            const isActive = user.is_active !== undefined ? (user.is_active === 1 || user.is_active === true) : true;
+            const statusClass = isActive ? 'bg-success' : 'bg-secondary';
+            const statusText = isActive ? 'Active' : 'Deactivated';
             
             html += `
                 <tr id="user-row-${user.id}">
@@ -207,6 +211,7 @@
                     <td>${escapeHtml(user.name)}</td>
                     <td>${escapeHtml(user.email)}</td>
                     <td><span class="badge ${roleClass}">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span></td>
+                    <td><span class="badge ${statusClass}" id="status-badge-${user.id}">${statusText}</span></td>
                     <td>`;
             
             if (canEdit) {
@@ -215,8 +220,15 @@
                         <select class="form-select form-select-sm" onchange="updateUserRole(${user.id}, this.value)" style="width: auto;">
                             <option value="teacher" ${user.role === 'teacher' ? 'selected' : ''}>Teacher</option>
                             <option value="student" ${user.role === 'student' ? 'selected' : ''}>Student</option>
-                        </select>
-                    </div>`;
+                        </select>`;
+                
+                if (isActive) {
+                    html += `<button class="btn btn-sm btn-warning ms-2" onclick="deactivateUser(${user.id})" title="Deactivate User"><i class="fas fa-ban"></i> Deactivate</button>`;
+                } else {
+                    html += `<button class="btn btn-sm btn-success ms-2" onclick="activateUser(${user.id})" title="Activate User"><i class="fas fa-check"></i> Activate</button>`;
+                }
+                
+                html += `</div>`;
             } else {
                 html += '<span class="text-muted"><i class="fas fa-lock"></i> Protected</span>';
             }
@@ -233,7 +245,7 @@
             <div class="mt-2">
                 <small class="text-muted">
                     <i class="fas fa-info-circle"></i> 
-                    Admin roles are protected and cannot be changed.
+                    Admin roles are protected and cannot be changed. Deactivated users remain in the database.
                 </small>
             </div>`;
         
@@ -424,6 +436,62 @@
             case 'student': return 'bg-primary';
             default: return 'bg-secondary';
         }
+    }
+
+    // Activate user function
+    function activateUser(userId) {
+        if (!confirm('Are you sure you want to activate this user?')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+        fetch(`<?= base_url('admin/users/activate') ?>/${userId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                // Reload users to reflect changes
+                loadUsers();
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error activating user: ' + error.message);
+        });
+    }
+
+    // Deactivate user function
+    function deactivateUser(userId) {
+        if (!confirm('Are you sure you want to deactivate this user? The account will remain in the database but will be inactive.')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+        fetch(`<?= base_url('admin/users/deactivate') ?>/${userId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                // Reload users to reflect changes
+                loadUsers();
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error deactivating user: ' + error.message);
+        });
     }
 
     function escapeHtml(text) {

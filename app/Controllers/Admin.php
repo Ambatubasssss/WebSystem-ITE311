@@ -133,6 +133,7 @@ class Admin extends BaseController
             'email' => $email,
             'password' => $hashedPassword,
             'role' => $role,
+            'is_active' => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
@@ -220,6 +221,100 @@ class Admin extends BaseController
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Failed to update user role.'
+            ]);
+        }
+    }
+
+    public function activateUser($userId)
+    {
+        if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Access denied. Admin role required.'
+            ]);
+        }
+
+        $userModel = new \App\Models\UserModel();
+        $user = $userModel->find($userId);
+
+        if (!$user) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User not found.'
+            ]);
+        }
+
+        // Prevent activating/deactivating admin accounts
+        if (strtolower($user['role']) === 'admin') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Admin accounts cannot be deactivated.'
+            ]);
+        }
+
+        // Activate user
+        $updateData = [
+            'is_active' => 1,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        if ($userModel->update($userId, $updateData)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'User activated successfully.',
+                'is_active' => 1
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to activate user.'
+            ]);
+        }
+    }
+
+    public function deactivateUser($userId)
+    {
+        if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Access denied. Admin role required.'
+            ]);
+        }
+
+        $userModel = new \App\Models\UserModel();
+        $user = $userModel->find($userId);
+
+        if (!$user) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User not found.'
+            ]);
+        }
+
+        // Prevent activating/deactivating admin accounts
+        if (strtolower($user['role']) === 'admin') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Admin accounts cannot be deactivated.'
+            ]);
+        }
+
+        // Deactivate user (soft delete - doesn't remove from database)
+        $updateData = [
+            'is_active' => 0,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        if ($userModel->update($userId, $updateData)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'User deactivated successfully. Account remains in database.',
+                'is_active' => 0
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to deactivate user.'
             ]);
         }
     }

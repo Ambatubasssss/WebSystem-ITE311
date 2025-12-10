@@ -80,6 +80,7 @@ class Auth extends BaseController
                 'email' => $email,
                 'password' => $hashedPassword,
                 'role' => 'student',
+                'is_active' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
@@ -170,6 +171,13 @@ class Auth extends BaseController
                 $attempts++;
                 session()->set($attemptsKey, $attempts);
                 session()->setFlashdata('error', 'Invalid credentials. Attempts remaining: ' . (5 - $attempts));
+                return view('auth/login');
+            }
+
+            // Check if user is active
+            $isActive = isset($user['is_active']) ? (int)$user['is_active'] : 1;
+            if (!$isActive) {
+                session()->setFlashdata('error', 'Your account has been deactivated. Please contact an administrator.');
                 return view('auth/login');
             }
 
