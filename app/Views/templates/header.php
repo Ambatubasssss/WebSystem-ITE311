@@ -567,30 +567,43 @@
     function loadNotifications() {
         console.log('Loading notifications...');
         
-        // Use jQuery $.get() to fetch notifications
-        $.get('<?= base_url('notifications') ?>', function(data) {
-            console.log('Notifications response:', data);
-            if (data.success) {
-                updateNotificationBadge(data.unread_count);
-                updateNotificationsList(data.notifications);
-            } else {
-                console.error('Failed to load notifications:', data.message);
+        // Use jQuery $.ajax() to fetch notifications with proper error handling
+        $.ajax({
+            url: '<?= base_url('notifications') ?>',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                console.log('Notifications response:', data);
+                if (data && data.success) {
+                    updateNotificationBadge(data.unread_count || 0);
+                    updateNotificationsList(data.notifications || []);
+                } else {
+                    console.error('Failed to load notifications:', data?.message || 'Unknown error');
+                    $('#notificationsContainer').html(`
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            ${data?.message || 'Failed to load notifications'}
+                        </div>
+                    `);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', error, 'Status:', status, 'Response:', xhr.responseText);
+                let errorMessage = 'Failed to load notifications';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (xhr.status === 401) {
+                    errorMessage = 'Please login to see notifications';
+                } else if (xhr.status === 500) {
+                    errorMessage = 'Server error. Please try again later.';
+                }
                 $('#notificationsContainer').html(`
-                    <div class="alert alert-warning">
+                    <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle"></i>
-                        ${data.message || 'Failed to load notifications'}
+                        ${errorMessage}
                     </div>
                 `);
             }
-        })
-        .fail(function(xhr, status, error) {
-            console.error('AJAX error:', error);
-            $('#notificationsContainer').html(`
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Failed to load notifications: ${error}
-                </div>
-            `);
         });
     }
 
@@ -658,9 +671,16 @@
         console.log('Marking notification as read:', notificationId);
         
         // Use jQuery $.post() to mark notification as read
-        $.post('<?= base_url('notifications/mark_read') ?>/' + notificationId, {
-            '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-        }, function(data) {
+        const formData = new FormData();
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        $.ajax({
+            url: '<?= base_url('notifications/mark_read') ?>/' + notificationId,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
             console.log('Mark as read response data:', data);
             if (data && data.success) {
                 // Remove the notification from the list using jQuery
@@ -671,6 +691,11 @@
                 // Update badge count
                 updateNotificationBadge(data.unread_count || 0);
                 
+                // Update CSRF token if provided
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                
                 // Show success message
                 showAlert('success', 'Notification marked as read');
             } else {
@@ -678,10 +703,11 @@
                 console.error('Mark as read failed:', errorMessage);
                 showAlert('danger', 'Failed to mark notification as read: ' + errorMessage);
             }
-        })
-        .fail(function(xhr, status, error) {
-            console.error('Mark as read error:', error);
-            showAlert('danger', 'Failed to mark notification as read');
+            },
+            error: function(xhr, status, error) {
+                console.error('Mark as read error:', error);
+                showAlert('danger', 'Failed to mark notification as read');
+            }
         });
     }
     </script>

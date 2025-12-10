@@ -60,6 +60,8 @@ $routes->group('admin', function($routes) {
     $routes->post('users/activate/(:num)', 'Admin::activateUser/$1');
     $routes->post('users/deactivate/(:num)', 'Admin::deactivateUser/$1');
     $routes->get('courses', 'Admin::courses');
+    $routes->post('courses/create', 'Admin::createCourse');
+    $routes->post('courses/delete/(:num)', 'Admin::deleteCourse/$1');
     $routes->get('course/(:num)/upload', 'Materials::upload/$1');
     $routes->post('course/(:num)/upload', 'Materials::upload/$1');
     
@@ -74,6 +76,19 @@ $routes->group('admin', function($routes) {
     $routes->post('year-level/update/(:num)', 'Admin::updateYearLevel/$1');
     $routes->get('year-level/delete/(:num)', 'Admin::deleteYearLevel/$1');
     $routes->post('assign-year-level', 'Admin::assignYearLevel');
+    
+    // Course scheduling and teacher assignment routes
+    $routes->get('courses/(:num)/schedules', 'Admin::getCourseSchedules/$1');
+    $routes->post('courses/(:num)/schedule', 'Admin::addCourseSchedule/$1');
+    $routes->post('courses/(:num)/schedule/delete/(:num)', 'Admin::deleteCourseSchedule/$1/$2');
+    $routes->get('courses/(:num)/teachers', 'Admin::getCourseTeachers/$1');
+    $routes->post('courses/(:num)/teacher', 'Admin::assignTeacherToCourse/$1');
+    $routes->post('courses/(:num)/teacher/update', 'Admin::updateTeacherAssignment/$1');
+    $routes->post('courses/(:num)/teacher/remove/(:num)', 'Admin::removeTeacherFromCourse/$1/$2');
+    $routes->post('courses/restore', 'Admin::restoreCourse');
+    $routes->post('courses/teacher-assignment/restore', 'Admin::restoreTeacherAssignment');
+    $routes->post('courses/update', 'Admin::updateCourse');
+    $routes->get('courses/check-cn', 'Admin::checkControlNumber');
 });
 
 // Materials routes

@@ -50,7 +50,7 @@ class Course extends BaseController
             ]);
         }
 
-        // Validate course_id
+        // Validate course_id - prevent SQL injection by ensuring it's a valid integer
         if (empty($courseId) || !is_numeric($courseId)) {
             return $this->response->setJSON([
                 'success' => false,
@@ -58,7 +58,18 @@ class Course extends BaseController
             ]);
         }
 
-        // Get course from database
+        // Cast to integer to prevent any string-based SQL injection attempts
+        $courseId = (int) $courseId;
+        
+        // Additional validation: ensure course_id is positive
+        if ($courseId <= 0) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid course ID provided.'
+            ]);
+        }
+
+        // Get course from database - CodeIgniter's Query Builder automatically escapes parameters
         $course = $this->courseModel->find($courseId);
         
         // Check if course exists

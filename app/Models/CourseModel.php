@@ -10,9 +10,9 @@ class CourseModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = ['title', 'description', 'created_at', 'updated_at'];
+        protected $allowedFields    = ['title', 'control_number', 'units', 'description', 'academic_year_id', 'semester_id', 'year_level_id', 'created_at', 'updated_at', 'deleted_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -30,6 +30,8 @@ class CourseModel extends Model
     // Validation
     protected $validationRules      = [
         'title' => 'required|min_length[3]|max_length[150]',
+        'control_number' => 'required|exact_length[4]|is_unique[courses.control_number,id,{id}]',
+        'units' => 'permit_empty|integer|greater_than_equal_to[0]|less_than_equal_to[5]',
         'description' => 'permit_empty|max_length[1000]'
     ];
     protected $validationMessages   = [];

@@ -128,7 +128,7 @@
                                         <div class="card bg-primary text-white mb-3">
                                             <div class="card-body">
                                                 <h6 class="card-title">My Courses</h6>
-                                                <p class="mb-0"><?= count($courses ?? []) ?> courses</p>
+                                                <p class="mb-0"><?= $myCoursesCount ?? 0 ?> courses</p>
                                             </div>
                                         </div>
                                     </div>
@@ -446,50 +446,565 @@
                             </a>
                         </div>
                         <div class="card-body">
-                            <?php if (empty($courses)): ?>
-                                <div class="text-center py-5">
-                                    <i class="fas fa-graduation-cap fa-4x text-muted mb-3"></i>
-                                    <h5 class="text-muted">No courses available</h5>
-                                    <p class="text-muted">Courses will appear here once they are created.</p>
+                            <!-- Filter Section -->
+                            <div class="card mb-4 border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="fas fa-filter"></i> Filter Courses</h5>
                                 </div>
-                            <?php else: ?>
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Course Title</th>
-                                                <th>Description</th>
-                                                <th>Materials</th>
-                                                <th>Created</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($courses as $course): ?>
+                                <div class="card-body">
+                                    <form method="GET" action="<?= base_url('dashboard') ?>" id="courseFilterForm">
+                                        <input type="hidden" name="section" value="courses">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="filter_academic_year_id" class="form-label">Academic Year</label>
+                                                <select class="form-select" id="filter_academic_year_id" name="academic_year_id" onchange="updateSemesterFilter()">
+                                                    <option value="">All Academic Years</option>
+                                                    <?php if (isset($academicYears)): ?>
+                                                        <?php foreach ($academicYears as $ay): ?>
+                                                            <option value="<?= $ay['id'] ?>" <?= (isset($selectedAcademicYearId) && $selectedAcademicYearId == $ay['id']) ? 'selected' : '' ?>>
+                                                                <?= esc($ay['year_start']) ?> - <?= esc($ay['year_end']) ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="filter_semester" class="form-label">Semester</label>
+                                                <select class="form-select" id="filter_semester" name="semester" onchange="updateTermFilter()">
+                                                    <option value="">All Semesters</option>
+                                                    <option value="1st" <?= (isset($selectedSemester) && $selectedSemester == '1st') ? 'selected' : '' ?>>1st Semester</option>
+                                                    <option value="2nd" <?= (isset($selectedSemester) && $selectedSemester == '2nd') ? 'selected' : '' ?>>2nd Semester</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="filter_term" class="form-label">Term</label>
+                                                <select class="form-select" id="filter_term" name="term">
+                                                    <option value="">All Terms</option>
+                                                    <option value="1st" <?= (isset($selectedTerm) && $selectedTerm == '1st') ? 'selected' : '' ?>>1st Term</option>
+                                                    <option value="2nd" <?= (isset($selectedTerm) && $selectedTerm == '2nd') ? 'selected' : '' ?>>2nd Term</option>
+                                                    <option value="3rd" <?= (isset($selectedTerm) && $selectedTerm == '3rd') ? 'selected' : '' ?>>3rd Term (Whole Semester)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-info">
+                                                    <i class="fas fa-search"></i> Filter Courses
+                                                </button>
+                                                <a href="<?= base_url('dashboard?section=courses') ?>" class="btn btn-secondary">
+                                                    <i class="fas fa-times"></i> Clear Filters
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Add Course Form -->
+                            <div class="card mb-4 border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Add New Course</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="createCourseForm" onsubmit="createCourse(event)">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="course_title" class="form-label">Course Title <span class="text-danger">*</span></label>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       id="course_title" 
+                                                       name="title" 
+                                                       required 
+                                                       minlength="3" 
+                                                       maxlength="150"
+                                                       placeholder="Enter course title">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label for="course_control_number" class="form-label">Control Number (CN) <span class="text-danger">*</span></label>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       id="course_control_number" 
+                                                       name="control_number" 
+                                                       required
+                                                       minlength="4"
+                                                       maxlength="4"
+                                                       pattern="[A-Za-z0-9]{4}"
+                                                       placeholder="e.g., CS10, MATH">
+                                                <small class="form-text text-muted">Exactly 4 characters - Unique identifier (required)</small>
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label for="course_units" class="form-label">Units <span class="text-danger">*</span></label>
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="course_units" 
+                                                       name="units" 
+                                                       required
+                                                       min="0"
+                                                       max="5"
+                                                       value="0"
+                                                       step="1">
+                                                <small class="form-text text-muted">Maximum 5 units</small>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <label for="course_description" class="form-label">Description</label>
+                                                <textarea class="form-control" 
+                                                          id="course_description" 
+                                                          name="description" 
+                                                          rows="3" 
+                                                          maxlength="1000"
+                                                          placeholder="Enter course description (optional)"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="academic_year_id" class="form-label">Academic Year</label>
+                                                <select class="form-select" id="academic_year_id" name="academic_year_id">
+                                                    <option value="">Select Academic Year</option>
+                                                    <?php if (isset($academicYears)): ?>
+                                                        <?php foreach ($academicYears as $ay): ?>
+                                                            <option value="<?= $ay['id'] ?>"><?= esc($ay['year_start']) ?> - <?= esc($ay['year_end']) ?></option>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="semester_id" class="form-label">Semester & Term</label>
+                                                <select class="form-select" id="semester_id" name="semester_id">
+                                                    <option value="">Select Semester & Term</option>
+                                                    <?php if (isset($semesters)): ?>
+                                                        <?php foreach ($semesters as $sem): ?>
+                                                            <option value="<?= $sem['id'] ?>">
+                                                                <?= esc($sem['name']) ?> - <?= esc($sem['semester'] ?? 'N/A') ?> Semester, <?= esc($sem['term'] ?? 'N/A') ?> Term
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="year_level_id" class="form-label">Year Level</label>
+                                                <select class="form-select" id="year_level_id" name="year_level_id">
+                                                    <option value="">Select Year Level</option>
+                                                    <?php if (isset($yearLevels)): ?>
+                                                        <?php foreach ($yearLevels as $yl): ?>
+                                                            <option value="<?= $yl['id'] ?>"><?= esc($yl['name']) ?> (Level <?= esc($yl['level']) ?>)</option>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-save"></i> Create Course
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+
+                            <!-- Courses List -->
+                            <div id="coursesTableContainer">
+                                <?php if (empty($courses)): ?>
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-graduation-cap fa-4x text-muted mb-3"></i>
+                                        <h5 class="text-muted">No courses available</h5>
+                                        <p class="text-muted">Courses will appear here once they are created.</p>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
                                                 <tr>
-                                                    <td><?= $course['id'] ?></td>
-                                                    <td><strong><?= esc($course['title']) ?></strong></td>
-                                                    <td><?= esc(substr($course['description'], 0, 100)) ?><?= strlen($course['description']) > 100 ? '...' : '' ?></td>
-                                                    <td><span class="badge bg-info"><?= $course['material_count'] ?? 0 ?> files</span></td>
-                                                    <td><?= date('M d, Y', strtotime($course['created_at'])) ?></td>
-                                                    <td>
-                                                        <a href="<?= base_url("dashboard?section=upload&course_id={$course['id']}") ?>" 
-                                                           class="btn btn-sm btn-primary mr-1" title="Manage Materials">
-                                                            <i class="fas fa-upload"></i> Materials
-                                                        </a>
-                                                        <a href="<?= base_url("materials/view/{$course['id']}") ?>" 
-                                                           class="btn btn-sm btn-info" title="View as Student">
-                                                            <i class="fas fa-eye"></i> View
-                                                        </a>
-                                                    </td>
+                                                    <th>ID</th>
+                                                    <th>CN</th>
+                                                    <th>Course Title</th>
+                                                    <th>Units</th>
+                                                    <th>Description</th>
+                                                    <th>Materials</th>
+                                                    <th>Created</th>
+                                                    <th>Actions</th>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody id="coursesTableBody">
+                                                <?php foreach ($courses as $course): ?>
+                                                    <tr id="course-row-<?= $course['id'] ?>">
+                                                        <td><?= $course['id'] ?></td>
+                                                        <td>
+                                                            <?php if (!empty($course['control_number'])): ?>
+                                                                <span class="badge bg-secondary"><?= esc($course['control_number']) ?></span>
+                                                            <?php else: ?>
+                                                                <span class="text-muted">-</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td>
+                                                            <strong><?= esc($course['title']) ?></strong>
+                                                            <?php 
+                                                            $courseTeacherModel = new \App\Models\CourseTeacherModel();
+                                                            $teachers = $courseTeacherModel->getTeachersByCourse($course['id']);
+                                                            if (!empty($teachers)): 
+                                                                $primaryTeacher = array_filter($teachers, function($t) { return $t['is_primary'] == 1; });
+                                                                $primaryTeacher = !empty($primaryTeacher) ? reset($primaryTeacher) : $teachers[0];
+                                                            ?>
+                                                                <br><small class="text-muted"><i class="fas fa-chalkboard-teacher"></i> <?= esc($primaryTeacher['teacher_name']) ?></small>
+                                                            <?php endif; ?>
+                                                            <?php if (isset($course['academic_year']) || isset($course['semester'])): ?>
+                                                                <br><small class="text-info">
+                                                                    <?php if (isset($course['academic_year'])): ?>
+                                                                        <i class="fas fa-calendar-alt"></i> <?= esc($course['academic_year']['year_start']) ?>-<?= esc($course['academic_year']['year_end']) ?>
+                                                                    <?php endif; ?>
+                                                                    <?php if (isset($course['semester'])): ?>
+                                                                        | <?= esc($course['semester']['semester'] ?? '') ?> Sem, <?= esc($course['semester']['term'] ?? '') ?> Term
+                                                                    <?php endif; ?>
+                                                                </small>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td><span class="badge bg-info"><?= $course['units'] ?? 0 ?> units</span></td>
+                                                        <td><?= esc(substr($course['description'], 0, 100)) ?><?= strlen($course['description']) > 100 ? '...' : '' ?></td>
+                                                        <td><span class="badge bg-info"><?= $course['material_count'] ?? 0 ?> files</span></td>
+                                                        <td><?= date('M d, Y', strtotime($course['created_at'])) ?></td>
+                                                        <td>
+                                                            <div class="btn-group-vertical" role="group" style="gap: 2px;">
+                                                                <button type="button" 
+                                                                        class="btn btn-sm btn-warning" 
+                                                                        onclick="editCourse(<?= htmlspecialchars(json_encode($course), ENT_QUOTES, 'UTF-8') ?>)" 
+                                                                        title="Edit Course">
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </button>
+                                                                <button type="button" 
+                                                                        class="btn btn-sm btn-success" 
+                                                                        onclick="showCourseManagement(<?= $course['id'] ?>, '<?= esc($course['title'], 'js') ?>')" 
+                                                                        title="Manage Schedule & Assign Teachers">
+                                                                    <i class="fas fa-calendar-alt"></i> Schedule & Teachers
+                                                                </button>
+                                                                <a href="<?= base_url("dashboard?section=upload&course_id={$course['id']}") ?>" 
+                                                                   class="btn btn-sm btn-primary" title="Manage Materials">
+                                                                    <i class="fas fa-upload"></i> Materials
+                                                                </a>
+                                                                <a href="<?= base_url("materials/view/{$course['id']}") ?>" 
+                                                                   class="btn btn-sm btn-info" title="View as Student">
+                                                                    <i class="fas fa-eye"></i> View
+                                                                </a>
+                                                                <button type="button" 
+                                                                        class="btn btn-sm btn-danger" 
+                                                                        onclick="deleteCourse(<?= $course['id'] ?>, '<?= esc($course['title'], 'js') ?>')" 
+                                                                        title="Delete Course">
+                                                                    <i class="fas fa-trash-alt"></i> Delete
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Deleted Courses Section (like GALORPOT's flow) -->
+                            <?php if (!empty($deleted_courses)): ?>
+                            <div class="card mt-4 border-secondary">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-trash"></i> Deleted Courses</h5>
                                 </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>CN</th>
+                                                    <th>Course Title</th>
+                                                    <th>Units</th>
+                                                    <th>Deleted At</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($deleted_courses as $course): ?>
+                                                    <tr class="table-secondary">
+                                                        <td><?= $course['id'] ?></td>
+                                                        <td>
+                                                            <?php if (!empty($course['control_number'])): ?>
+                                                                <span class="badge bg-secondary"><?= esc($course['control_number']) ?></span>
+                                                            <?php else: ?>
+                                                                <span class="text-muted">-</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td><strong><?= esc($course['title']) ?></strong></td>
+                                                        <td><span class="badge bg-info"><?= $course['units'] ?? 0 ?> units</span></td>
+                                                        <td><?= $course['deleted_at'] ? date('M d, Y H:i', strtotime($course['deleted_at'])) : 'N/A' ?></td>
+                                                        <td>
+                                                            <button type="button" 
+                                                                    class="btn btn-sm btn-success" 
+                                                                    onclick="restoreCourse(<?= $course['id'] ?>, '<?= esc($course['title'], 'js') ?>')" 
+                                                                    title="Restore Course">
+                                                                <i class="fas fa-undo"></i> Restore
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                             <?php endif; ?>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Management Modal (Schedule & Teachers) -->
+            <div class="modal fade" id="courseManagementModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="courseManagementModalTitle">Manage Course</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="manageCourseId" value="">
+                            
+                            <!-- Course Schedule Section -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0"><i class="fas fa-calendar-alt"></i> Course Schedule</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="addScheduleForm" onsubmit="addCourseSchedule(event)">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label">Day</label>
+                                                <select class="form-select form-select-sm" name="day_of_week" required>
+                                                    <option value="">Select Day</option>
+                                                    <option value="Monday">Monday</option>
+                                                    <option value="Tuesday">Tuesday</option>
+                                                    <option value="Wednesday">Wednesday</option>
+                                                    <option value="Thursday">Thursday</option>
+                                                    <option value="Friday">Friday</option>
+                                                    <option value="Saturday">Saturday</option>
+                                                    <option value="Sunday">Sunday</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label">Start Time</label>
+                                                <input type="time" class="form-control form-control-sm" name="start_time" required>
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label">End Time</label>
+                                                <input type="time" class="form-control form-control-sm" name="end_time" required>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-sm btn-primary mt-2">
+                                            <i class="fas fa-plus"></i> Add Schedule
+                                        </button>
+                                    </form>
+                                    <hr>
+                                    <div id="schedulesList">
+                                        <p class="text-muted">No schedules added yet.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Teacher Assignment Section -->
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0"><i class="fas fa-chalkboard-teacher"></i> Assign Teachers</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info alert-sm mb-3">
+                                        <i class="fas fa-info-circle"></i> <strong>Note:</strong> The system will automatically check for schedule conflicts. If a teacher is already assigned to another course with overlapping schedules in the same semester/term, the assignment will be rejected.
+                                    </div>
+                                    <form id="assignTeacherForm" onsubmit="assignTeacherToCourse(event)">
+                                        <div class="row">
+                                            <div class="col-md-8 mb-2">
+                                                <label class="form-label">Select Teacher</label>
+                                                <select class="form-select form-select-sm" name="teacher_id" id="teacherSelect" required>
+                                                    <option value="">Select Teacher</option>
+                                                    <?php 
+                                                    $userModel = new \App\Models\UserModel();
+                                                    $teachers = $userModel->where('role', 'teacher')->findAll();
+                                                    foreach ($teachers as $teacher): 
+                                                    ?>
+                                                        <option value="<?= $teacher['id'] ?>"><?= esc($teacher['name']) ?> (<?= esc($teacher['email']) ?>)</option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label">Role</label>
+                                                <div class="form-check form-switch mt-2">
+                                                    <input class="form-check-input" type="checkbox" id="is_primary" name="is_primary" value="1">
+                                                    <label class="form-check-label" for="is_primary">Primary Teacher</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-sm btn-success mt-2">
+                                            <i class="fas fa-user-plus"></i> Assign Teacher
+                                        </button>
+                                    </form>
+                                    <hr>
+                                    <div id="teachersList">
+                                        <p class="text-muted">No teachers assigned yet.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Course Modal -->
+            <div class="modal fade" id="editCourseModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Course</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="editCourseForm" onsubmit="updateCourse(event)">
+                            <div class="modal-body">
+                                <input type="hidden" id="edit_course_id" name="id">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="edit_course_title" class="form-label">Course Title <span class="text-danger">*</span></label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="edit_course_title" 
+                                               name="title" 
+                                               required 
+                                               minlength="3" 
+                                               maxlength="150">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="edit_course_control_number" class="form-label">Control Number (CN) <span class="text-danger">*</span></label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="edit_course_control_number" 
+                                               name="control_number" 
+                                               required
+                                               minlength="4"
+                                               maxlength="4"
+                                               pattern="[A-Za-z0-9]{4}">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="edit_course_units" class="form-label">Units <span class="text-danger">*</span></label>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="edit_course_units" 
+                                               name="units" 
+                                               required
+                                               min="0"
+                                               max="5"
+                                               step="1">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="edit_course_description" class="form-label">Description</label>
+                                        <textarea class="form-control" 
+                                                  id="edit_course_description" 
+                                                  name="description" 
+                                                  rows="3" 
+                                                  maxlength="1000"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="edit_academic_year_id" class="form-label">Academic Year</label>
+                                        <select class="form-select" id="edit_academic_year_id" name="academic_year_id">
+                                            <option value="">Select Academic Year</option>
+                                            <?php if (isset($academicYears)): ?>
+                                                <?php foreach ($academicYears as $ay): ?>
+                                                    <option value="<?= $ay['id'] ?>"><?= esc($ay['year_start']) ?> - <?= esc($ay['year_end']) ?></option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="edit_semester_id" class="form-label">Semester & Term</label>
+                                        <select class="form-select" id="edit_semester_id" name="semester_id">
+                                            <option value="">Select Semester & Term</option>
+                                            <?php if (isset($semesters)): ?>
+                                                <?php foreach ($semesters as $sem): ?>
+                                                    <option value="<?= $sem['id'] ?>">
+                                                        <?= esc($sem['name']) ?> - <?= esc($sem['semester'] ?? 'N/A') ?> Semester, <?= esc($sem['term'] ?? 'N/A') ?> Term
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="edit_year_level_id" class="form-label">Year Level</label>
+                                        <select class="form-select" id="edit_year_level_id" name="year_level_id">
+                                            <option value="">Select Year Level</option>
+                                            <?php if (isset($yearLevels)): ?>
+                                                <?php foreach ($yearLevels as $yl): ?>
+                                                    <option value="<?= $yl['id'] ?>"><?= esc($yl['name']) ?> (Level <?= esc($yl['level']) ?>)</option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save"></i> Update Course
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Teacher Assignment Modal -->
+            <div class="modal fade" id="editTeacherAssignmentModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Teacher Assignment</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="editTeacherAssignmentForm" onsubmit="updateTeacherAssignment(event)">
+                            <div class="modal-body">
+                                <input type="hidden" id="edit_assignment_id" name="assignment_id">
+                                <input type="hidden" id="edit_assignment_course_id" name="course_id">
+                                <div class="mb-3">
+                                    <label for="edit_assignment_teacher_id" class="form-label">Teacher <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="edit_assignment_teacher_id" name="teacher_id" required>
+                                        <option value="">Select Teacher</option>
+                                        <?php 
+                                        $userModel = new \App\Models\UserModel();
+                                        $teachers = $userModel->where('role', 'teacher')->findAll();
+                                        foreach ($teachers as $teacher): 
+                                        ?>
+                                            <option value="<?= $teacher['id'] ?>"><?= esc($teacher['name']) ?> (<?= esc($teacher['email']) ?>)</option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit_assignment_is_primary" class="form-label">Role</label>
+                                    <select class="form-select" id="edit_assignment_is_primary" name="is_primary">
+                                        <option value="0">Secondary Teacher</option>
+                                        <option value="1">Primary Teacher</option>
+                                    </select>
+                                    <small class="form-text text-muted">Primary teacher is the main instructor for the course</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save"></i> Update Assignment
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -2351,6 +2866,676 @@
         }
     }
 
+    // Create Course function
+    function createCourse(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const formData = new FormData(form);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+        
+        fetch('<?= base_url('admin/courses/create') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Reset form
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                // Reload page to show new course
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert('danger', data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error creating course: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    // Course Management Functions
+    function showCourseManagement(courseId, courseTitle) {
+        document.getElementById('manageCourseId').value = courseId;
+        document.getElementById('courseManagementModalTitle').textContent = `Manage: ${courseTitle}`;
+        
+        // Load schedules and teachers
+        loadCourseSchedules(courseId);
+        loadCourseTeachers(courseId);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('courseManagementModal'));
+        modal.show();
+    }
+
+    function loadCourseSchedules(courseId) {
+        fetch(`<?= base_url('admin/courses') ?>/${courseId}/schedules`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('schedulesList');
+            if (data.success && data.schedules && data.schedules.length > 0) {
+                let html = '<div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>Day</th><th>Time</th><th>Actions</th></tr></thead><tbody>';
+                data.schedules.forEach(schedule => {
+                    html += `
+                        <tr id="schedule-row-${schedule.id}">
+                            <td><span class="badge bg-primary">${schedule.day_of_week}</span></td>
+                            <td>${schedule.start_time} - ${schedule.end_time}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="deleteCourseSchedule(${courseId}, ${schedule.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p class="text-muted">No schedules added yet.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading schedules:', error);
+            document.getElementById('schedulesList').innerHTML = '<p class="text-danger">Error loading schedules.</p>';
+        });
+    }
+
+    function loadCourseTeachers(courseId) {
+        fetch(`<?= base_url('admin/courses') ?>/${courseId}/teachers`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('teachersList');
+            if (data.success && data.teachers && data.teachers.length > 0) {
+                let html = '<div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>Teacher</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead><tbody>';
+                data.teachers.forEach(teacher => {
+                    html += `
+                        <tr id="teacher-row-${teacher.id}">
+                            <td><strong>${teacher.teacher_name}</strong></td>
+                            <td>${teacher.teacher_email}</td>
+                            <td>${teacher.is_primary == 1 ? '<span class="badge bg-success">Primary</span>' : '<span class="badge bg-secondary">Secondary</span>'}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-warning me-1" onclick="editTeacherAssignment(${courseId}, ${teacher.id}, ${teacher.teacher_id}, ${teacher.is_primary})" title="Edit Assignment">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="removeTeacherFromCourse(${courseId}, ${teacher.teacher_id})" title="Remove Teacher">
+                                    <i class="fas fa-user-minus"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+                
+                // Show deleted teachers if any (like GALORPOT's flow)
+                if (data.deleted_teachers && data.deleted_teachers.length > 0) {
+                    let deletedHtml = '<div class="table-responsive"><table class="table table-sm table-secondary"><thead><tr><th>Teacher</th><th>Email</th><th>Role</th><th>Deleted At</th><th>Actions</th></tr></thead><tbody>';
+                    data.deleted_teachers.forEach(teacher => {
+                        deletedHtml += `
+                            <tr>
+                                <td><strong>${teacher.teacher_name}</strong></td>
+                                <td>${teacher.teacher_email}</td>
+                                <td>${teacher.is_primary == 1 ? '<span class="badge bg-success">Primary</span>' : '<span class="badge bg-secondary">Secondary</span>'}</td>
+                                <td>${teacher.deleted_at ? new Date(teacher.deleted_at).toLocaleString() : 'N/A'}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-success" onclick="restoreTeacherAssignment(${courseId}, ${teacher.id})" title="Restore Assignment">
+                                        <i class="fas fa-undo"></i> Restore
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    deletedHtml += '</tbody></table></div>';
+                    document.getElementById('deletedTeachersContainer').innerHTML = deletedHtml;
+                    document.getElementById('deletedTeachersList').style.display = 'block';
+                } else {
+                    document.getElementById('deletedTeachersList').style.display = 'none';
+                }
+            } else {
+                container.innerHTML = '<p class="text-muted">No teachers assigned yet.</p>';
+                document.getElementById('deletedTeachersList').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading teachers:', error);
+            document.getElementById('teachersList').innerHTML = '<p class="text-danger">Error loading teachers.</p>';
+        });
+    }
+
+    // Restore Teacher Assignment Function (like GALORPOT's flow)
+    function restoreTeacherAssignment(courseId, assignmentId) {
+        if (!confirm('Are you sure you want to restore this teacher assignment?')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('id', assignmentId);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+
+        fetch('<?= base_url('admin/courses/teacher-assignment/restore') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Reload teachers list
+                loadCourseTeachers(courseId);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error restoring assignment: ' + error.message);
+        });
+    }
+
+    function addCourseSchedule(event) {
+        event.preventDefault();
+        
+        const courseId = document.getElementById('manageCourseId').value;
+        const form = event.target;
+        const formData = new FormData(form);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+        
+        fetch(`<?= base_url('admin/courses') ?>/${courseId}/schedule`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                form.reset();
+                loadCourseSchedules(courseId);
+            } else {
+                showAlert('danger', data.message);
+            }
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        })
+        .catch(error => {
+            showAlert('danger', 'Error adding schedule: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    function deleteCourseSchedule(courseId, scheduleId) {
+        if (!confirm('Are you sure you want to delete this schedule?')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+
+        fetch(`<?= base_url('admin/courses') ?>/${courseId}/schedule/delete/${scheduleId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error deleting schedule: ' + error.message);
+        });
+    }
+
+    function assignTeacherToCourse(event) {
+        event.preventDefault();
+        
+        const courseId = document.getElementById('manageCourseId').value;
+        const form = event.target;
+        const formData = new FormData(form);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Assigning...';
+        
+        fetch(`<?= base_url('admin/courses') ?>/${courseId}/teacher`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                form.reset();
+                document.getElementById('is_primary').checked = false;
+                loadCourseTeachers(courseId);
+            } else {
+                showAlert('danger', data.message);
+            }
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        })
+        .catch(error => {
+            showAlert('danger', 'Error assigning teacher: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    function removeTeacherFromCourse(courseId, teacherId) {
+        if (!confirm('Are you sure you want to remove this teacher from the course?')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+
+        fetch(`<?= base_url('admin/courses') ?>/${courseId}/teacher/remove/${teacherId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Find and remove the row
+                const row = document.querySelector(`#teacher-row-${teacherId}`);
+                if (row) {
+                    row.remove();
+                }
+                // Reload if empty
+                const container = document.getElementById('teachersList');
+                if (container.querySelector('tbody') && container.querySelector('tbody').children.length === 0) {
+                    container.innerHTML = '<p class="text-muted">No teachers assigned yet.</p>';
+                }
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error removing teacher: ' + error.message);
+        });
+    }
+
+    // Delete Course function
+    // Edit Course Function
+    function editCourse(course) {
+        document.getElementById('edit_course_id').value = course.id || '';
+        document.getElementById('edit_course_title').value = course.title || '';
+        document.getElementById('edit_course_control_number').value = course.control_number || '';
+        document.getElementById('edit_course_units').value = course.units || 0;
+        document.getElementById('edit_course_description').value = course.description || '';
+        document.getElementById('edit_academic_year_id').value = course.academic_year_id || '';
+        document.getElementById('edit_semester_id').value = course.semester_id || '';
+        document.getElementById('edit_year_level_id').value = course.year_level_id || '';
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('editCourseModal'));
+        modal.show();
+    }
+
+    // Update Course Function
+    function updateCourse(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const formData = new FormData(form);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        
+        fetch('<?= base_url('admin/courses/update') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editCourseModal'));
+                modal.hide();
+                // Reload page to refresh course list
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert('danger', data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error updating course: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    // Edit Teacher Assignment Function
+    function editTeacherAssignment(courseId, assignmentId, teacherId, isPrimary) {
+        document.getElementById('edit_assignment_id').value = assignmentId;
+        document.getElementById('edit_assignment_course_id').value = courseId;
+        document.getElementById('edit_assignment_teacher_id').value = teacherId;
+        document.getElementById('edit_assignment_is_primary').value = isPrimary;
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('editTeacherAssignmentModal'));
+        modal.show();
+    }
+
+    // Update Teacher Assignment Function
+    function updateTeacherAssignment(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const courseId = document.getElementById('edit_assignment_course_id').value;
+        const formData = new FormData(form);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        
+        fetch(`<?= base_url('admin/courses') ?>/${courseId}/teacher/update`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editTeacherAssignmentModal'));
+                modal.hide();
+                // Reload teachers list
+                loadCourseTeachers(courseId);
+            } else {
+                showAlert('danger', data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error updating assignment: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    // Edit Course Function
+    function editCourse(course) {
+        document.getElementById('edit_course_id').value = course.id || '';
+        document.getElementById('edit_course_title').value = course.title || '';
+        document.getElementById('edit_course_control_number').value = course.control_number || '';
+        document.getElementById('edit_course_units').value = course.units || 0;
+        document.getElementById('edit_course_description').value = course.description || '';
+        document.getElementById('edit_academic_year_id').value = course.academic_year_id || '';
+        document.getElementById('edit_semester_id').value = course.semester_id || '';
+        document.getElementById('edit_year_level_id').value = course.year_level_id || '';
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('editCourseModal'));
+        modal.show();
+    }
+
+    // Update Course Function
+    function updateCourse(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const formData = new FormData(form);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        
+        fetch('<?= base_url('admin/courses/update') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editCourseModal'));
+                modal.hide();
+                // Reload page to refresh course list
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert('danger', data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error updating course: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    // Edit Teacher Assignment Function
+    function editTeacherAssignment(courseId, assignmentId, teacherId, isPrimary) {
+        document.getElementById('edit_assignment_id').value = assignmentId;
+        document.getElementById('edit_assignment_course_id').value = courseId;
+        document.getElementById('edit_assignment_teacher_id').value = teacherId;
+        document.getElementById('edit_assignment_is_primary').value = isPrimary;
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('editTeacherAssignmentModal'));
+        modal.show();
+    }
+
+    // Update Teacher Assignment Function
+    function updateTeacherAssignment(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const courseId = document.getElementById('edit_assignment_course_id').value;
+        const formData = new FormData(form);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        
+        fetch(`<?= base_url('admin/courses') ?>/${courseId}/teacher/update`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editTeacherAssignmentModal'));
+                modal.hide();
+                // Reload teachers list
+                loadCourseTeachers(courseId);
+            } else {
+                showAlert('danger', data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error updating assignment: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    function deleteCourse(courseId, courseTitle) {
+        if (!confirm(`Are you sure you want to delete the course "${courseTitle}"? The course will be marked as deleted and can be restored later.`)) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+
+        fetch(`<?= base_url('admin/courses/delete') ?>/${courseId}`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Reload page to show updated list and deleted courses section
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error deleting course: ' + error.message);
+        });
+    }
+
+    // Restore Course Function (like GALORPOT's flow)
+    function restoreCourse(courseId, courseTitle) {
+        if (!confirm(`Are you sure you want to restore the course "${courseTitle}"?`)) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('id', courseId);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+
+        fetch('<?= base_url('admin/courses/restore') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Reload page to show restored course
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error restoring course: ' + error.message);
+        });
+    }
+
     // Activate user function
     function activateUser(userId) {
         if (!confirm('Are you sure you want to activate this user?')) {
@@ -2635,5 +3820,41 @@
                 });
         });
     });
+    // Course Filter Functions
+    function updateSemesterFilter() {
+        const academicYearId = document.getElementById('filter_academic_year_id').value;
+        const semesterSelect = document.getElementById('filter_semester');
+        const termSelect = document.getElementById('filter_term');
+        
+        // Reset semester and term when academic year changes
+        semesterSelect.value = '';
+        termSelect.value = '';
+        
+        // If no academic year selected, enable both selects
+        if (!academicYearId) {
+            semesterSelect.disabled = false;
+            termSelect.disabled = false;
+            return;
+        }
+        
+        // Enable semester select when academic year is selected
+        semesterSelect.disabled = false;
+        termSelect.disabled = false;
+    }
+
+    function updateTermFilter() {
+        const semester = document.getElementById('filter_semester').value;
+        const termSelect = document.getElementById('filter_term');
+        
+        // Reset term when semester changes
+        termSelect.value = '';
+        
+        // Enable term select when semester is selected
+        if (semester) {
+            termSelect.disabled = false;
+        } else {
+            termSelect.disabled = false;
+        }
+    }
     </script>
 <?= $this->endSection() ?>

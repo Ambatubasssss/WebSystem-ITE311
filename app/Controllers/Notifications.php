@@ -20,17 +20,16 @@ class Notifications extends BaseController
      */
     public function get()
     {
-        // Debug logging
-        log_message('info', 'Notifications::get() called');
-        log_message('info', 'Session userID: ' . (session('userID') ?? 'null'));
-        log_message('info', 'Session role: ' . (session('role') ?? 'null'));
+        // Set JSON response header
+        $this->response->setContentType('application/json');
         
         // Check if user is logged in
-        if (!session('userID')) {
-            log_message('warning', 'User not logged in for notifications');
+        if (!session()->get('logged_in') || !session('userID')) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'User not logged in'
+                'message' => 'User not logged in',
+                'unread_count' => 0,
+                'notifications' => []
             ])->setStatusCode(401);
         }
 
@@ -59,7 +58,8 @@ class Notifications extends BaseController
             return $this->response->setJSON([
                 'success' => true,
                 'unread_count' => $unreadCount,
-                'notifications' => $formattedNotifications
+                'notifications' => $formattedNotifications,
+                'csrf_token' => csrf_hash()
             ]);
 
         } catch (\Exception $e) {
@@ -76,13 +76,11 @@ class Notifications extends BaseController
      */
     public function markAsRead($notificationId)
     {
-        // Debug logging
-        log_message('info', 'MarkAsRead called for notification ID: ' . $notificationId);
-        log_message('info', 'Session userID: ' . (session('userID') ?? 'null'));
+        // Set JSON response header
+        $this->response->setContentType('application/json');
         
         // Check if user is logged in
-        if (!session('userID')) {
-            log_message('warning', 'User not logged in for mark as read');
+        if (!session()->get('logged_in') || !session('userID')) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'User not logged in'
@@ -117,7 +115,8 @@ class Notifications extends BaseController
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Notification marked as read',
-                    'unread_count' => $unreadCount
+                    'unread_count' => $unreadCount,
+                    'csrf_token' => csrf_hash()
                 ]);
             } else {
                 return $this->response->setJSON([

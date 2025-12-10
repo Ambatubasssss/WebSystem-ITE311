@@ -300,10 +300,93 @@ class Auth extends BaseController
             if ($section === 'users') {
                 $data['allUsers'] = $userModel->findAll();
             } elseif ($section === 'courses') {
-                $data['courses'] = $courseModel->findAll();
-                // Get material counts for each course
+                // Load academic data for course creation form and filters
+                $academicYearModel = new \App\Models\AcademicYearModel();
+                $semesterModel = new \App\Models\SemesterModel();
+                $yearLevelModel = new \App\Models\YearLevelModel();
+                $data['academicYears'] = $academicYearModel->orderBy('year_start', 'DESC')->findAll();
+                $data['allSemesters'] = $semesterModel->orderBy('created_at', 'DESC')->findAll();
+                $data['yearLevels'] = $yearLevelModel->orderBy('level', 'ASC')->findAll();
+                
+                // Get filter parameters from query string
+                $filterAcademicYearId = $this->request->getGet('academic_year_id');
+                $filterSemester = $this->request->getGet('semester'); // 1st or 2nd
+                $filterTerm = $this->request->getGet('term'); // 1st, 2nd, or 3rd
+                
+                // Build course query with filters
+                $courseQuery = $courseModel;
+                
+                // Filter by academic year if provided
+                if (!empty($filterAcademicYearId)) {
+                    $courseQuery->where('academic_year_id', $filterAcademicYearId);
+                    $data['selectedAcademicYearId'] = $filterAcademicYearId;
+                    
+                    // Filter semesters by academic year for the semester dropdown
+                    $data['semesters'] = $semesterModel->where('academic_year_id', $filterAcademicYearId)->orderBy('semester', 'ASC')->orderBy('term', 'ASC')->findAll();
+                } else {
+                    $data['semesters'] = $data['allSemesters'];
+                }
+                
+                // Filter by semester and term if provided (requires academic year)
+                if (!empty($filterSemester) && !empty($filterTerm) && !empty($filterAcademicYearId)) {
+                    // Find the semester_id that matches the academic year, semester, and term
+                    $semesterFilter = $semesterModel->where('academic_year_id', $filterAcademicYearId)
+                                                    ->where('semester', $filterSemester)
+                                                    ->where('term', $filterTerm)
+                                                    ->first();
+                    
+                    if ($semesterFilter) {
+                        $courseQuery->where('semester_id', $semesterFilter['id']);
+                        $data['selectedSemesterId'] = $semesterFilter['id'];
+                        $data['selectedSemester'] = $filterSemester;
+                        $data['selectedTerm'] = $filterTerm;
+                    }
+                } elseif (!empty($filterSemester) && !empty($filterTerm)) {
+                    // Semester and term selected but no academic year - clear the filter
+                    $data['selectedSemester'] = null;
+                    $data['selectedTerm'] = null;
+                }
+                
+            // Get filtered courses (exclude soft deleted - like GALORPOT's flow)
+            $data['courses'] = $courseQuery->orderBy('title', 'ASC')->findAll();
+            
+            // Get deleted courses separately (like GALORPOT's flow)
+            $data['deleted_courses'] = $courseModel->withDeleted()
+                                                   ->onlyDeleted()
+                                                   ->orderBy('deleted_at', 'DESC')
+                                                   ->findAll();
+                
+                // Get material counts and academic info for each course
                 foreach ($data['courses'] as &$course) {
                     $course['material_count'] = $materialModel->where('course_id', $course['id'])->countAllResults();
+                    
+                    // Get academic year info
+                    if ($course['academic_year_id']) {
+                        $course['academic_year'] = $academicYearModel->find($course['academic_year_id']);
+                    }
+                    
+                    // Get semester info
+                    if ($course['semester_id']) {
+                        $course['semester'] = $semesterModel->find($course['semester_id']);
+                    }
+                    
+                    // Get year level info
+                    if ($course['year_level_id']) {
+                        $course['year_level'] = $yearLevelModel->find($course['year_level_id']);
+                    }
+                }
+            } elseif ($section === 'upload') {
+                // Get course ID from query if provided
+                $courseId = $this->request->getGet('course_id');
+                if ($courseId) {
+                    $course = $courseModel->find($courseId);
+                    if ($course) {
+                        $data['course'] = $course;
+                        $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
+                    }
+                } else {
+                    // Show all courses for selection
+                    $data['courses'] = $courseModel->findAll();
                 }
             } elseif ($section === 'academic-years') {
                 $academicYearModel = new \App\Models\AcademicYearModel();
@@ -331,96 +414,157 @@ class Auth extends BaseController
                         $student['year_level'] = $yearLevelModel->find($student['year_level_id']);
                     }
                 }
-            } elseif ($section === 'upload') {
-                // Get course ID from query if provided
-                $courseId = $this->request->getGet('course_id');
-                if ($courseId) {
-                    $course = $courseModel->find($courseId);
-                    if ($course) {
-                        $data['course'] = $course;
-                        $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
-                    }
-                } else {
-                    // Show all courses for selection
-                    $data['courses'] = $courseModel->findAll();
-                }
             } elseif ($section === 'materials') {
                 // Get course ID from query
                 $courseId = $this->request->getGet('course_id');
                 if ($courseId) {
-                    $course = $courseModel->find($courseId);
-                    if ($course) {
-                        $data['course'] = $course;
-                        $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
+                    // Verify the teacher is assigned to this course
+                    if ($courseTeacherModel->isTeacherAssigned($courseId, $teacherId)) {
+                        $course = $courseModel->find($courseId);
+                        if ($course) {
+                            $data['course'] = $course;
+                            $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
+                        }
+                    } else {
+                        session()->setFlashdata('error', 'You are not assigned to this course.');
+                        return redirect()->to('/dashboard?section=my-courses');
                     }
                 }
             }
         } elseif ($role === 'teacher') {
             $data['totalStudents'] = $userModel->where('role', 'student')->countAllResults();
             
+            // Get teacher's user ID
+            $teacherId = session('userID');
+            $courseTeacherModel = new \App\Models\CourseTeacherModel();
+            
             // Section-specific data
             if ($section === 'my-courses') {
-                $courses = $courseModel->findAll();
+                // Get only courses assigned to this teacher
+                $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
                 $coursesWithMaterials = [];
-                foreach ($courses as $course) {
-                    $materialCount = $materialModel->where('course_id', $course['id'])->countAllResults();
-                    $course['material_count'] = $materialCount;
-                    $coursesWithMaterials[] = $course;
+                
+                foreach ($teacherCourses as $teacherCourse) {
+                    $course = $courseModel->find($teacherCourse['course_id']);
+                    if ($course) {
+                        $materialCount = $materialModel->where('course_id', $course['id'])->countAllResults();
+                        $course['material_count'] = $materialCount;
+                        $course['is_primary'] = $teacherCourse['is_primary'];
+                        $coursesWithMaterials[] = $course;
+                    }
                 }
                 $data['courses'] = $coursesWithMaterials;
             } elseif ($section === 'upload') {
                 // Get course ID from query if provided
                 $courseId = $this->request->getGet('course_id');
                 if ($courseId) {
-                    $course = $courseModel->find($courseId);
-                    if ($course) {
-                        $data['course'] = $course;
-                        $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
+                    // Verify the teacher is assigned to this course
+                    if ($courseTeacherModel->isTeacherAssigned($courseId, $teacherId)) {
+                        $course = $courseModel->find($courseId);
+                        if ($course) {
+                            $data['course'] = $course;
+                            $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
+                        }
+                    } else {
+                        session()->setFlashdata('error', 'You are not assigned to this course.');
+                        return redirect()->to('/dashboard?section=my-courses');
                     }
                 } else {
-                    // Show all courses for selection
-                    $data['courses'] = $courseModel->findAll();
+                    // Show only courses assigned to this teacher for selection
+                    $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
+                    $assignedCourses = [];
+                    foreach ($teacherCourses as $teacherCourse) {
+                        $course = $courseModel->find($teacherCourse['course_id']);
+                        if ($course) {
+                            $assignedCourses[] = $course;
+                        }
+                    }
+                    $data['courses'] = $assignedCourses;
                 }
             } elseif ($section === 'enroll-students') {
-                // Get all courses and students for enrollment management
-                $data['courses'] = $courseModel->findAll();
+                // Get only courses assigned to this teacher
+                $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
+                $assignedCourses = [];
+                foreach ($teacherCourses as $teacherCourse) {
+                    $course = $courseModel->find($teacherCourse['course_id']);
+                    if ($course) {
+                        $assignedCourses[] = $course;
+                    }
+                }
+                $data['courses'] = $assignedCourses;
                 $data['students'] = $userModel->where('role', 'student')->findAll();
                 
                 // Get course ID from query if provided to show enrolled students
                 $courseId = $this->request->getGet('course_id');
                 if ($courseId) {
-                    $data['selectedCourse'] = $courseModel->find($courseId);
-                    // Get enrolled students for this course
-                    $db = \Config\Database::connect();
-                    $enrolledQuery = $db->query("
-                        SELECT e.*, u.id as user_id, u.name, u.email
-                        FROM enrollments e
-                        JOIN users u ON u.id = e.user_id
-                        WHERE e.course_id = ? AND u.role = 'student'
-                        ORDER BY e.created_at DESC
-                    ", [$courseId]);
-                    $data['enrolledStudents'] = $enrolledQuery->getResultArray();
+                    // Verify the teacher is assigned to this course
+                    if ($courseTeacherModel->isTeacherAssigned($courseId, $teacherId)) {
+                        $data['selectedCourse'] = $courseModel->find($courseId);
+                        // Get enrolled students for this course
+                        $db = \Config\Database::connect();
+                        $enrolledQuery = $db->query("
+                            SELECT e.*, u.id as user_id, u.name, u.email
+                            FROM enrollments e
+                            JOIN users u ON u.id = e.user_id
+                            WHERE e.course_id = ? AND u.role = 'student'
+                            ORDER BY e.created_at DESC
+                        ", [$courseId]);
+                        $data['enrolledStudents'] = $enrolledQuery->getResultArray();
+                    } else {
+                        session()->setFlashdata('error', 'You are not assigned to this course.');
+                        return redirect()->to('/dashboard?section=enroll-students');
+                    }
                 }
             } elseif ($section === 'create-assignment') {
-                // Get all courses for assignment creation
-                $data['courses'] = $courseModel->findAll();
+                // Get only courses assigned to this teacher for assignment creation
+                $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
+                $assignedCourses = [];
+                foreach ($teacherCourses as $teacherCourse) {
+                    $course = $courseModel->find($teacherCourse['course_id']);
+                    if ($course) {
+                        $assignedCourses[] = $course;
+                    }
+                }
+                $data['courses'] = $assignedCourses;
             } elseif ($section === 'assignments') {
                 // Get course ID from query if provided
                 $courseId = $this->request->getGet('course_id');
                 if ($courseId) {
-                    $data['course'] = $courseModel->find($courseId);
-                    $data['assignments'] = $assignmentModel->getAssignmentsByCourse($courseId);
+                    // Verify the teacher is assigned to this course
+                    if ($courseTeacherModel->isTeacherAssigned($courseId, $teacherId)) {
+                        $data['course'] = $courseModel->find($courseId);
+                        $data['assignments'] = $assignmentModel->getAssignmentsByCourse($courseId);
+                    } else {
+                        session()->setFlashdata('error', 'You are not assigned to this course.');
+                        return redirect()->to('/dashboard?section=assignments');
+                    }
                 } else {
-                    // Show all courses for selection
-                    $data['courses'] = $courseModel->findAll();
+                    // Show only courses assigned to this teacher for selection
+                    $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
+                    $assignedCourses = [];
+                    foreach ($teacherCourses as $teacherCourse) {
+                        $course = $courseModel->find($teacherCourse['course_id']);
+                        if ($course) {
+                            $assignedCourses[] = $course;
+                        }
+                    }
+                    $data['courses'] = $assignedCourses;
                 }
             } elseif ($section === 'view-assignment') {
                 // Get assignment ID from query
                 $assignmentId = $this->request->getGet('assignment_id');
                 if ($assignmentId) {
-                    $data['assignment'] = $assignmentModel->getAssignmentWithDetails($assignmentId);
-                    if ($data['assignment']) {
-                        $data['submissions'] = $assignmentSubmissionModel->getSubmissionsByAssignment($assignmentId);
+                    $assignment = $assignmentModel->getAssignmentWithDetails($assignmentId);
+                    if ($assignment) {
+                        // Verify the teacher is assigned to the course
+                        $courseId = $assignment['course_id'] ?? null;
+                        if ($courseId && $courseTeacherModel->isTeacherAssigned($courseId, $teacherId)) {
+                            $data['assignment'] = $assignment;
+                            $data['submissions'] = $assignmentSubmissionModel->getSubmissionsByAssignment($assignmentId);
+                        } else {
+                            session()->setFlashdata('error', 'You are not assigned to this course.');
+                            return redirect()->to('/dashboard?section=assignments');
+                        }
                     }
                 }
             }
