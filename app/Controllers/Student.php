@@ -37,7 +37,7 @@ class Student extends BaseController
 
         // Check if user is enrolled in the course
         $enrollmentModel = new \App\Models\EnrollmentModel();
-        if (!$enrollmentModel->isAlreadyEnrolled(session('userID'), $course_id)) {
+        if (!$enrollmentModel->isApprovedEnrolled(session('userID'), $course_id)) {
             session()->setFlashdata('error', 'You are not enrolled in this course.');
             return redirect()->to('/dashboard');
         }

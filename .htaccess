@@ -15,6 +15,41 @@ Options -Indexes
 	# change the following line to match the subfolder you need.
 	# http://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewritebase
 	# RewriteBase /
+	
+	# ============================================================
+	# PATH TRAVERSAL PROTECTION - MUST BE FIRST
+	# ============================================================
+	# Catch ALL path traversal attempts and redirect to homepage
+	# This prevents access to parent directories and Apache errors
+	
+	# Check REQUEST_URI for path traversal patterns
+	# Must check before Apache tries to resolve the path
+	# Handle ../.. patterns (double dot slash - most common)
+	RewriteCond %{REQUEST_URI} \.\./\.\./ [NC]
+	RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+	
+	# Handle ../ patterns (single dot slash)
+	RewriteCond %{REQUEST_URI} \.\./ [NC]
+	RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+	
+	# Handle ... patterns (three dots)
+	RewriteCond %{REQUEST_URI} \.\.\./ [NC]
+	RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+	
+	# Handle .. at end of path
+	RewriteCond %{REQUEST_URI} \.\.$ [NC]
+	RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+	
+	# Check QUERY_STRING for path traversal
+	RewriteCond %{QUERY_STRING} \.\./\.\./ [NC]
+	RewriteRule ^.*$ /ITE311-MALILAY/? [R=301,L]
+	
+	RewriteCond %{QUERY_STRING} \.\./ [NC]
+	RewriteRule ^.*$ /ITE311-MALILAY/? [R=301,L]
+	
+	# Handle /ITE311/MALILAY/... patterns (redirect to homepage)
+	RewriteCond %{REQUEST_URI} ^/ITE311/MALILAY/ [NC]
+	RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
 
 	# Redirect Trailing Slashes...
 	RewriteCond %{REQUEST_FILENAME} !-d
@@ -34,46 +69,6 @@ Options -Indexes
 	RewriteCond %{THE_REQUEST} \s/+ITE311-MALILAY/index\.php\s [NC]
 	RewriteRule ^index\.php$ /ITE311-MALILAY/ [R=301,L]
 
-# Handle specific path traversal patterns with multiple dots
-RewriteCond %{REQUEST_URI} \.\./\.\./ [NC]
-RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
-
-# Handle path traversal with index.php
-RewriteCond %{REQUEST_URI} \.\./.*index\.php [NC]
-RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
-
-# Handle three dots pattern (.../index.php)
-RewriteCond %{REQUEST_URI} \.\.\./index\.php [NC]
-RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
-
-# Handle multiple three dots pattern (.../.../index.php)
-RewriteCond %{REQUEST_URI} \.\.\./\.\.\./index\.php [NC]
-RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
-
-# Handle any three dots in URL path
-RewriteCond %{REQUEST_URI} \.\.\./ [NC]
-RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
-
-# Handle any path traversal attempts - redirect to clean URL
-RewriteCond %{REQUEST_URI} \.\./ [NC]
-RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
-
-# Handle direct access to index.php with path traversal
-RewriteCond %{THE_REQUEST} \s/+ITE311-MALILAY/.*\.\./.*index\.php [NC]
-RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
-
-# Handle URLs that would redirect to XAMPP dashboard
-RewriteCond %{THE_REQUEST} \s/+ITE311-MALILAY/\.\./index\.php [NC]
-RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
-
-# Prevent access to parent directory files
-RewriteCond %{REQUEST_URI} ^/ITE311-MALILAY/\.\./ [NC]
-RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
-
-# Handle any remaining path traversal patterns
-RewriteCond %{REQUEST_URI} \.\./ [NC]
-RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
-
 	# Checks to see if the user is attempting to access a valid file,
 	# such as an image or css document, if this isn't true it sends the
 	# request to the front controller, index.php
@@ -91,6 +86,12 @@ RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
 	# can be sent to index.php, and everything works as normal.
 	ErrorDocument 404 index.php
 </IfModule>
+
+# Handle 404 and 403 errors - redirect to homepage
+# Use absolute URL to ensure proper redirect
+ErrorDocument 404 /ITE311-MALILAY/
+ErrorDocument 403 /ITE311-MALILAY/
+ErrorDocument 500 /ITE311-MALILAY/
 
 # Custom error pages (removed - using redirects instead)
 

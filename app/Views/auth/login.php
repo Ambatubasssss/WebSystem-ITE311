@@ -48,13 +48,8 @@
 
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary">Login</button>
-                                <a href="<?= base_url('register') ?>" class="btn btn-outline-secondary">Register New Account</a>
                             </div>
                         </form>
-
-                        <div class="text-center mt-3">
-                            <p class="mb-0">Don't have an account? <a href="<?= base_url('register') ?>">Register here</a></p>
-                        </div>
                     </div>
                 </div>
             </div>

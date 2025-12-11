@@ -37,11 +37,23 @@ class Notifications extends BaseController
         log_message('info', 'Getting notifications for user ID: ' . $userId);
         
         try {
+            // Check if notifications table exists
+            $db = \Config\Database::connect();
+            if (!$db->tableExists('notifications')) {
+                log_message('info', 'Notifications table does not exist, returning empty list');
+                return $this->response->setJSON([
+                    'success' => true,
+                    'unread_count' => 0,
+                    'notifications' => [],
+                    'csrf_token' => csrf_hash()
+                ]);
+            }
+            
             // Get unread count
             $unreadCount = $this->notificationModel->getUnreadCount($userId);
             
-            // Get latest notifications (limit 5)
-            $notifications = $this->notificationModel->getNotificationsForUser($userId, 5);
+            // Get latest notifications (limit 10 to show more history including read ones)
+            $notifications = $this->notificationModel->getNotificationsForUser($userId, 10);
             
             // Format notifications for JSON response
             $formattedNotifications = [];
@@ -64,10 +76,13 @@ class Notifications extends BaseController
 
         } catch (\Exception $e) {
             log_message('error', 'Notification fetch error: ' . $e->getMessage());
+            // Return empty notifications instead of error to prevent UI from showing loading state
             return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Failed to fetch notifications'
-            ])->setStatusCode(500);
+                'success' => true,
+                'unread_count' => 0,
+                'notifications' => [],
+                'csrf_token' => csrf_hash()
+            ]);
         }
     }
 

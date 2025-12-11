@@ -52,12 +52,23 @@ class CourseTeacherModel extends Model
      */
     public function getTeachersByCourse($courseId)
     {
-        return $this->select('course_teachers.*, users.name as teacher_name, users.email as teacher_email')
-                    ->join('users', 'users.id = course_teachers.teacher_id')
-                    ->where('course_teachers.course_id', $courseId)
-                    ->orderBy('course_teachers.is_primary', 'DESC')
-                    ->orderBy('users.name', 'ASC')
-                    ->findAll();
+        try {
+            // Use left join to handle cases where user might be missing
+            $results = $this->select('course_teachers.*, users.name as teacher_name, users.email as teacher_email')
+                        ->join('users', 'users.id = course_teachers.teacher_id', 'left')
+                        ->where('course_teachers.course_id', $courseId)
+                        ->orderBy('course_teachers.is_primary', 'DESC')
+                        ->orderBy('users.name', 'ASC')
+                        ->findAll();
+            
+            // Filter out any assignments where the user doesn't exist or is null
+            return array_values(array_filter($results, function($item) {
+                return !empty($item['teacher_id']) && !empty($item['teacher_name']);
+            }));
+        } catch (\Exception $e) {
+            log_message('error', 'Error in getTeachersByCourse: ' . $e->getMessage());
+            return [];
+        }
     }
 
     /**
@@ -68,6 +79,7 @@ class CourseTeacherModel extends Model
         return $this->select('course_teachers.*, courses.title, courses.description')
                     ->join('courses', 'courses.id = course_teachers.course_id')
                     ->where('course_teachers.teacher_id', $teacherId)
+                    ->where('courses.deleted_at IS NULL') // Exclude soft-deleted courses
                     ->orderBy('courses.title', 'ASC')
                     ->findAll();
     }

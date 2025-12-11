@@ -11,24 +11,25 @@ if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/index.ph
     exit;
 }
 
-// Handle path traversal attempts - redirect to appropriate dashboard
-if (isset($_SERVER['REQUEST_URI']) && (strpos($_SERVER['REQUEST_URI'], '../') !== false || strpos($_SERVER['REQUEST_URI'], '..\\') !== false)) {
-    // Start session to check role
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+// Handle path traversal attempts - redirect to homepage
+// This catches any path traversal that Apache/mod_rewrite might have missed
+if (isset($_SERVER['REQUEST_URI'])) {
+    $requestUri = $_SERVER['REQUEST_URI'];
+    $queryString = $_SERVER['QUERY_STRING'] ?? '';
+    
+    // Check for path traversal patterns
+    if (strpos($requestUri, '../') !== false || 
+        strpos($requestUri, '..\\') !== false ||
+        strpos($requestUri, '../..') !== false ||
+        strpos($requestUri, '...') !== false ||
+        strpos($queryString, '../') !== false ||
+        strpos($queryString, '..\\') !== false) {
+        
+        // Always redirect to homepage for security
+        $baseUrl = '/ITE311-MALILAY/';
+        header('Location: ' . $baseUrl, true, 301);
+        exit;
     }
-    
-    $baseUrl = '/ITE311-MALILAY/';
-    
-    // Check if user is logged in
-    if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
-        $redirectUrl = $baseUrl . 'dashboard';
-    } else {
-        $redirectUrl = $baseUrl . 'login';
-    }
-    
-    header('Location: ' . $redirectUrl, true, 301);
-    exit;
 }
 
 /*

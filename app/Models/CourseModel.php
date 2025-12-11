@@ -12,7 +12,7 @@ class CourseModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-        protected $allowedFields    = ['title', 'control_number', 'units', 'description', 'academic_year_id', 'semester_id', 'year_level_id', 'created_at', 'updated_at', 'deleted_at'];
+        protected $allowedFields    = ['title', 'control_number', 'units', 'description', 'academic_year_id', 'semester_id', 'year_level_id', 'status', 'completed_at', 'created_at', 'updated_at', 'deleted_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -59,11 +59,20 @@ class CourseModel extends Model
 
     /**
      * Get courses not enrolled by a specific user
+     * Filters by student's year level if they are a student
      */
-    public function getCoursesNotEnrolledByUser($user_id)
+    public function getCoursesNotEnrolledByUser($user_id, $year_level_id = null)
     {
-        // Get all courses
-        $allCourses = $this->findAll();
+        // Build query - filter by year level if provided
+        $query = $this->where('deleted_at', null);
+        
+        // If year level is provided, only show courses for that year level
+        if ($year_level_id) {
+            $query->where('year_level_id', $year_level_id);
+        }
+        
+        // Get all courses matching the criteria
+        $allCourses = $query->orderBy('title', 'ASC')->findAll();
         
         // If no courses exist, return empty array
         if (empty($allCourses)) {

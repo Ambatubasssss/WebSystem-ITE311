@@ -73,16 +73,12 @@ class Materials extends BaseController
         }
 
         // Define allowed file types and MIME types for security
-        $allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'];
+        // Only allow PPT and PDF files for assignment materials
+        $allowedExtensions = ['pdf', 'ppt', 'pptx'];
         $allowedMimeTypes = [
             'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'application/vnd.ms-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'text/plain'
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation'
         ];
         
         // Get file extension and validate
@@ -91,13 +87,13 @@ class Materials extends BaseController
         
         // Security: Validate file extension
         if (!in_array($extension, $allowedExtensions)) {
-            return redirect()->back()->with('error', 'Invalid file type. Allowed formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT');
+            return redirect()->back()->with('error', 'Invalid file type. Only PDF and PowerPoint (PPT, PPTX) files are allowed.');
         }
         
         // Security: Validate MIME type to prevent file type spoofing
         $mimeType = $file->getClientMimeType();
         if (!in_array($mimeType, $allowedMimeTypes)) {
-            return redirect()->back()->with('error', 'Invalid file type detected. Please upload a valid document.');
+            return redirect()->back()->with('error', 'Invalid file type detected. Only PDF and PowerPoint files are allowed.');
         }
         
         // Security: Validate file size (10MB = 10485760 bytes)
@@ -231,7 +227,7 @@ class Materials extends BaseController
         // Check if user is enrolled in the course (skip for admin/teacher)
         $userRole = strtolower(session('role') ?? '');
         if ($userRole !== 'admin' && $userRole !== 'teacher') {
-            if (!$this->enrollmentModel->isAlreadyEnrolled(session('userID'), $material['course_id'])) {
+            if (!$this->enrollmentModel->isApprovedEnrolled(session('userID'), $material['course_id'])) {
                 return redirect()->to('/dashboard')->with('error', 'You are not enrolled in this course.');
             }
         }
@@ -283,7 +279,7 @@ class Materials extends BaseController
         // Check if user is enrolled in the course (skip for admin/teacher)
         $userRole = strtolower(session('role') ?? '');
         if ($userRole !== 'admin' && $userRole !== 'teacher') {
-            if (!$this->enrollmentModel->isAlreadyEnrolled(session('userID'), $course_id)) {
+            if (!$this->enrollmentModel->isApprovedEnrolled(session('userID'), $course_id)) {
                 return redirect()->to('/dashboard')->with('error', 'You are not enrolled in this course.');
             }
         }
@@ -316,7 +312,7 @@ class Materials extends BaseController
         // Check if user is enrolled in the course (skip for admin/teacher)
         $userRole = strtolower(session('role') ?? '');
         if ($userRole !== 'admin' && $userRole !== 'teacher') {
-            if (!$this->enrollmentModel->isAlreadyEnrolled(session('userID'), $material['course_id'])) {
+            if (!$this->enrollmentModel->isApprovedEnrolled(session('userID'), $material['course_id'])) {
                 return redirect()->to('/dashboard')->with('error', 'You are not enrolled in this course.');
             }
         }

@@ -7,105 +7,6 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class Auth extends BaseController
 {
-    public function register()
-    {
-        // Check if form was submitted (POST request)
-        if ($this->request->getMethod() === 'POST') {
-            // Set validation rules
-            $validation = \Config\Services::validation();
-            $validation->setRules([
-                'name' => [
-                    'label' => 'Name',
-                    'rules' => 'required|min_length[3]|max_length[100]|alpha_numeric_space',
-                    'errors' => [
-                        'required' => 'The {field} field is required.',
-                        'min_length' => 'The {field} must be at least {param} characters long.',
-                        'max_length' => 'The {field} cannot exceed {param} characters.',
-                        'alpha_numeric_space' => 'The {field} can only contain letters, numbers, and spaces.'
-                    ]
-                ],
-                'email' => [
-                    'label' => 'Email',
-                    'rules' => 'required|valid_email|max_length[255]|is_unique[users.email]',
-                    'errors' => [
-                        'required' => 'The {field} field is required.',
-                        'valid_email' => 'Please provide a valid email address.',
-                        'max_length' => 'The {field} cannot exceed {param} characters.',
-                        'is_unique' => 'This email address is already registered.'
-                    ]
-                ],
-                'password' => [
-                    'label' => 'Password',
-                    'rules' => 'required|min_length[8]|regex_match[/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/]',
-                    'errors' => [
-                        'required' => 'The {field} field is required.',
-                        'min_length' => 'The {field} must be at least {param} characters long.',
-                        'regex_match' => 'The {field} must contain at least one uppercase letter, one lowercase letter, one number, and one special character.'
-                    ]
-                ],
-                'password_confirm' => [
-                    'label' => 'Password Confirmation',
-                    'rules' => 'required|matches[password]',
-                    'errors' => [
-                        'required' => 'Please confirm your password.',
-                        'matches' => 'The password confirmation does not match.'
-                    ]
-                ]
-            ]);
-
-            // Run validation
-            if (!$validation->withRequest($this->request)->run()) {
-                // Validation failed
-                $errors = $validation->getErrors();
-                session()->setFlashdata('error', implode('<br>', $errors));
-                return view('auth/register', ['validation' => $validation]);
-            }
-
-            // Get validated and sanitized form data
-            $name = $this->request->getPost('name');
-            $email = $this->request->getPost('email');
-            $password = $this->request->getPost('password');
-
-            // Additional sanitization
-            $name = trim($name);
-            $email = trim(strtolower($email));
-
-            // Hash the password
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-            // Save user data to database
-            $userModel = new \App\Models\UserModel();
-            $userData = [
-                'name' => $name,
-                'email' => $email,
-                'password' => $hashedPassword,
-                'role' => 'student',
-                'is_active' => 1,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-
-            try {
-                $result = $userModel->insert($userData);
-                
-                if ($result) {
-                    // Set flash message and redirect to login
-                    session()->setFlashdata('success', 'Registration successful! Please login.');
-                    return redirect()->to('/login');
-                } else {
-                    // Debug: Show the error
-                    $errors = $userModel->errors();
-                    session()->setFlashdata('error', 'Registration failed. Errors: ' . json_encode($errors));
-                }
-            } catch (\Exception $e) {
-                session()->setFlashdata('error', 'Registration failed: ' . $e->getMessage());
-            }
-        }
-
-        // Load the registration view
-        return view('auth/register');
-    }
-
     public function login()
     {
         // Check if form was submitted (POST request)
@@ -262,6 +163,15 @@ class Auth extends BaseController
             ],
         ];
 
+        // Check and update course/enrollment completion status
+        try {
+            $completionService = new \App\Libraries\CompletionService();
+            $completionService->checkAndUpdateCompletions();
+        } catch (\Exception $e) {
+            // Log error but don't break the dashboard
+            log_message('error', 'Error checking completions: ' . $e->getMessage());
+        }
+
         // Load models
         $courseModel = new \App\Models\CourseModel();
         $materialModel = new \App\Models\MaterialModel();
@@ -284,10 +194,12 @@ class Auth extends BaseController
         $data['currentSemester'] = $currentSemester;
         
         // Get student's year level if they are a student
+        $studentYearLevelId = null;
         if ($role === 'student') {
             $userData = $userModel->find(session('userID'));
             if ($userData && isset($userData['year_level_id']) && $userData['year_level_id']) {
-                $data['studentYearLevel'] = $yearLevelModel->find($userData['year_level_id']);
+                $studentYearLevelId = $userData['year_level_id'];
+                $data['studentYearLevel'] = $yearLevelModel->find($studentYearLevelId);
             }
         }
 
@@ -438,6 +350,10 @@ class Auth extends BaseController
             $teacherId = session('userID');
             $courseTeacherModel = new \App\Models\CourseTeacherModel();
             
+            // Calculate teacher's course count for overview
+            $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
+            $data['myCoursesCount'] = count($teacherCourses);
+            
             // Section-specific data
             if ($section === 'my-courses') {
                 // Get only courses assigned to this teacher
@@ -500,16 +416,41 @@ class Auth extends BaseController
                     // Verify the teacher is assigned to this course
                     if ($courseTeacherModel->isTeacherAssigned($courseId, $teacherId)) {
                         $data['selectedCourse'] = $courseModel->find($courseId);
-                        // Get enrolled students for this course
+                        
+                        // Get approved enrolled students for this course
                         $db = \Config\Database::connect();
-                        $enrolledQuery = $db->query("
-                            SELECT e.*, u.id as user_id, u.name, u.email
-                            FROM enrollments e
-                            JOIN users u ON u.id = e.user_id
-                            WHERE e.course_id = ? AND u.role = 'student'
-                            ORDER BY e.created_at DESC
-                        ", [$courseId]);
+                        
+                        // Check if status column exists (for backward compatibility)
+                        $fields = $db->getFieldNames('enrollments');
+                        $hasStatusColumn = in_array('status', $fields);
+                        
+                        if ($hasStatusColumn) {
+                            $enrolledQuery = $db->query("
+                                SELECT e.id as enrollment_id, e.course_id, e.user_id, e.enrollment_date, e.status, e.approved_at, e.approved_by, e.rejected_at, e.rejected_by, e.rejection_reason, e.created_at, e.updated_at, u.id as user_id, u.name, u.email
+                                FROM enrollments e
+                                JOIN users u ON u.id = e.user_id
+                                WHERE e.course_id = ? AND u.role = 'student' AND e.status = 'approved'
+                                ORDER BY e.created_at DESC
+                            ", [$courseId]);
+                        } else {
+                            // If status column doesn't exist, get all enrollments (backward compatibility)
+                            $enrolledQuery = $db->query("
+                                SELECT e.id as enrollment_id, e.course_id, e.user_id, e.enrollment_date, e.created_at, e.updated_at, u.id as user_id, u.name, u.email
+                                FROM enrollments e
+                                JOIN users u ON u.id = e.user_id
+                                WHERE e.course_id = ? AND u.role = 'student'
+                                ORDER BY e.created_at DESC
+                            ", [$courseId]);
+                        }
                         $data['enrolledStudents'] = $enrolledQuery->getResultArray();
+                        
+                        // Get pending enrollments for this course
+                        try {
+                            $data['pendingEnrollments'] = $enrollmentModel->getPendingEnrollments($courseId);
+                        } catch (\Exception $e) {
+                            log_message('error', 'Error getting pending enrollments: ' . $e->getMessage());
+                            $data['pendingEnrollments'] = [];
+                        }
                     } else {
                         session()->setFlashdata('error', 'You are not assigned to this course.');
                         return redirect()->to('/dashboard?section=enroll-students');
@@ -575,25 +516,54 @@ class Auth extends BaseController
             
             try {
                 $db = \Config\Database::connect();
+                $userId = session('userID');
                 
-                // Get all courses from database
-                $allCoursesQuery = $db->query("SELECT id, title, description FROM courses ORDER BY id");
-                $allCourses = $allCoursesQuery->getResultArray();
+                // Use the student's year level already fetched above
                 
-                // Get enrolled courses
-                $enrollmentsQuery = $db->query("
-                    SELECT e.*, c.title, c.description, c.id as course_id
+                // Get all enrollments (for status display)
+                $allEnrollmentsQuery = $db->query("
+                    SELECT e.*, c.title, c.description, c.id as course_id, c.year_level_id, e.status, e.approved_at, e.rejected_at, e.rejection_reason
                     FROM enrollments e 
                     JOIN courses c ON c.id = e.course_id 
                     WHERE e.user_id = ? 
                     ORDER BY e.created_at DESC
-                ", [session('userID')]);
-                $enrolledCourses = $enrollmentsQuery->getResultArray();
+                ", [$userId]);
+                $allEnrollments = $allEnrollmentsQuery->getResultArray();
                 
-                // Get enrolled course IDs
-                $enrolledCourseIds = array_column($enrolledCourses, 'course_id');
+                // Get only approved enrollments for enrolled courses list
+                $enrolledCourses = array_filter($allEnrollments, function($enrollment) {
+                    return $enrollment['status'] === 'approved';
+                });
+                $enrolledCourses = array_values($enrolledCourses);
                 
-                // Filter available courses (not enrolled)
+                // Get enrolled course IDs (all statuses) to exclude from available courses
+                $enrolledCourseIds = array_column($allEnrollments, 'course_id');
+                
+                // Store all enrollments for status display
+                $data['allEnrollments'] = $allEnrollments;
+                
+                // Build query for available courses - filter by year level if student has one
+                if ($studentYearLevelId) {
+                    // Only show courses matching the student's year level
+                    $allCoursesQuery = $db->query("
+                        SELECT id, title, description, year_level_id 
+                        FROM courses 
+                        WHERE deleted_at IS NULL 
+                        AND year_level_id = ? 
+                        ORDER BY title ASC
+                    ", [$studentYearLevelId]);
+                } else {
+                    // If student has no year level, show all courses (for backwards compatibility)
+                    $allCoursesQuery = $db->query("
+                        SELECT id, title, description, year_level_id 
+                        FROM courses 
+                        WHERE deleted_at IS NULL 
+                        ORDER BY title ASC
+                    ");
+                }
+                $allCourses = $allCoursesQuery->getResultArray();
+                
+                // Filter available courses (not enrolled and matching year level)
                 foreach ($allCourses as $course) {
                     if (!in_array($course['id'], $enrolledCourseIds)) {
                         $availableCourses[] = $course;
@@ -639,8 +609,8 @@ class Auth extends BaseController
                 if ($assignmentId) {
                     $assignment = $assignmentModel->getAssignmentWithDetails($assignmentId);
                     if ($assignment) {
-                        // Check if student is enrolled
-                        if ($enrollmentModel->isAlreadyEnrolled(session('userID'), $assignment['course_id'])) {
+                        // Check if student is approved and enrolled
+                        if ($enrollmentModel->isApprovedEnrolled(session('userID'), $assignment['course_id'])) {
                             $data['assignment'] = $assignment;
                             $data['submission'] = $assignmentSubmissionModel->getSubmissionByUserAndAssignment(session('userID'), $assignmentId);
                             $data['has_submitted'] = $data['submission'] !== null;
@@ -653,8 +623,8 @@ class Auth extends BaseController
                 // Get course ID from query
                 $courseId = $this->request->getGet('course_id');
                 if ($courseId) {
-                    // Check if user is enrolled
-                    if ($enrollmentModel->isAlreadyEnrolled(session('userID'), $courseId)) {
+                    // Check if user is approved and enrolled
+                    if ($enrollmentModel->isApprovedEnrolled(session('userID'), $courseId)) {
                         $course = $courseModel->find($courseId);
                         if ($course) {
                             $data['course'] = $course;

@@ -521,22 +521,25 @@
         }, 5000);
     }
 
-    // Notification System JavaScript using jQuery
-    $(document).ready(function() {
-        console.log('DOM loaded with jQuery...');
+    // Notification System JavaScript using jQuery with vanilla JS fallback
+    function initNotifications() {
+        console.log('Initializing notifications...');
         
         // Check if user is logged in before loading notifications
         <?php if (session()->get('logged_in')): ?>
         // Load notifications when page loads
         loadNotifications();
         <?php else: ?>
-        // User not logged in, show empty state
-        $('#notificationsContainer').html(`
-            <div class="text-center p-3">
-                <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
-                <p class="text-muted mb-0">Please login to see notifications</p>
-            </div>
-        `);
+        // User not logged in, show empty state immediately
+        const container = document.getElementById('notificationsContainer');
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center p-3">
+                    <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">Please login to see notifications</p>
+                </div>
+            `;
+        }
         <?php endif; ?>
         
         // Refresh notifications every 60 seconds (only if logged in)
@@ -545,97 +548,166 @@
         <?php endif; ?>
         
         // Manual refresh button
-        $('#refreshNotifications').on('click', function(e) {
-            e.preventDefault();
-            loadNotifications();
-        });
+        const refreshBtn = document.getElementById('refreshNotifications');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                loadNotifications();
+            });
+        }
         
-        // Timeout for loading state (10 seconds)
+        // Aggressive timeout to clear loading state (3 seconds) - MUST clear loading
+        // This is a critical fallback to prevent infinite loading
         setTimeout(function() {
-            const container = $('#notificationsContainer');
-            if (container.length && container.html().includes('Loading notifications')) {
-                container.html(`
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Loading timeout. Please try refreshing.
-                    </div>
-                `);
+            const container = document.getElementById('notificationsContainer');
+            if (container) {
+                const html = container.innerHTML;
+                if (html && (html.includes('Loading notifications') || html.includes('spinner-border'))) {
+                    console.warn('CRITICAL: Timeout fallback triggered - forcing empty state');
+                    updateNotificationsList([]);
+                }
             }
-        }, 10000);
-    });
+        }, 3000);
+    }
+    
+    // Use jQuery if available, otherwise vanilla JS
+    if (typeof jQuery !== 'undefined') {
+        $(document).ready(function() {
+            console.log('DOM loaded with jQuery...');
+            initNotifications();
+        });
+    } else {
+        // Vanilla JS fallback
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initNotifications);
+        } else {
+            initNotifications();
+        }
+    }
 
     function loadNotifications() {
         console.log('Loading notifications...');
         
-        // Use jQuery $.ajax() to fetch notifications with proper error handling
-        $.ajax({
-            url: '<?= base_url('notifications') ?>',
-            type: 'GET',
-            dataType: 'json',
-            success: function(data) {
+        // Set a flag to track if we've updated the UI
+        let uiUpdated = false;
+        
+        // Force clear loading after 3 seconds if still loading - CRITICAL FALLBACK
+        const forceClearTimeout = setTimeout(function() {
+            if (!uiUpdated) {
+                console.warn('FORCE CLEAR: Loading state cleared after 3 seconds timeout');
+                updateNotificationsList([]);
+                uiUpdated = true;
+            }
+        }, 3000);
+        
+        // Use jQuery if available, otherwise vanilla fetch
+        if (typeof jQuery !== 'undefined' && typeof $.ajax === 'function') {
+            $.ajax({
+                url: '<?= base_url('notifications') ?>',
+                type: 'GET',
+                dataType: 'json',
+                timeout: 5000, // 5 second timeout
+                success: function(data) {
+                    clearTimeout(forceClearTimeout);
+                    uiUpdated = true;
+                    console.log('Notifications response:', data);
+                    
+                    try {
+                        if (data && data.success !== false) {
+                            updateNotificationBadge(data.unread_count || 0);
+                            updateNotificationsList(data.notifications || []);
+                        } else {
+                            console.error('Failed to load notifications:', data?.message || 'Unknown error');
+                            updateNotificationsList([]);
+                        }
+                    } catch (e) {
+                        console.error('Error processing notifications:', e);
+                        updateNotificationsList([]);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    clearTimeout(forceClearTimeout);
+                    uiUpdated = true;
+                    console.error('AJAX error:', error, 'Status:', status, 'Response:', xhr.responseText);
+                    updateNotificationsList([]);
+                },
+                complete: function() {
+                    uiUpdated = true;
+                    console.log('Notifications request completed');
+                }
+            });
+        } else {
+            // Vanilla fetch fallback
+            console.log('Using vanilla fetch for notifications');
+            fetch('<?= base_url('notifications') ?>', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                clearTimeout(forceClearTimeout);
+                uiUpdated = true;
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
                 console.log('Notifications response:', data);
-                if (data && data.success) {
+                if (data && data.success !== false) {
                     updateNotificationBadge(data.unread_count || 0);
                     updateNotificationsList(data.notifications || []);
                 } else {
-                    console.error('Failed to load notifications:', data?.message || 'Unknown error');
-                    $('#notificationsContainer').html(`
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            ${data?.message || 'Failed to load notifications'}
-                        </div>
-                    `);
+                    updateNotificationsList([]);
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error('AJAX error:', error, 'Status:', status, 'Response:', xhr.responseText);
-                let errorMessage = 'Failed to load notifications';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMessage = xhr.responseJSON.message;
-                } else if (xhr.status === 401) {
-                    errorMessage = 'Please login to see notifications';
-                } else if (xhr.status === 500) {
-                    errorMessage = 'Server error. Please try again later.';
-                }
-                $('#notificationsContainer').html(`
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        ${errorMessage}
-                    </div>
-                `);
-            }
-        });
+            })
+            .catch(error => {
+                clearTimeout(forceClearTimeout);
+                uiUpdated = true;
+                console.error('Fetch error:', error);
+                updateNotificationsList([]);
+            });
+        }
     }
 
     function updateNotificationBadge(count) {
-        const badge = $('#notificationBadge');
-        if (count > 0) {
-            badge.text(count);
-            badge.show();
-        } else {
-            badge.hide();
+        const badge = typeof jQuery !== 'undefined' ? $('#notificationBadge') : null;
+        const badgeEl = badge && badge.length ? badge[0] : document.getElementById('notificationBadge');
+        
+        if (badgeEl) {
+            if (count > 0) {
+                badgeEl.textContent = count;
+                badgeEl.style.display = '';
+            } else {
+                badgeEl.style.display = 'none';
+            }
         }
     }
 
     function updateNotificationsList(notifications) {
-        const container = $('#notificationsContainer');
+        // Get container using both jQuery and vanilla JS
+        const container = typeof jQuery !== 'undefined' ? $('#notificationsContainer') : null;
+        const containerEl = container && container.length ? container[0] : document.getElementById('notificationsContainer');
         
         console.log('Updating notifications list:', notifications);
         
-        if (!container.length) return;
+        if (!containerEl) {
+            console.warn('Notifications container not found');
+            return;
+        }
         
+        // Always clear loading state first
         if (!notifications || notifications.length === 0) {
-            container.html(`
+            containerEl.innerHTML = `
                 <div class="text-center p-3">
                     <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
                     <p class="text-muted mb-0">No notifications</p>
                 </div>
-            `);
+            `;
             return;
         }
 
         let html = '';
-        $.each(notifications, function(index, notification) {
+        notifications.forEach(function(notification) {
             const alertClass = notification.is_read ? 'alert-light' : 'alert-info';
             const readClass = notification.is_read ? 'text-muted' : 'fw-bold';
             
@@ -656,14 +728,17 @@
             `;
         });
         
-        container.html(html);
+        containerEl.innerHTML = html;
         
-        // Bind mark as read events using jQuery
-        $('.mark-read-btn').on('click', function(e) {
-            e.preventDefault();
-            const notificationId = $(this).data('id');
-            console.log('Mark as read button clicked for notification:', notificationId);
-            markAsRead(notificationId);
+        // Bind mark as read events
+        const markReadButtons = containerEl.querySelectorAll('.mark-read-btn');
+        markReadButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const notificationId = this.getAttribute('data-id');
+                console.log('Mark as read button clicked for notification:', notificationId);
+                markAsRead(notificationId);
+            });
         });
     }
 
@@ -683,8 +758,15 @@
             success: function(data) {
             console.log('Mark as read response data:', data);
             if (data && data.success) {
-                // Remove the notification from the list using jQuery
-                $('.notification-item[data-id="' + notificationId + '"]').fadeOut(300, function() {
+                // Update the notification's appearance instead of removing it
+                const notificationItem = $('.notification-item[data-id="' + notificationId + '"]');
+                
+                // Change styling to show it's read
+                notificationItem.removeClass('alert-info').addClass('alert-light');
+                notificationItem.find('p').removeClass('fw-bold').addClass('text-muted');
+                
+                // Remove the mark as read button
+                notificationItem.find('.mark-read-btn').fadeOut(200, function() {
                     $(this).remove();
                 });
                 
@@ -696,8 +778,8 @@
                     updateCSRFToken(data.csrf_token);
                 }
                 
-                // Show success message
-                showAlert('success', 'Notification marked as read');
+                // Reload notifications to ensure consistency
+                loadNotifications();
             } else {
                 const errorMessage = (data && data.message) ? data.message : 'Unknown error occurred';
                 console.error('Mark as read failed:', errorMessage);

@@ -9,9 +9,7 @@ $routes->get('/', 'Home::index');
 $routes->get('about', 'Home::about');
 $routes->get('contact', 'Home::contact');
 
-// routes for login register and dashboard
-$routes->get('/register', 'Auth::register');
-$routes->post('/register', 'Auth::register');
+// routes for login and dashboard
 $routes->get('/login', 'Auth::login');
 $routes->post('/login', 'Auth::login');
 $routes->get('/logout', 'Auth::logout');
@@ -27,6 +25,11 @@ $routes->post('/password/update', 'Auth::updatePassword');
 $routes->post('/course/enroll', 'Course::enroll');
 $routes->get('/course/available', 'Course::getAvailableCourses');
 $routes->get('/course/enrollments', 'Course::getUserEnrollments');
+$routes->post('/course/enrollment/approve', 'Course::approveEnrollment');
+$routes->post('/course/enrollment/reject', 'Course::rejectEnrollment');
+$routes->post('/course/enrollment/unenroll', 'Course::unenrollStudent');
+$routes->get('/course/(:num)/pending-enrollments', 'Course::getPendingEnrollments/$1');
+$routes->get('/course/pending-enrollments', 'Course::getPendingEnrollments');
 $routes->get('/course/view/(:num)', 'Course::view/$1');
 $routes->get('/course/students', 'Course::getStudents');
 $routes->get('/course/(:num)/students', 'Course::getCourseStudents/$1');
@@ -92,6 +95,10 @@ $routes->group('admin', function($routes) {
 });
 
 // Materials routes
+// Admin course upload routes (standalone format for instructions)
+$routes->get('/admin/course/(:num)/upload', 'Materials::upload/$1');
+$routes->post('/admin/course/(:num)/upload', 'Materials::upload/$1');
+
 $routes->get('/materials/delete/(:num)', 'Materials::delete/$1');
 $routes->get('/materials/download/(:num)', 'Materials::download/$1');
 $routes->get('/materials/view/(:num)', 'Materials::view/$1');
@@ -105,6 +112,7 @@ $routes->post('/assignment/grade', 'Assignment::grade');
 $routes->get('/assignment/delete/(:num)', 'Assignment::delete/$1');
 $routes->get('/assignment/submission/download/(:num)', 'Assignment::downloadSubmission/$1');
 $routes->get('/assignment/submission/view/(:num)', 'Assignment::viewSubmission/$1');
+$routes->get('/assignment/download-attachment/(:num)', 'Assignment::downloadAttachment/$1');
 
 // Notification routes
 $routes->get('/notifications', 'Notifications::get');
@@ -113,4 +121,21 @@ $routes->post('/notifications/create_test', 'Notifications::createTestNotificati
 
 // Unified dashboard only per Lab 5
 
+// Catch-all route for invalid URLs - redirect to homepage
+// This handles URLs like /ITE311-MALILAY/... or /ITE311/MALILAY/... etc.
+$routes->set404Override(function() {
+    $uri = service('uri');
+    $segments = $uri->getSegments();
+    
+    // If it looks like a project folder path, redirect to homepage
+    if (count($segments) > 0) {
+        $firstSegment = strtolower($segments[0]);
+        if (in_array($firstSegment, ['ite311-malilay', 'ite311', 'malilay'])) {
+            return redirect()->to('/');
+        }
+    }
+    
+    // For other 404s, redirect to homepage as well
+    return redirect()->to('/');
+});
 

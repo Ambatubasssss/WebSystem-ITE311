@@ -233,6 +233,63 @@
                                     </div>
                                 </div>
 
+                                <!-- Enrollment Status Section -->
+                                <?php if (!empty($allEnrollments)): ?>
+                                    <?php 
+                                    $pendingEnrollments = array_filter($allEnrollments, function($e) { return $e['status'] === 'pending'; });
+                                    $rejectedEnrollments = array_filter($allEnrollments, function($e) { return $e['status'] === 'rejected'; });
+                                    ?>
+                                    <?php if (!empty($pendingEnrollments) || !empty($rejectedEnrollments)): ?>
+                                        <div class="row mt-4">
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header bg-warning text-dark">
+                                                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Enrollment Status</h5>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <?php if (!empty($pendingEnrollments)): ?>
+                                                            <h6 class="text-warning"><i class="fas fa-clock"></i> Pending Approvals</h6>
+                                                            <div class="row mb-3">
+                                                                <?php foreach ($pendingEnrollments as $pending): ?>
+                                                                    <div class="col-md-6 mb-2">
+                                                                        <div class="alert alert-warning mb-0">
+                                                                            <strong><?= esc($pending['title']) ?></strong><br>
+                                                                            <small>
+                                                                                <i class="fas fa-clock"></i> Requested: <?= date('M j, Y H:i', strtotime($pending['created_at'])) ?><br>
+                                                                                <span class="badge bg-warning">Waiting for teacher approval</span>
+                                                                            </small>
+                                                                        </div>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                        
+                                                        <?php if (!empty($rejectedEnrollments)): ?>
+                                                            <h6 class="text-danger"><i class="fas fa-times-circle"></i> Rejected Enrollments</h6>
+                                                            <div class="row">
+                                                                <?php foreach ($rejectedEnrollments as $rejected): ?>
+                                                                    <div class="col-md-6 mb-2">
+                                                                        <div class="alert alert-danger mb-0">
+                                                                            <strong><?= esc($rejected['title']) ?></strong><br>
+                                                                            <small>
+                                                                                <i class="fas fa-times"></i> Rejected: <?= date('M j, Y H:i', strtotime($rejected['rejected_at'] ?? $rejected['created_at'])) ?><br>
+                                                                                <?php if (!empty($rejected['rejection_reason'])): ?>
+                                                                                    <em>Reason: <?= esc($rejected['rejection_reason']) ?></em><br>
+                                                                                <?php endif; ?>
+                                                                                <span class="badge bg-danger">Rejected</span>
+                                                                            </small>
+                                                                        </div>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+
                                 <!-- Available Courses Section -->
                                 <div class="row mt-4 collapse" id="availableCourses">
                                     <div class="col-12">
@@ -314,6 +371,31 @@
                             </a>
                         </div>
                         <div class="card-body">
+                            <!-- Search and Filter Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        <input type="text" class="form-control" id="usersSearchInput" placeholder="Search users by name, email, or role...">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="usersRoleFilter">
+                                        <option value="">All Roles</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="teacher">Teacher</option>
+                                        <option value="student">Student</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="usersStatusFilter">
+                                        <option value="">All Status</option>
+                                        <option value="1">Active</option>
+                                        <option value="0">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
                             <!-- Add User Form -->
                             <div class="mb-4">
                                 <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#addUserForm" aria-expanded="false" aria-controls="addUserForm">
@@ -382,7 +464,7 @@
                                                 <?php 
                                                     $isActive = isset($user['is_active']) ? (int)$user['is_active'] : 1;
                                                 ?>
-                                                <tr id="user-row-<?= $user['id'] ?>">
+                                                <tr class="searchable-row" data-name="<?= strtolower(esc($user['name'])) ?>" data-email="<?= strtolower(esc($user['email'])) ?>" data-role="<?= strtolower($user['role']) ?>" data-status="<?= $isActive ?>">
                                                     <td><?= $user['id'] ?></td>
                                                     <td><?= esc($user['name']) ?></td>
                                                     <td><?= esc($user['email']) ?></td>
@@ -528,9 +610,10 @@
                                                        required
                                                        minlength="4"
                                                        maxlength="4"
-                                                       pattern="[A-Za-z0-9]{4}"
-                                                       placeholder="e.g., CS10, MATH">
-                                                <small class="form-text text-muted">Exactly 4 characters - Unique identifier (required)</small>
+                                                       pattern="[0-9]{4}"
+                                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                                       placeholder="e.g., 1234">
+                                                <small class="form-text text-muted">Exactly 4 digits - Unique identifier (required)</small>
                                             </div>
                                             <div class="col-md-3 mb-3">
                                                 <label for="course_units" class="form-label">Units <span class="text-danger">*</span></label>
@@ -891,7 +974,10 @@
                                                required
                                                minlength="4"
                                                maxlength="4"
-                                               pattern="[A-Za-z0-9]{4}">
+                                               pattern="[0-9]{4}"
+                                               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                               placeholder="e.g., 1234">
+                                        <small class="form-text text-muted">Exactly 4 digits - Unique identifier (required)</small>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label for="edit_course_units" class="form-label">Units <span class="text-danger">*</span></label>
@@ -1566,15 +1652,25 @@
                             </a>
                         </div>
                         <div class="card-body">
+                            <!-- Search Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        <input type="text" class="form-control course-search-input" placeholder="Search courses by title, description, or control number...">
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <?php if (empty($courses)): ?>
                                 <div class="text-center py-5">
                                     <i class="fas fa-book fa-4x text-muted mb-3"></i>
                                     <h5 class="text-muted">No courses available</h5>
                                 </div>
                             <?php else: ?>
-                                <div class="row">
+                                <div class="row" id="coursesRow">
                                     <?php foreach ($courses as $course): ?>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-6 mb-3 course-card">
                                         <div class="card">
                                             <div class="card-body">
                                                 <h5 class="card-title"><?= esc($course['title']) ?></h5>
@@ -1656,10 +1752,10 @@
                                                                class="form-control" 
                                                                id="material_file" 
                                                                name="material_file" 
-                                                               accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" 
+                                                               accept=".pdf,.ppt,.pptx" 
                                                                required>
                                                         <small class="form-text text-muted">
-                                                            Allowed formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT (Max: 10MB)
+                                                            <i class="fas fa-info-circle"></i> Only PDF and PowerPoint (PPT, PPTX) files are allowed. (Max: 10MB)
                                                         </small>
                                                     </div>
                                                     
@@ -1716,7 +1812,7 @@
                                                             </thead>
                                                             <tbody>
                                                                 <?php foreach ($materials as $material): ?>
-                                                                    <tr>
+                                                                    <tr class="material-row">
                                                                         <td><i class="fas fa-file"></i> <?= esc($material['file_name']) ?></td>
                                                                         <td><span class="badge bg-info"><?= strtoupper($material['file_type']) ?></span></td>
                                                                         <td><?= formatBytes($material['file_size']) ?></td>
@@ -1773,11 +1869,15 @@
                                             <h5 class="mb-0"><i class="fas fa-graduation-cap"></i> Select Course</h5>
                                         </div>
                                         <div class="card-body">
+                                            <!-- Course Search -->
+                                            <div class="mb-3">
+                                                <input type="text" class="form-control course-search-input" placeholder="Search courses...">
+                                            </div>
                                             <?php if (!empty($courses)): ?>
                                                 <div class="list-group">
                                                     <?php foreach ($courses as $c): ?>
                                                         <a href="<?= base_url("dashboard?section=enroll-students&course_id={$c['id']}") ?>" 
-                                                           class="list-group-item list-group-item-action <?= (isset($selectedCourse) && $selectedCourse['id'] == $c['id']) ? 'active' : '' ?>">
+                                                           class="list-group-item list-group-item-action course-card <?= (isset($selectedCourse) && $selectedCourse['id'] == $c['id']) ? 'active' : '' ?>">
                                                             <h6 class="mb-1"><?= esc($c['title']) ?></h6>
                                                             <p class="mb-1 small"><?= esc(substr($c['description'], 0, 80)) ?><?= strlen($c['description']) > 80 ? '...' : '' ?></p>
                                                         </a>
@@ -1796,6 +1896,16 @@
                                                 <h5 class="mb-0"><i class="fas fa-book"></i> <?= esc($selectedCourse['title']) ?></h5>
                                             </div>
                                             <div class="card-body">
+                                                <!-- Student Search -->
+                                                <div class="row mb-3">
+                                                    <div class="col-md-12">
+                                                        <div class="input-group">
+                                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                                            <input type="text" class="form-control student-search-input" placeholder="Search students by name or email...">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
                                                 <div class="row mb-3">
                                                     <div class="col-md-6">
                                                         <h6>Enroll New Student</h6>
@@ -1832,7 +1942,42 @@
 
                                                 <hr>
 
-                                                <h6>Enrolled Students</h6>
+                                                <!-- Pending Enrollments Section -->
+                                                <?php if (!empty($pendingEnrollments)): ?>
+                                                    <h6 class="text-warning"><i class="fas fa-clock"></i> Pending Enrollment Requests</h6>
+                                                    <div class="table-responsive mb-4">
+                                                        <table class="table table-striped table-warning">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Name</th>
+                                                                    <th>Email</th>
+                                                                    <th>Request Date</th>
+                                                                    <th>Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php foreach ($pendingEnrollments as $pending): ?>
+                                                                    <tr id="pending-row-<?= $pending['id'] ?>">
+                                                                        <td><?= esc($pending['student_name']) ?></td>
+                                                                        <td><?= esc($pending['student_email']) ?></td>
+                                                                        <td><?= date('M d, Y H:i', strtotime($pending['created_at'])) ?></td>
+                                                                        <td>
+                                                                            <button type="button" class="btn btn-sm btn-success me-1" onclick="approveEnrollment(<?= $pending['id'] ?>, <?= $selectedCourse['id'] ?>)">
+                                                                                <i class="fas fa-check"></i> Approve
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-sm btn-danger" onclick="rejectEnrollment(<?= $pending['id'] ?>, <?= $selectedCourse['id'] ?>)">
+                                                                                <i class="fas fa-times"></i> Reject
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                <?php endforeach; ?>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <hr>
+                                                <?php endif; ?>
+
+                                                <h6>Approved Enrollments</h6>
                                                 <?php if (!empty($enrolledStudents)): ?>
                                                     <div class="table-responsive">
                                                         <table class="table table-striped">
@@ -1841,17 +1986,23 @@
                                                                     <th>Name</th>
                                                                     <th>Email</th>
                                                                     <th>Enrolled Date</th>
+                                                                    <th>Status</th>
                                                                     <th>Actions</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                                 <?php foreach ($enrolledStudents as $enrolled): ?>
-                                                                    <tr>
+                                                                    <tr id="enrolled-row-<?= $enrolled['enrollment_id'] ?? $enrolled['id'] ?>">
                                                                         <td><?= esc($enrolled['name']) ?></td>
                                                                         <td><?= esc($enrolled['email']) ?></td>
-                                                                        <td><?= date('M d, Y', strtotime($enrolled['created_at'])) ?></td>
+                                                                        <td><?= date('M d, Y', strtotime($enrolled['approved_at'] ?? $enrolled['created_at'])) ?></td>
                                                                         <td>
-                                                                            <span class="badge bg-success">Enrolled</span>
+                                                                            <span class="badge bg-success">Approved</span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <button type="button" class="btn btn-sm btn-danger" onclick="unenrollStudent(<?= $enrolled['enrollment_id'] ?? $enrolled['id'] ?>, <?= $selectedCourse['id'] ?>, '<?= esc($enrolled['name']) ?>', '<?= esc($selectedCourse['title']) ?>')" title="Unenroll Student">
+                                                                                <i class="fas fa-user-minus"></i> Unenroll
+                                                                            </button>
                                                                         </td>
                                                                     </tr>
                                                                 <?php endforeach; ?>
@@ -1860,7 +2011,7 @@
                                                     </div>
                                                 <?php else: ?>
                                                     <div class="alert alert-info">
-                                                        <i class="fas fa-info-circle"></i> No students enrolled in this course yet.
+                                                        <i class="fas fa-info-circle"></i> No approved enrollments in this course yet.
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
@@ -1894,7 +2045,7 @@
                             </a>
                         </div>
                         <div class="card-body">
-                            <form action="<?= base_url('assignment/create') ?>" method="post">
+                            <form action="<?= base_url('assignment/create') ?>" method="post" enctype="multipart/form-data">
                                 <?= csrf_field() ?>
                                 <div class="mb-3">
                                     <label for="course_id" class="form-label">Course <span class="text-danger">*</span></label>
@@ -1914,6 +2065,17 @@
                                 <div class="mb-3">
                                     <label for="description" class="form-label">Description</label>
                                     <textarea class="form-control" id="description" name="description" rows="5"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="attachment_file" class="form-label">Assignment File (Optional)</label>
+                                    <input type="file" 
+                                           class="form-control" 
+                                           id="attachment_file" 
+                                           name="attachment_file" 
+                                           accept=".pdf,.ppt,.pptx">
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i> Only PDF and PowerPoint (PPT, PPTX) files are allowed. (Max: 10MB)
+                                    </small>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
@@ -1959,9 +2121,17 @@
                         <div class="card-body">
                             <?php if (!isset($course) && !empty($courses)): ?>
                                 <!-- Course Selection -->
+                                <div class="row mb-4">
+                                    <div class="col-md-12">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="form-control course-search-input" placeholder="Search courses...">
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <?php foreach ($courses as $c): ?>
-                                        <div class="col-md-4 mb-3">
+                                        <div class="col-md-4 mb-3 course-card">
                                             <div class="card">
                                                 <div class="card-body">
                                                     <h6 class="card-title"><?= esc($c['title']) ?></h6>
@@ -1976,6 +2146,15 @@
                                 </div>
                             <?php elseif (isset($course)): ?>
                                 <h5>Assignments for: <?= esc($course['title']) ?></h5>
+                                <!-- Assignment Search -->
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="form-control assignment-search-input" placeholder="Search assignments by title...">
+                                        </div>
+                                    </div>
+                                </div>
                                 <?php if (!empty($assignments)): ?>
                                     <div class="table-responsive mt-3">
                                         <table class="table table-striped">
@@ -1990,7 +2169,7 @@
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($assignments as $assignment): ?>
-                                                    <tr>
+                                                    <tr class="assignment-row">
                                                         <td><strong><?= esc($assignment['title']) ?></strong></td>
                                                         <td><?= $assignment['due_date'] ? date('M d, Y H:i', strtotime($assignment['due_date'])) : 'No due date' ?></td>
                                                         <td><?= esc($assignment['total_points']) ?></td>
@@ -2040,6 +2219,14 @@
                                     <p><strong>Due Date:</strong> <?= $assignment['due_date'] ? date('M d, Y H:i', strtotime($assignment['due_date'])) : 'No due date' ?></p>
                                     <p><strong>Total Points:</strong> <?= esc($assignment['total_points']) ?></p>
                                     <p><strong>Created by:</strong> <?= esc($assignment['created_by_name']) ?></p>
+                                    <?php if (!empty($assignment['attachment_file_path'])): ?>
+                                        <p><strong>Attachment:</strong> 
+                                            <a href="<?= base_url('assignment/download-attachment/' . $assignment['id']) ?>" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                <i class="fas fa-download"></i> <?= esc($assignment['attachment_file_name']) ?>
+                                            </a>
+                                            <small class="text-muted">(<?= number_format($assignment['attachment_file_size'] / 1024, 2) ?> KB)</small>
+                                        </p>
+                                    <?php endif; ?>
                                 </div>
                             </div>
 
@@ -2104,8 +2291,10 @@
                                                 <?php else: ?>
                                                     <div class="mb-3">
                                                         <label for="submission_file" class="form-label">Upload File <span class="text-danger">*</span></label>
-                                                        <input type="file" class="form-control" id="submission_file" name="submission_file" required accept=".pdf,.doc,.docx,.txt,.zip,.rar">
-                                                        <small class="form-text text-muted">Allowed formats: PDF, DOC, DOCX, TXT, ZIP, RAR (Max: 10MB)</small>
+                                                        <input type="file" class="form-control" id="submission_file" name="submission_file" required accept=".pdf,.ppt,.pptx">
+                                                        <small class="form-text text-muted">
+                                                            <i class="fas fa-info-circle"></i> Only PDF and PowerPoint (PPT, PPTX) files are allowed. (Max: 10MB)
+                                                        </small>
                                                     </div>
                                                 <?php endif; ?>
                                                 
@@ -2284,6 +2473,24 @@
                             </a>
                         </div>
                         <div class="card-body">
+                            <!-- Search and Filter Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        <input type="text" class="form-control enrollment-search-input" placeholder="Search enrollments by course name or instructor...">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <select class="form-select enrollment-status-filter">
+                                        <option value="">All Status</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Rejected">Rejected</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
                             <?php if (!empty($enrollments)): ?>
                                 <div class="table-responsive">
                                     <table class="table table-striped table-hover">
@@ -2297,7 +2504,7 @@
                                         </thead>
                                         <tbody>
                                             <?php foreach ($enrollments as $enrollment): ?>
-                                                <tr>
+                                                <tr class="enrollment-row" data-status="<?= esc($enrollment['status']) ?>">
                                                     <td><strong><?= esc($enrollment['course']) ?></strong></td>
                                                     <td><?= esc($enrollment['instructor']) ?></td>
                                                     <td>
@@ -2340,6 +2547,15 @@
                             </a>
                         </div>
                         <div class="card-body">
+                            <!-- Search Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        <input type="text" class="form-control assignment-search-input" placeholder="Search assignments by title or course...">
+                                    </div>
+                                </div>
+                            </div>
                             <?php if (!empty($assignments)): ?>
                                 <div class="table-responsive">
                                     <table class="table table-striped table-hover">
@@ -2426,6 +2642,16 @@
                                 </div>
                             </div>
 
+                            <!-- Search Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        <input type="text" class="form-control material-search-input" placeholder="Search materials by file name or type...">
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Materials List -->
                             <div class="row">
                                 <div class="col-12">
@@ -2438,7 +2664,7 @@
                                     <?php else: ?>
                                         <div class="row">
                                             <?php foreach ($materials as $material): ?>
-                                                <div class="col-md-6 col-lg-4 mb-4">
+                                                <div class="col-md-6 col-lg-4 mb-4 material-card">
                                                     <div class="card h-100">
                                                         <div class="card-body">
                                                             <div class="d-flex align-items-start">
@@ -2673,6 +2899,138 @@
     <!-- jQuery and AJAX Enrollment Script -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+    // Approve Enrollment Function (must be global for onclick)
+    function approveEnrollment(enrollmentId, courseId) {
+        if (!confirm('Are you sure you want to approve this enrollment request?')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('enrollment_id', enrollmentId);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+
+        fetch('<?= base_url('course/enrollment/approve') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Remove from pending list and reload page to show in approved list
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error approving enrollment: ' + error.message);
+        });
+    }
+
+    // Reject Enrollment Function (must be global for onclick)
+    function rejectEnrollment(enrollmentId, courseId) {
+        const reason = prompt('Please provide a reason for rejection (optional):');
+        if (reason === null) {
+            return; // User cancelled
+        }
+
+        if (!confirm('Are you sure you want to reject this enrollment request?')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('enrollment_id', enrollmentId);
+        if (reason) {
+            formData.append('rejection_reason', reason);
+        }
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+
+        fetch('<?= base_url('course/enrollment/reject') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Remove from pending list
+                const row = document.getElementById('pending-row-' + enrollmentId);
+                if (row) {
+                    row.remove();
+                }
+                // Check if no more pending enrollments
+                const pendingTable = document.querySelector('.table-warning tbody');
+                if (pendingTable && pendingTable.children.length === 0) {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error rejecting enrollment: ' + error.message);
+        });
+    }
+
+    // Unenroll Student Function (must be global for onclick)
+    function unenrollStudent(enrollmentId, courseId, studentName, courseTitle) {
+        if (!confirm(`Are you sure you want to unenroll ${studentName} from "${courseTitle}"?`)) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('enrollment_id', enrollmentId);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+
+        fetch('<?= base_url('course/enrollment/unenroll') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Remove from enrolled list
+                const row = document.getElementById('enrolled-row-' + enrollmentId);
+                if (row) {
+                    row.remove();
+                }
+                // Reload page to refresh counts and available students list
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error unenrolling student: ' + error.message);
+        });
+    }
+
     $(document).ready(function() {
         // Handle navbar button clicks
         $('a[data-bs-toggle="collapse"]').on('click', function() {
@@ -2741,6 +3099,7 @@
         });
 
         // Handle teacher enrollment form submission
+
         $('#enrollStudentForm').on('submit', function(e) {
             e.preventDefault();
             
@@ -2966,69 +3325,113 @@
     }
 
     function loadCourseTeachers(courseId) {
+        const container = document.getElementById('teachersList');
+        if (!container) {
+            console.error('Teachers list container not found');
+            return;
+        }
+        
+        // Show loading state
+        container.innerHTML = '<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Loading teachers...</p>';
+        
         fetch(`<?= base_url('admin/courses') ?>/${courseId}/teachers`, {
             method: 'GET',
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            const container = document.getElementById('teachersList');
-            if (data.success && data.teachers && data.teachers.length > 0) {
-                let html = '<div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>Teacher</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead><tbody>';
-                data.teachers.forEach(teacher => {
-                    html += `
-                        <tr id="teacher-row-${teacher.id}">
-                            <td><strong>${teacher.teacher_name}</strong></td>
-                            <td>${teacher.teacher_email}</td>
-                            <td>${teacher.is_primary == 1 ? '<span class="badge bg-success">Primary</span>' : '<span class="badge bg-secondary">Secondary</span>'}</td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-warning me-1" onclick="editTeacherAssignment(${courseId}, ${teacher.id}, ${teacher.teacher_id}, ${teacher.is_primary})" title="Edit Assignment">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="removeTeacherFromCourse(${courseId}, ${teacher.teacher_id})" title="Remove Teacher">
-                                    <i class="fas fa-user-minus"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
+        .then(response => {
+            // Check if response is ok
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    throw new Error('Response is not JSON. Response: ' + text.substring(0, 100));
                 });
-                html += '</tbody></table></div>';
-                container.innerHTML = html;
-                
-                // Show deleted teachers if any (like GALORPOT's flow)
-                if (data.deleted_teachers && data.deleted_teachers.length > 0) {
-                    let deletedHtml = '<div class="table-responsive"><table class="table table-sm table-secondary"><thead><tr><th>Teacher</th><th>Email</th><th>Role</th><th>Deleted At</th><th>Actions</th></tr></thead><tbody>';
-                    data.deleted_teachers.forEach(teacher => {
-                        deletedHtml += `
-                            <tr>
-                                <td><strong>${teacher.teacher_name}</strong></td>
-                                <td>${teacher.teacher_email}</td>
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Teachers data received:', data);
+            
+            if (data.success) {
+                // Check if teachers array exists and has items
+                if (data.teachers && Array.isArray(data.teachers) && data.teachers.length > 0) {
+                    let html = '<div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>Teacher</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead><tbody>';
+                    data.teachers.forEach(teacher => {
+                        html += `
+                            <tr id="teacher-row-${teacher.id}">
+                                <td><strong>${teacher.teacher_name || 'N/A'}</strong></td>
+                                <td>${teacher.teacher_email || 'N/A'}</td>
                                 <td>${teacher.is_primary == 1 ? '<span class="badge bg-success">Primary</span>' : '<span class="badge bg-secondary">Secondary</span>'}</td>
-                                <td>${teacher.deleted_at ? new Date(teacher.deleted_at).toLocaleString() : 'N/A'}</td>
                                 <td>
-                                    <button type="button" class="btn btn-sm btn-success" onclick="restoreTeacherAssignment(${courseId}, ${teacher.id})" title="Restore Assignment">
-                                        <i class="fas fa-undo"></i> Restore
+                                    <button type="button" class="btn btn-sm btn-warning me-1" onclick="editTeacherAssignment(${courseId}, ${teacher.id}, ${teacher.teacher_id}, ${teacher.is_primary})" title="Edit Assignment">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="removeTeacherFromCourse(${courseId}, ${teacher.teacher_id})" title="Remove Teacher">
+                                        <i class="fas fa-user-minus"></i>
                                     </button>
                                 </td>
                             </tr>
                         `;
                     });
-                    deletedHtml += '</tbody></table></div>';
-                    document.getElementById('deletedTeachersContainer').innerHTML = deletedHtml;
-                    document.getElementById('deletedTeachersList').style.display = 'block';
+                    html += '</tbody></table></div>';
+                    container.innerHTML = html;
+                    
+                    // Show deleted teachers if any (like GALORPOT's flow)
+                    if (data.deleted_teachers && Array.isArray(data.deleted_teachers) && data.deleted_teachers.length > 0) {
+                        let deletedHtml = '<div class="table-responsive"><table class="table table-sm table-secondary"><thead><tr><th>Teacher</th><th>Email</th><th>Role</th><th>Deleted At</th><th>Actions</th></tr></thead><tbody>';
+                        data.deleted_teachers.forEach(teacher => {
+                            deletedHtml += `
+                                <tr>
+                                    <td><strong>${teacher.teacher_name || 'N/A'}</strong></td>
+                                    <td>${teacher.teacher_email || 'N/A'}</td>
+                                    <td>${teacher.is_primary == 1 ? '<span class="badge bg-success">Primary</span>' : '<span class="badge bg-secondary">Secondary</span>'}</td>
+                                    <td>${teacher.deleted_at ? new Date(teacher.deleted_at).toLocaleString() : 'N/A'}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-success" onclick="restoreTeacherAssignment(${courseId}, ${teacher.id})" title="Restore Assignment">
+                                            <i class="fas fa-undo"></i> Restore
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        deletedHtml += '</tbody></table></div>';
+                        const deletedContainer = document.getElementById('deletedTeachersContainer');
+                        if (deletedContainer) {
+                            deletedContainer.innerHTML = deletedHtml;
+                        }
+                        const deletedList = document.getElementById('deletedTeachersList');
+                        if (deletedList) {
+                            deletedList.style.display = 'block';
+                        }
+                    } else {
+                        const deletedList = document.getElementById('deletedTeachersList');
+                        if (deletedList) {
+                            deletedList.style.display = 'none';
+                        }
+                    }
                 } else {
-                    document.getElementById('deletedTeachersList').style.display = 'none';
+                    container.innerHTML = '<p class="text-muted">No teachers assigned yet.</p>';
+                    const deletedList = document.getElementById('deletedTeachersList');
+                    if (deletedList) {
+                        deletedList.style.display = 'none';
+                    }
                 }
             } else {
-                container.innerHTML = '<p class="text-muted">No teachers assigned yet.</p>';
-                document.getElementById('deletedTeachersList').style.display = 'none';
+                // Show error message from server
+                const errorMsg = data.message || 'Failed to load teachers';
+                container.innerHTML = `<p class="text-danger"><i class="fas fa-exclamation-triangle"></i> ${errorMsg}</p>`;
+                console.error('Server returned error:', data);
             }
         })
         .catch(error => {
             console.error('Error loading teachers:', error);
-            document.getElementById('teachersList').innerHTML = '<p class="text-danger">Error loading teachers.</p>';
+            container.innerHTML = `<p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading teachers: ${error.message || 'Unknown error'}</p>`;
         });
     }
 
@@ -3856,5 +4259,327 @@
             termSelect.disabled = false;
         }
     }
+    
+    // ============================================================
+    // UNIVERSAL SEARCH AND FILTER FUNCTIONALITY
+    // ============================================================
+    
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+    
+    $(document).ready(function() {
+        // Users Search and Filter
+        function filterUsers() {
+            const searchTerm = $('#usersSearchInput').val().toLowerCase();
+            const roleFilter = $('#usersRoleFilter').val();
+            const statusFilter = $('#usersStatusFilter').val();
+            
+            $('.searchable-row').each(function() {
+                const name = $(this).data('name') || '';
+                const email = $(this).data('email') || '';
+                const role = $(this).data('role') || '';
+                const status = $(this).data('status');
+                
+                const matchesSearch = !searchTerm || name.includes(searchTerm) || email.includes(searchTerm) || role.includes(searchTerm);
+                const matchesRole = !roleFilter || role === roleFilter;
+                const matchesStatus = !statusFilter || status.toString() === statusFilter;
+                
+                if (matchesSearch && matchesRole && matchesStatus) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+            
+            // Show/hide "no results" message
+            const visibleRows = $('.searchable-row:visible').length;
+            if (visibleRows === 0 && ($('#usersSearchInput').val() || $('#usersRoleFilter').val() || $('#usersStatusFilter').val())) {
+                if ($('#noUsersResults').length === 0) {
+                    $('#usersTableContainer tbody').append('<tr id="noUsersResults"><td colspan="6" class="text-center py-4"><i class="fas fa-search"></i> No users found matching your criteria.</td></tr>');
+                }
+            } else {
+                $('#noUsersResults').remove();
+            }
+        }
+        
+        $('#usersSearchInput').on('keyup', filterUsers);
+        $('#usersRoleFilter, #usersStatusFilter').on('change', filterUsers);
+        
+        // Courses Search and Filter (for all course lists)
+        function filterCourses() {
+            const searchInput = $(this).length ? $(this) : $('.course-search-input');
+            const searchTerm = searchInput.val().toLowerCase();
+            const originalSearchTerm = searchInput.val() || ''; // Keep original for display
+            
+            let visibleCount = 0;
+            
+            $('.course-card, .course-row').each(function() {
+                const text = $(this).text().toLowerCase();
+                if (!searchTerm || text.includes(searchTerm)) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+            
+            // Show/hide "no results" message
+            const container = searchInput.closest('.card-body').length ? searchInput.closest('.card-body') : searchInput.closest('.row').parent();
+            const existingNoResults = container.find('.no-results-message');
+            const coursesRow = container.find('#coursesRow, .row').has('.course-card, .course-row').first();
+            
+            if (searchTerm && visibleCount === 0) {
+                if (existingNoResults.length === 0) {
+                    const noResultsHtml = `
+                        <div class="no-results-message text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No results found</h5>
+                            <p class="text-muted">There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another</p>
+                        </div>
+                    `;
+                    // Insert after the courses row or at the end of container
+                    if (coursesRow.length) {
+                        coursesRow.after(noResultsHtml);
+                    } else {
+                        container.append(noResultsHtml);
+                    }
+                } else {
+                    existingNoResults.find('strong').text(originalSearchTerm);
+                }
+            } else {
+                existingNoResults.remove();
+            }
+        }
+        
+        $(document).on('keyup', '.course-search-input', filterCourses);
+        
+        // Assignments Search and Filter
+        function filterAssignments() {
+            const searchInput = $(this).length ? $(this) : $('.assignment-search-input');
+            const searchTerm = searchInput.val().toLowerCase();
+            const originalSearchTerm = searchInput.val();
+            
+            let visibleCount = 0;
+            
+            $('.assignment-row, .assignment-card').each(function() {
+                const text = $(this).text().toLowerCase();
+                if (!searchTerm || text.includes(searchTerm)) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+            
+            // Show/hide "no results" message
+            const container = searchInput.closest('.card-body').length ? searchInput.closest('.card-body') : $('.card-body').first();
+            const existingNoResults = container.find('.no-results-message');
+            
+            if (searchTerm && visibleCount === 0) {
+                if (existingNoResults.length === 0) {
+                    const noResultsHtml = `
+                        <div class="no-results-message text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No results found</h5>
+                            <p class="text-muted">There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another</p>
+                        </div>
+                    `;
+                    const searchRow = searchInput.closest('.row');
+                    if (searchRow.length) {
+                        searchRow.after(noResultsHtml);
+                    } else {
+                        container.append(noResultsHtml);
+                    }
+                } else {
+                    existingNoResults.find('strong').text(originalSearchTerm);
+                }
+            } else {
+                existingNoResults.remove();
+            }
+        }
+        
+        $(document).on('keyup', '.assignment-search-input', filterAssignments);
+        
+        // Materials Search and Filter
+        function filterMaterials() {
+            const searchInput = $(this).length ? $(this) : $('.material-search-input');
+            const searchTerm = searchInput.val().toLowerCase();
+            const originalSearchTerm = searchInput.val();
+            
+            let visibleCount = 0;
+            
+            $('.material-row, .material-card').each(function() {
+                const text = $(this).text().toLowerCase();
+                if (!searchTerm || text.includes(searchTerm)) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+            
+            // Show/hide "no results" message
+            const container = searchInput.closest('.card-body').length ? searchInput.closest('.card-body') : $('.card-body').first();
+            const existingNoResults = container.find('.no-results-message');
+            
+            if (searchTerm && visibleCount === 0) {
+                if (existingNoResults.length === 0) {
+                    const noResultsHtml = `
+                        <div class="no-results-message text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No results found</h5>
+                            <p class="text-muted">There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another</p>
+                        </div>
+                    `;
+                    const searchRow = searchInput.closest('.row');
+                    if (searchRow.length) {
+                        searchRow.after(noResultsHtml);
+                    } else {
+                        container.append(noResultsHtml);
+                    }
+                } else {
+                    existingNoResults.find('strong').text(originalSearchTerm);
+                }
+            } else {
+                existingNoResults.remove();
+            }
+        }
+        
+        $(document).on('keyup', '.material-search-input', filterMaterials);
+        
+        // Students Search and Filter (for enroll students section)
+        function filterStudents() {
+            const searchInput = $(this).length ? $(this) : $('.student-search-input');
+            const searchTerm = searchInput.val().toLowerCase();
+            const originalSearchTerm = searchInput.val();
+            
+            let visibleCount = 0;
+            
+            $('.student-row, .student-card').each(function() {
+                const text = $(this).text().toLowerCase();
+                if (!searchTerm || text.includes(searchTerm)) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+            
+            // Show/hide "no results" message
+            const container = searchInput.closest('.card-body, .card').length ? searchInput.closest('.card-body, .card') : $('.card-body').first();
+            const existingNoResults = container.find('.no-results-message');
+            
+            if (searchTerm && visibleCount === 0) {
+                if (existingNoResults.length === 0) {
+                    const noResultsHtml = `
+                        <div class="no-results-message text-center py-3">
+                            <i class="fas fa-search fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another</p>
+                        </div>
+                    `;
+                    const searchRow = searchInput.closest('.row');
+                    if (searchRow.length) {
+                        searchRow.after(noResultsHtml);
+                    } else {
+                        container.append(noResultsHtml);
+                    }
+                } else {
+                    existingNoResults.find('strong').text(originalSearchTerm);
+                }
+            } else {
+                existingNoResults.remove();
+            }
+        }
+        
+        $(document).on('keyup', '.student-search-input', filterStudents);
+        
+        // Enrollments Search and Filter
+        function filterEnrollments() {
+            const searchInput = $('.enrollment-search-input');
+            const searchTerm = searchInput.val().toLowerCase();
+            const originalSearchTerm = searchInput.val();
+            const statusFilter = $('.enrollment-status-filter').val();
+            
+            let visibleCount = 0;
+            
+            $('.enrollment-row, .enrollment-card').each(function() {
+                const text = $(this).text().toLowerCase();
+                const status = $(this).data('status') || '';
+                
+                const matchesSearch = !searchTerm || text.includes(searchTerm);
+                const matchesStatus = !statusFilter || status === statusFilter;
+                
+                if (matchesSearch && matchesStatus) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+            
+            // Show/hide "no results" message
+            const container = searchInput.closest('.card-body').length ? searchInput.closest('.card-body') : $('.card-body').first();
+            const existingNoResults = container.find('.no-results-message');
+            
+            if ((searchTerm || statusFilter) && visibleCount === 0) {
+                if (existingNoResults.length === 0) {
+                    let message = '';
+                    if (searchTerm && statusFilter) {
+                        message = `There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>" with status "${statusFilter}", search another`;
+                    } else if (searchTerm) {
+                        message = `There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another`;
+                    } else if (statusFilter) {
+                        message = `There's no enrollments with status "${statusFilter}"`;
+                    }
+                    
+                    const noResultsHtml = `
+                        <div class="no-results-message text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No results found</h5>
+                            <p class="text-muted">${message}</p>
+                        </div>
+                    `;
+                    const searchRow = searchInput.closest('.row');
+                    if (searchRow.length) {
+                        searchRow.after(noResultsHtml);
+                    } else {
+                        container.append(noResultsHtml);
+                    }
+                } else {
+                    if (searchTerm) {
+                        existingNoResults.find('strong').text(originalSearchTerm);
+                    }
+                }
+            } else {
+                existingNoResults.remove();
+            }
+        }
+        
+        $(document).on('keyup', '.enrollment-search-input', filterEnrollments);
+        $(document).on('change', '.enrollment-status-filter', filterEnrollments);
+        
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    });
     </script>
 <?= $this->endSection() ?>
+

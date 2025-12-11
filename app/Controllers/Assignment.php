@@ -56,6 +56,67 @@ class Assignment extends BaseController
                 return redirect()->back()->with('error', 'Course not found.');
             }
 
+            // Handle file upload if provided
+            $attachmentFileName = null;
+            $attachmentFilePath = null;
+            $attachmentFileSize = null;
+            $attachmentFileType = null;
+            
+            if (isset($_FILES['attachment_file']) && $_FILES['attachment_file']['error'] === UPLOAD_ERR_OK) {
+                // Validate file type - only allow PDF and PPT files
+                $allowedExtensions = ['pdf', 'ppt', 'pptx'];
+                $allowedMimeTypes = [
+                    'application/pdf',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+                ];
+                
+                $originalFileName = $_FILES['attachment_file']['name'];
+                $extension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
+                $mimeType = $_FILES['attachment_file']['type'];
+                
+                // Validate file extension
+                if (!in_array($extension, $allowedExtensions)) {
+                    return redirect()->back()->with('error', 'Invalid file type. Only PDF and PowerPoint (PPT, PPTX) files are allowed for assignment attachments.');
+                }
+                
+                // Validate MIME type to prevent file type spoofing
+                if (!in_array($mimeType, $allowedMimeTypes)) {
+                    return redirect()->back()->with('error', 'Invalid file type detected. Only PDF and PowerPoint files are allowed.');
+                }
+                
+                // Validate file size (10MB = 10485760 bytes)
+                $maxSize = 10 * 1024 * 1024; // 10MB in bytes
+                if ($_FILES['attachment_file']['size'] > $maxSize) {
+                    return redirect()->back()->with('error', 'File size exceeds the maximum limit of 10MB.');
+                }
+                
+                // Setup upload directory
+                $uploadPath = WRITEPATH . 'uploads/assignments/attachments/';
+                if (!is_dir($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+                
+                // Sanitize filename to prevent path traversal attacks
+                $sanitizedFileName = basename($originalFileName);
+                $sanitizedFileName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $sanitizedFileName);
+                $sanitizedFileName = preg_replace('/_{2,}/', '_', $sanitizedFileName);
+                
+                // Generate unique filename
+                $uniqueFileName = 'attachment_' . time() . '_' . uniqid() . '_' . $sanitizedFileName;
+                $targetPath = $uploadPath . $uniqueFileName;
+                
+                // Move uploaded file
+                if (!move_uploaded_file($_FILES['attachment_file']['tmp_name'], $targetPath)) {
+                    return redirect()->back()->with('error', 'Failed to upload attachment file.');
+                }
+                
+                $attachmentFileName = $sanitizedFileName;
+                $attachmentFilePath = 'uploads/assignments/attachments/' . $uniqueFileName;
+                $attachmentFileSize = $_FILES['attachment_file']['size'];
+                $attachmentFileType = $extension;
+            }
+
             $data = [
                 'course_id' => $courseId,
                 'title' => $title,
@@ -63,6 +124,10 @@ class Assignment extends BaseController
                 'due_date' => $dueDate ? date('Y-m-d H:i:s', strtotime($dueDate)) : null,
                 'total_points' => $totalPoints,
                 'assignment_type' => $assignmentType,
+                'attachment_file_name' => $attachmentFileName,
+                'attachment_file_path' => $attachmentFilePath,
+                'attachment_file_size' => $attachmentFileSize,
+                'attachment_file_type' => $attachmentFileType,
                 'created_by' => session('userID')
             ];
 
@@ -108,7 +173,7 @@ class Assignment extends BaseController
         // Check access
         if ($userRole === 'student') {
             // Check if student is enrolled
-            if (!$this->enrollmentModel->isAlreadyEnrolled($userId, $assignment['course_id'])) {
+            if (!$this->enrollmentModel->isApprovedEnrolled($userId, $assignment['course_id'])) {
                 return redirect()->to('/dashboard')->with('error', 'You are not enrolled in this course.');
             }
         } elseif ($userRole !== 'teacher' && $userRole !== 'admin') {
@@ -185,14 +250,47 @@ class Assignment extends BaseController
                 return redirect()->back()->with('error', 'File upload failed. Please try again.');
             }
 
+            // Validate file type - only allow PDF and PPT files
+            $allowedExtensions = ['pdf', 'ppt', 'pptx'];
+            $allowedMimeTypes = [
+                'application/pdf',
+                'application/vnd.ms-powerpoint',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+            ];
+            
+            $originalFileName = $_FILES['submission_file']['name'];
+            $extension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
+            $mimeType = $_FILES['submission_file']['type'];
+            
+            // Validate file extension
+            if (!in_array($extension, $allowedExtensions)) {
+                return redirect()->back()->with('error', 'Invalid file type. Only PDF and PowerPoint (PPT, PPTX) files are allowed.');
+            }
+            
+            // Validate MIME type to prevent file type spoofing
+            if (!in_array($mimeType, $allowedMimeTypes)) {
+                return redirect()->back()->with('error', 'Invalid file type detected. Only PDF and PowerPoint files are allowed.');
+            }
+            
+            // Validate file size (10MB = 10485760 bytes)
+            $maxSize = 10 * 1024 * 1024; // 10MB in bytes
+            if ($_FILES['submission_file']['size'] > $maxSize) {
+                return redirect()->back()->with('error', 'File size exceeds the maximum limit of 10MB.');
+            }
+
             // Setup upload directory
             $uploadPath = WRITEPATH . 'uploads/assignments/';
             if (!is_dir($uploadPath)) {
                 mkdir($uploadPath, 0755, true);
             }
 
+            // Sanitize filename to prevent path traversal attacks
+            $sanitizedFileName = basename($originalFileName);
+            $sanitizedFileName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $sanitizedFileName);
+            $sanitizedFileName = preg_replace('/_{2,}/', '_', $sanitizedFileName);
+            
             // Generate unique filename
-            $fileName = 'submission_' . time() . '_' . $userId . '_' . $_FILES['submission_file']['name'];
+            $fileName = 'submission_' . time() . '_' . $userId . '_' . $sanitizedFileName;
             $targetPath = $uploadPath . $fileName;
 
             // Move uploaded file
@@ -202,8 +300,8 @@ class Assignment extends BaseController
 
             $filePath = 'uploads/assignments/' . $fileName;
             $fileSize = $_FILES['submission_file']['size'];
-            $fileType = pathinfo($_FILES['submission_file']['name'], PATHINFO_EXTENSION);
-            $fileName = $_FILES['submission_file']['name'];
+            $fileType = $extension;
+            $fileName = $sanitizedFileName;
         }
 
         // Insert into database
@@ -439,11 +537,64 @@ class Assignment extends BaseController
             return redirect()->back()->with('error', 'You can only delete your own assignments.');
         }
 
+        // Delete attachment file if exists
+        if (!empty($assignment['attachment_file_path'])) {
+            $filePath = WRITEPATH . $assignment['attachment_file_path'];
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+
         // Delete assignment (submissions will remain due to CASCADE or we can keep them)
         if ($this->assignmentModel->delete($assignment_id)) {
             return redirect()->to('/dashboard?section=assignments&course_id=' . $assignment['course_id'])->with('success', 'Assignment deleted successfully.');
         } else {
             return redirect()->back()->with('error', 'Failed to delete assignment.');
         }
+    }
+
+    /**
+     * Download assignment attachment file
+     */
+    public function downloadAttachment($assignment_id)
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/login');
+        }
+
+        $assignment = $this->assignmentModel->getAssignmentWithDetails($assignment_id);
+        if (!$assignment) {
+            return redirect()->to('/dashboard')->with('error', 'Assignment not found.');
+        }
+
+        // Check if assignment has attachment
+        if (empty($assignment['attachment_file_path'])) {
+            return redirect()->back()->with('error', 'Assignment has no attachment file.');
+        }
+
+        // Check access - student must be enrolled, teacher/admin can access
+        $userRole = strtolower(session('role') ?? '');
+        $userId = session('userID');
+
+        if ($userRole === 'student') {
+            if (!$this->enrollmentModel->isApprovedEnrolled($userId, $assignment['course_id'])) {
+                return redirect()->to('/dashboard')->with('error', 'You are not enrolled in this course.');
+            }
+        } elseif ($userRole !== 'teacher' && $userRole !== 'admin') {
+            return redirect()->to('/dashboard')->with('error', 'Access denied.');
+        }
+
+        $filePath = WRITEPATH . $assignment['attachment_file_path'];
+        
+        if (!file_exists($filePath)) {
+            return redirect()->back()->with('error', 'Attachment file not found.');
+        }
+
+        // Set headers for download
+        $this->response->setHeader('Content-Type', 'application/octet-stream');
+        $this->response->setHeader('Content-Disposition', 'attachment; filename="' . $assignment['attachment_file_name'] . '"');
+        $this->response->setHeader('Content-Length', filesize($filePath));
+        
+        return $this->response->download($filePath, null);
     }
 }

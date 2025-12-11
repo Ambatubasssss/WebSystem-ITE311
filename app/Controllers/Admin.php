@@ -584,6 +584,15 @@ class Admin extends BaseController
         ];
 
         if ($academicYearModel->insert($data)) {
+            // If academic year is set as active, notify all students and teachers
+            if ($isActive) {
+                $completionService = new \App\Libraries\CompletionService();
+                $completionService->notifyAcademicYearOpened([
+                    'year_start' => $yearStart,
+                    'year_end' => $yearEnd
+                ]);
+            }
+            
             session()->setFlashdata('success', 'Academic year created successfully.');
         } else {
             session()->setFlashdata('error', 'Failed to create academic year.');
@@ -612,7 +621,19 @@ class Admin extends BaseController
         $isActive = $this->request->getPost('is_active') ? 1 : 0;
 
         // If setting as active, deactivate all others
-        if ($isActive) {
+        $wasActive = $academicYear['is_active'];
+        if ($isActive && !$wasActive) {
+            // Academic year is being activated for the first time
+            $academicYearModel->set('is_active', 0)->where('id !=', $id)->update();
+            
+            // Notify all students and teachers
+            $completionService = new \App\Libraries\CompletionService();
+            $completionService->notifyAcademicYearOpened([
+                'year_start' => $yearStart,
+                'year_end' => $yearEnd
+            ]);
+        } elseif ($isActive) {
+            // Just deactivate others, no notification needed
             $academicYearModel->set('is_active', 0)->where('id !=', $id)->update();
         }
 
@@ -1492,31 +1513,60 @@ class Admin extends BaseController
     // Get course teachers
     public function getCourseTeachers($courseId)
     {
+        // Set JSON response header
+        $this->response->setContentType('application/json');
+        
         if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Access denied.'
-            ]);
+            ])->setStatusCode(403);
         }
 
-        $courseTeacherModel = new \App\Models\CourseTeacherModel();
-        $teachers = $courseTeacherModel->getTeachersByCourse($courseId);
-        
-        // Get deleted teacher assignments (like GALORPOT's flow)
-        $deletedTeachers = $courseTeacherModel->withDeleted()
-                                              ->onlyDeleted()
-                                              ->select('course_teachers.*, users.name as teacher_name, users.email as teacher_email')
-                                              ->join('users', 'users.id = course_teachers.teacher_id')
-                                              ->where('course_teachers.course_id', $courseId)
-                                              ->orderBy('course_teachers.deleted_at', 'DESC')
-                                              ->findAll();
+        try {
+            $courseTeacherModel = new \App\Models\CourseTeacherModel();
+            
+            // Get active teachers for the course
+            $teachers = [];
+            try {
+                $teachers = $courseTeacherModel->getTeachersByCourse($courseId);
+            } catch (\Exception $e) {
+                log_message('error', 'Error getting teachers by course: ' . $e->getMessage());
+                // Continue with empty array if there's an error
+                $teachers = [];
+            }
+            
+            // Get deleted teacher assignments (like GALORPOT's flow)
+            $deletedTeachers = [];
+            try {
+                $deletedTeachers = $courseTeacherModel->withDeleted()
+                                                      ->onlyDeleted()
+                                                      ->select('course_teachers.*, users.name as teacher_name, users.email as teacher_email')
+                                                      ->join('users', 'users.id = course_teachers.teacher_id')
+                                                      ->where('course_teachers.course_id', $courseId)
+                                                      ->orderBy('course_teachers.deleted_at', 'DESC')
+                                                      ->findAll();
+            } catch (\Exception $e) {
+                log_message('error', 'Error getting deleted teachers: ' . $e->getMessage());
+                // Continue with empty array if there's an error
+                $deletedTeachers = [];
+            }
 
-        return $this->response->setJSON([
-            'success' => true,
-            'teachers' => $teachers,
-            'deleted_teachers' => $deletedTeachers,
-            'csrf_token' => csrf_hash()
-        ]);
+            return $this->response->setJSON([
+                'success' => true,
+                'teachers' => $teachers ?: [],
+                'deleted_teachers' => $deletedTeachers ?: [],
+                'csrf_token' => csrf_hash()
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error in getCourseTeachers: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error loading teachers: ' . $e->getMessage(),
+                'teachers' => [],
+                'deleted_teachers' => []
+            ])->setStatusCode(500);
+        }
     }
 
     // Restore Course (like GALORPOT's flow)
