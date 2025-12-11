@@ -528,14 +528,14 @@
                             </a>
                         </div>
                         <div class="card-body">
-                            <!-- Search and Filter Section -->
+                            <!-- Search Section -->
                             <div class="card mb-4 border-info">
                                 <div class="card-header bg-info text-white">
-                                    <h5 class="mb-0"><i class="fas fa-filter"></i> Search & Filter Courses</h5>
+                                    <h5 class="mb-0"><i class="fas fa-search"></i> Search Courses</h5>
                                 </div>
                                 <div class="card-body">
                                     <!-- Search Box -->
-                                    <div class="row mb-3">
+                                    <div class="row">
                                         <div class="col-md-12">
                                             <label for="course_search" class="form-label">Search Courses</label>
                                             <div class="input-group">
@@ -551,53 +551,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Filter Form -->
-                                    <form method="GET" action="<?= base_url('dashboard') ?>" id="courseFilterForm">
-                                        <input type="hidden" name="section" value="courses">
-                                        <div class="row">
-                                            <div class="col-md-4 mb-3">
-                                                <label for="filter_academic_year_id" class="form-label">Academic Year</label>
-                                                <select class="form-select" id="filter_academic_year_id" name="academic_year_id" onchange="updateSemesterFilter()">
-                                                    <option value="">All Academic Years</option>
-                                                    <?php if (isset($academicYears)): ?>
-                                                        <?php foreach ($academicYears as $ay): ?>
-                                                            <option value="<?= $ay['id'] ?>" <?= (isset($selectedAcademicYearId) && $selectedAcademicYearId == $ay['id']) ? 'selected' : '' ?>>
-                                                                <?= esc($ay['year_start']) ?> - <?= esc($ay['year_end']) ?>
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    <?php endif; ?>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label for="filter_semester" class="form-label">Semester</label>
-                                                <select class="form-select" id="filter_semester" name="semester" onchange="updateTermFilter()">
-                                                    <option value="">All Semesters</option>
-                                                    <option value="1st" <?= (isset($selectedSemester) && $selectedSemester == '1st') ? 'selected' : '' ?>>1st Semester</option>
-                                                    <option value="2nd" <?= (isset($selectedSemester) && $selectedSemester == '2nd') ? 'selected' : '' ?>>2nd Semester</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label for="filter_term" class="form-label">Term</label>
-                                                <select class="form-select" id="filter_term" name="term">
-                                                    <option value="">All Terms</option>
-                                                    <option value="1st" <?= (isset($selectedTerm) && $selectedTerm == '1st') ? 'selected' : '' ?>>1st Term</option>
-                                                    <option value="2nd" <?= (isset($selectedTerm) && $selectedTerm == '2nd') ? 'selected' : '' ?>>2nd Term</option>
-                                                    <option value="3rd" <?= (isset($selectedTerm) && $selectedTerm == '3rd') ? 'selected' : '' ?>>3rd Term (Whole Semester)</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <button type="submit" class="btn btn-info">
-                                                    <i class="fas fa-search"></i> Filter Courses
-                                                </button>
-                                                <a href="<?= base_url('dashboard?section=courses') ?>" class="btn btn-secondary">
-                                                    <i class="fas fa-times"></i> Clear Filters
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </form>
                                 </div>
                             </div>
 
@@ -805,6 +758,91 @@
                                     </div>
                                 <?php endif; ?>
                             </div>
+
+                            <!-- Completed Courses Section -->
+                            <?php if (!empty($completed_courses ?? [])): ?>
+                                <div class="card mt-4 border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-check-circle"></i> Completed Courses 
+                                            <span class="badge bg-light text-dark"><?= count($completed_courses) ?></span>
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted">
+                                            <i class="fas fa-info-circle"></i> These courses have been completed and archived from previous academic years.
+                                        </p>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>CN</th>
+                                                        <th>Course Title</th>
+                                                        <th>Units</th>
+                                                        <th>Academic Year</th>
+                                                        <th>Completed Date</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($completed_courses as $course): ?>
+                                                        <tr class="completed-course-row">
+                                                            <td><?= $course['id'] ?></td>
+                                                            <td>
+                                                                <?php if (!empty($course['control_number'])): ?>
+                                                                    <span class="badge bg-secondary"><?= esc($course['control_number']) ?></span>
+                                                                <?php else: ?>
+                                                                    <span class="text-muted">-</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td>
+                                                                <strong><?= esc($course['title']) ?></strong>
+                                                                <?php if (isset($course['academic_year'])): ?>
+                                                                    <br><small class="text-info">
+                                                                        <i class="fas fa-calendar-alt"></i> <?= esc($course['academic_year']['year_start']) ?>-<?= esc($course['academic_year']['year_end']) ?>
+                                                                    </small>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td><span class="badge bg-info"><?= $course['units'] ?? 0 ?> units</span></td>
+                                                            <td>
+                                                                <?php if (isset($course['academic_year'])): ?>
+                                                                    <?= esc($course['academic_year']['year_start']) ?>-<?= esc($course['academic_year']['year_end']) ?>
+                                                                <?php else: ?>
+                                                                    <span class="text-muted">N/A</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td>
+                                                                <?php if (!empty($course['completed_at'])): ?>
+                                                                    <span class="badge bg-success">
+                                                                        <?= date('M d, Y', strtotime($course['completed_at'])) ?>
+                                                                    </span>
+                                                                <?php else: ?>
+                                                                    <span class="text-muted">N/A</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td>
+                                                                <div class="btn-group-vertical" role="group" style="gap: 2px;">
+                                                                    <a href="<?= base_url("materials/view/{$course['id']}") ?>" 
+                                                                       class="btn btn-sm btn-info" title="View Course">
+                                                                        <i class="fas fa-eye"></i> View
+                                                                    </a>
+                                                                    <button type="button" 
+                                                                            class="btn btn-sm btn-warning" 
+                                                                            onclick="reactivateCourse(<?= $course['id'] ?>, '<?= esc($course['title'], 'js') ?>')" 
+                                                                            title="Reactivate Course">
+                                                                        <i class="fas fa-redo"></i> Reactivate
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
 
                             <!-- Deleted Courses Section (like GALORPOT's flow) -->
                             <?php if (!empty($deleted_courses)): ?>
@@ -1778,7 +1816,7 @@
                                                         </small>
                                                     </div>
                                                     
-                                                    <button type="submit" class="btn btn-primary">
+                                                    <button type="submit" class="btn btn-primary btn-lg w-100">
                                                         <i class="fas fa-upload"></i> Upload Material
                                                     </button>
                                                 </form>
@@ -1861,6 +1899,12 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            <?php else: ?>
+                                <!-- No course selected and no courses available -->
+                                <div class="alert alert-info text-center">
+                                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                    <p class="mb-0">Please select a course to upload materials, or contact an administrator if you don't have any assigned courses.</p>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -1976,7 +2020,7 @@
                                                             </thead>
                                                             <tbody>
                                                                 <?php foreach ($pendingEnrollments as $pending): ?>
-                                                                    <tr id="pending-row-<?= $pending['id'] ?>">
+                                                                    <tr id="pending-row-<?= $pending['id'] ?>" class="student-row pending-student-row">
                                                                         <td><?= esc($pending['student_name']) ?></td>
                                                                         <td><?= esc($pending['student_email']) ?></td>
                                                                         <td><?= date('M d, Y H:i', strtotime($pending['created_at'])) ?></td>
@@ -2011,7 +2055,7 @@
                                                             </thead>
                                                             <tbody>
                                                                 <?php foreach ($enrolledStudents as $enrolled): ?>
-                                                                    <tr id="enrolled-row-<?= $enrolled['enrollment_id'] ?? $enrolled['id'] ?>">
+                                                                    <tr id="enrolled-row-<?= $enrolled['enrollment_id'] ?? $enrolled['id'] ?>" class="student-row enrolled-student-row">
                                                                         <td><?= esc($enrolled['name']) ?></td>
                                                                         <td><?= esc($enrolled['email']) ?></td>
                                                                         <td><?= date('M d, Y', strtotime($enrolled['approved_at'] ?? $enrolled['created_at'])) ?></td>
@@ -3680,10 +3724,15 @@
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
-                showAlert('success', data.message);
+                showAlert('success', data.message || 'Course updated successfully!');
                 if (data.csrf_token) {
                     updateCSRFToken(data.csrf_token);
                 }
@@ -3695,13 +3744,14 @@
                     window.location.reload();
                 }, 1500);
             } else {
-                showAlert('danger', data.message);
+                showAlert('danger', data.message || 'Failed to update course. Please try again.');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
             }
         })
         .catch(error => {
-            showAlert('danger', 'Error updating course: ' + error.message);
+            console.error('Update course error:', error);
+            showAlert('danger', 'Error updating course: ' + (error.message || 'Unknown error occurred'));
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         });
@@ -3801,10 +3851,15 @@
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
-                showAlert('success', data.message);
+                showAlert('success', data.message || 'Course updated successfully!');
                 if (data.csrf_token) {
                     updateCSRFToken(data.csrf_token);
                 }
@@ -3816,13 +3871,14 @@
                     window.location.reload();
                 }, 1500);
             } else {
-                showAlert('danger', data.message);
+                showAlert('danger', data.message || 'Failed to update course. Please try again.');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
             }
         })
         .catch(error => {
-            showAlert('danger', 'Error updating course: ' + error.message);
+            console.error('Update course error:', error);
+            showAlert('danger', 'Error updating course: ' + (error.message || 'Unknown error occurred'));
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         });
@@ -3955,6 +4011,43 @@
         })
         .catch(error => {
             showAlert('danger', 'Error restoring course: ' + error.message);
+        });
+    }
+
+    // Reactivate Completed Course Function
+    function reactivateCourse(courseId, courseTitle) {
+        if (!confirm(`Are you sure you want to reactivate the course "${courseTitle}"? This will move it back to active courses.`)) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('id', courseId);
+        formData.append('<?= csrf_token() ?>', getCSRFToken());
+
+        fetch('<?= base_url('admin/courses/reactivate') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                if (data.csrf_token) {
+                    updateCSRFToken(data.csrf_token);
+                }
+                // Reload page to show reactivated course in active courses
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'Error reactivating course: ' + error.message);
         });
     }
 
@@ -4335,12 +4428,18 @@
         $('#usersRoleFilter, #usersStatusFilter').on('change', filterUsers);
         
         // Courses Search and Filter (for all course lists)
-        function filterCourses() {
-            const searchInput = $(this).length ? $(this) : $('.course-search-input');
-            const searchTerm = searchInput.val().toLowerCase();
-            const originalSearchTerm = searchInput.val() || ''; // Keep original for display
+        function filterCourses(event) {
+            // Get the input that triggered this event
+            const searchInput = event && event.target ? $(event.target) : $('.course-search-input').first();
+            if (!searchInput.length) return;
+            
+            const searchTerm = (searchInput.val() || '').trim().toLowerCase();
+            const originalSearchTerm = (searchInput.val() || '').trim(); // Keep original for display
             
             let visibleCount = 0;
+            
+            // Count total course cards/rows first
+            const totalCourses = $('.course-card, .course-row').length;
             
             $('.course-card, .course-row').each(function() {
                 const text = $(this).text().toLowerCase();
@@ -4352,30 +4451,49 @@
                 }
             });
             
-            // Show/hide "no results" message
-            const container = searchInput.closest('.card-body').length ? searchInput.closest('.card-body') : searchInput.closest('.row').parent();
-            const existingNoResults = container.find('.no-results-message');
-            const coursesRow = container.find('#coursesRow, .row').has('.course-card, .course-row').first();
+            // Find the best container for the message
+            let container = searchInput.closest('.card-body');
+            if (!container.length) {
+                container = searchInput.closest('.row').parent();
+            }
+            if (!container.length) {
+                container = searchInput.closest('.card').find('.card-body');
+            }
+            if (!container.length) {
+                container = $('.card-body').first();
+            }
             
+            const existingNoResults = container.find('.no-results-message');
+            const coursesRow = container.find('#coursesRow');
+            
+            // Show "no results" message if search term exists and no matches found
             if (searchTerm && visibleCount === 0) {
                 if (existingNoResults.length === 0) {
                     const noResultsHtml = `
                         <div class="no-results-message text-center py-5">
                             <i class="fas fa-search fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">No results found</h5>
-                            <p class="text-muted">There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another</p>
+                            <p class="text-muted mb-0">There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another</p>
                         </div>
                     `;
-                    // Insert after the courses row or at the end of container
+                    // Try to insert after courses row, otherwise after search row, otherwise append to container
                     if (coursesRow.length) {
                         coursesRow.after(noResultsHtml);
                     } else {
-                        container.append(noResultsHtml);
+                        const searchRow = searchInput.closest('.row');
+                        if (searchRow.length) {
+                            searchRow.after(noResultsHtml);
+                        } else {
+                            container.append(noResultsHtml);
+                        }
                     }
                 } else {
+                    // Update existing message
                     existingNoResults.find('strong').text(originalSearchTerm);
+                    existingNoResults.show();
                 }
             } else {
+                // Remove "no results" message if search is cleared or results found
                 existingNoResults.remove();
             }
         }
@@ -4413,8 +4531,11 @@
                 if (!noResultsMsg) {
                     noResultsMsg = document.createElement('tr');
                     noResultsMsg.id = 'noCoursesResults';
-                    noResultsMsg.innerHTML = '<td colspan="8" class="text-center py-4"><i class="fas fa-search"></i> No courses found matching "' + escapeHtml(searchTerm) + '"</td>';
+                    noResultsMsg.innerHTML = '<td colspan="8" class="text-center py-4"><i class="fas fa-search fa-2x text-muted mb-2"></i><p class="text-muted mb-0">There\'s no "<strong>' + escapeHtml(searchTerm) + '</strong>", search another</p></td>';
                     tableBody.appendChild(noResultsMsg);
+                } else {
+                    // Update existing message
+                    noResultsMsg.innerHTML = '<td colspan="8" class="text-center py-4"><i class="fas fa-search fa-2x text-muted mb-2"></i><p class="text-muted mb-0">There\'s no "<strong>' + escapeHtml(searchTerm) + '</strong>", search another</p></td>';
                 }
             } else {
                 if (noResultsMsg) {
@@ -4434,9 +4555,11 @@
         // Assignments Search and Filter
         function filterAssignments() {
             const searchInput = $(this).length ? $(this) : $('.assignment-search-input');
-            const searchTerm = searchInput.val().toLowerCase();
-            const originalSearchTerm = searchInput.val();
+            const searchTerm = (searchInput.val() || '').trim().toLowerCase();
+            const originalSearchTerm = (searchInput.val() || '').trim();
             
+            // Count total assignments first
+            const totalAssignments = $('.assignment-row, .assignment-card').length;
             let visibleCount = 0;
             
             $('.assignment-row, .assignment-card').each(function() {
@@ -4450,7 +4573,14 @@
             });
             
             // Show/hide "no results" message
-            const container = searchInput.closest('.card-body').length ? searchInput.closest('.card-body') : $('.card-body').first();
+            let container = searchInput.closest('.card-body');
+            if (!container.length) {
+                container = searchInput.closest('.row').parent();
+            }
+            if (!container.length) {
+                container = $('.card-body').first();
+            }
+            
             const existingNoResults = container.find('.no-results-message');
             
             if (searchTerm && visibleCount === 0) {
@@ -4459,17 +4589,23 @@
                         <div class="no-results-message text-center py-5">
                             <i class="fas fa-search fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">No results found</h5>
-                            <p class="text-muted">There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another</p>
+                            <p class="text-muted mb-0">There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another</p>
                         </div>
                     `;
                     const searchRow = searchInput.closest('.row');
                     if (searchRow.length) {
                         searchRow.after(noResultsHtml);
                     } else {
-                        container.append(noResultsHtml);
+                        const tableContainer = searchInput.closest('.table-responsive').parent();
+                        if (tableContainer.length) {
+                            tableContainer.append(noResultsHtml);
+                        } else {
+                            container.append(noResultsHtml);
+                        }
                     }
                 } else {
                     existingNoResults.find('strong').text(originalSearchTerm);
+                    existingNoResults.show();
                 }
             } else {
                 existingNoResults.remove();
@@ -4481,9 +4617,11 @@
         // Materials Search and Filter
         function filterMaterials() {
             const searchInput = $(this).length ? $(this) : $('.material-search-input');
-            const searchTerm = searchInput.val().toLowerCase();
-            const originalSearchTerm = searchInput.val();
+            const searchTerm = (searchInput.val() || '').trim().toLowerCase();
+            const originalSearchTerm = (searchInput.val() || '').trim();
             
+            // Count total materials first
+            const totalMaterials = $('.material-row, .material-card').length;
             let visibleCount = 0;
             
             $('.material-row, .material-card').each(function() {
@@ -4497,7 +4635,14 @@
             });
             
             // Show/hide "no results" message
-            const container = searchInput.closest('.card-body').length ? searchInput.closest('.card-body') : $('.card-body').first();
+            let container = searchInput.closest('.card-body');
+            if (!container.length) {
+                container = searchInput.closest('.row').parent();
+            }
+            if (!container.length) {
+                container = $('.card-body').first();
+            }
+            
             const existingNoResults = container.find('.no-results-message');
             
             if (searchTerm && visibleCount === 0) {
@@ -4506,7 +4651,7 @@
                         <div class="no-results-message text-center py-5">
                             <i class="fas fa-search fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">No results found</h5>
-                            <p class="text-muted">There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another</p>
+                            <p class="text-muted mb-0">There's no "<strong>${escapeHtml(originalSearchTerm)}</strong>", search another</p>
                         </div>
                     `;
                     const searchRow = searchInput.closest('.row');
@@ -4517,6 +4662,7 @@
                     }
                 } else {
                     existingNoResults.find('strong').text(originalSearchTerm);
+                    existingNoResults.show();
                 }
             } else {
                 existingNoResults.remove();
@@ -4528,12 +4674,15 @@
         // Students Search and Filter (for enroll students section)
         function filterStudents() {
             const searchInput = $(this).length ? $(this) : $('.student-search-input');
-            const searchTerm = searchInput.val().toLowerCase();
-            const originalSearchTerm = searchInput.val();
+            if (!searchInput.length) return;
+            
+            const searchTerm = (searchInput.val() || '').trim().toLowerCase();
+            const originalSearchTerm = (searchInput.val() || '').trim();
             
             let visibleCount = 0;
             
-            $('.student-row, .student-card').each(function() {
+            // Search in student rows, student cards, enrolled student table rows, and pending enrollment rows
+            $('.student-row, .student-card, .enrolled-student-row, .pending-student-row').each(function() {
                 const text = $(this).text().toLowerCase();
                 if (!searchTerm || text.includes(searchTerm)) {
                     $(this).show();
@@ -4563,6 +4712,7 @@
                     }
                 } else {
                     existingNoResults.find('strong').text(originalSearchTerm);
+                    existingNoResults.show();
                 }
             } else {
                 existingNoResults.remove();
@@ -4574,8 +4724,10 @@
         // Enrollments Search and Filter
         function filterEnrollments() {
             const searchInput = $('.enrollment-search-input');
-            const searchTerm = searchInput.val().toLowerCase();
-            const originalSearchTerm = searchInput.val();
+            if (!searchInput.length) return;
+            
+            const searchTerm = (searchInput.val() || '').trim().toLowerCase();
+            const originalSearchTerm = (searchInput.val() || '').trim();
             const statusFilter = $('.enrollment-status-filter').val();
             
             let visibleCount = 0;
@@ -4627,6 +4779,7 @@
                     if (searchTerm) {
                         existingNoResults.find('strong').text(originalSearchTerm);
                     }
+                    existingNoResults.show();
                 }
             } else {
                 existingNoResults.remove();
@@ -4636,8 +4789,159 @@
         $(document).on('keyup', '.enrollment-search-input', filterEnrollments);
         $(document).on('change', '.enrollment-status-filter', filterEnrollments);
         
+        // ============================================================
+        // SERVER-SIDE AJAX SEARCH FUNCTIONALITY
+        // ============================================================
+        
+        // Debounce function to limit API calls
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Universal AJAX search function
+        function performServerSearch(section, searchTerm, filterType = '', courseId = '') {
+            if (!searchTerm || searchTerm.length < 2) {
+                // If search term is too short, just do client-side filtering
+                return;
+            }
+            
+            const searchUrl = '<?= base_url('dashboard/search') ?>';
+            const searchData = {
+                section: section,
+                search_term: searchTerm,
+                filter_type: filterType,
+                course_id: courseId
+            };
+            
+            // Show loading indicator
+            const loadingHtml = `
+                <div class="text-center py-3" id="searchLoading">
+                    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                    <p class="text-muted mt-2">Searching...</p>
+                </div>
+            `;
+            $('.search-results-container').html(loadingHtml);
+            
+            $.ajax({
+                url: searchUrl,
+                method: 'GET',
+                data: searchData,
+                dataType: 'json',
+                success: function(response) {
+                    $('#searchLoading').remove();
+                    
+                    if (response.success) {
+                        // Update results based on section
+                        updateSearchResults(section, response.results, response.count, searchTerm);
+                    } else {
+                        showSearchError(response.message || 'Search failed. Please try again.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#searchLoading').remove();
+                    console.error('Search error:', error);
+                    showSearchError('An error occurred during search. Please try again.');
+                }
+            });
+        }
+        
+        // Update search results in the UI
+        function updateSearchResults(section, results, count, searchTerm) {
+            // This will be called by specific section handlers
+            // Each section can override this behavior
+            console.log(`Search results for ${section}:`, count, 'items found');
+        }
+        
+        // Show search error message
+        function showSearchError(message) {
+            const errorHtml = `
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle"></i> ${escapeHtml(message)}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('.search-results-container').html(errorHtml);
+        }
+        
+        // Debounced search functions for each section
+        const debouncedCourseSearch = debounce(function(searchTerm) {
+            performServerSearch('courses', searchTerm);
+        }, 500);
+        
+        const debouncedUserSearch = debounce(function(searchTerm) {
+            performServerSearch('users', searchTerm);
+        }, 500);
+        
+        const debouncedMaterialSearch = debounce(function(searchTerm, courseId) {
+            performServerSearch('materials', searchTerm, '', courseId);
+        }, 500);
+        
+        const debouncedAssignmentSearch = debounce(function(searchTerm, courseId) {
+            performServerSearch('assignments', searchTerm, '', courseId);
+        }, 500);
+        
+        const debouncedEnrollmentSearch = debounce(function(searchTerm, courseId) {
+            performServerSearch('enrollments', searchTerm, '', courseId);
+        }, 500);
+        
+        // Enhanced course search with AJAX
+        $(document).on('keyup', '#course_search', function() {
+            const searchTerm = $(this).val();
+            // Client-side filtering (instant)
+            filterCoursesTable();
+            // Server-side search (debounced)
+            if (searchTerm.length >= 2) {
+                debouncedCourseSearch(searchTerm);
+            }
+        });
+        
+        // Enhanced material search with AJAX
+        $(document).on('keyup', '.material-search-input', function() {
+            const searchTerm = $(this).val();
+            const courseId = $(this).data('course-id') || $('input[name="course_id"]').val() || '';
+            // Client-side filtering (instant)
+            filterMaterials();
+            // Server-side search (debounced)
+            if (searchTerm.length >= 2) {
+                debouncedMaterialSearch(searchTerm, courseId);
+            }
+        });
+        
+        // Enhanced assignment search with AJAX
+        $(document).on('keyup', '.assignment-search-input', function() {
+            const searchTerm = $(this).val();
+            const courseId = $(this).data('course-id') || '';
+            // Client-side filtering (instant)
+            filterAssignments();
+            // Server-side search (debounced)
+            if (searchTerm.length >= 2) {
+                debouncedAssignmentSearch(searchTerm, courseId);
+            }
+        });
+        
+        // Enhanced enrollment search with AJAX
+        $(document).on('keyup', '.enrollment-search-input', function() {
+            const searchTerm = $(this).val();
+            const courseId = $(this).data('course-id') || '';
+            // Client-side filtering (instant)
+            filterEnrollments();
+            // Server-side search (debounced)
+            if (searchTerm.length >= 2) {
+                debouncedEnrollmentSearch(searchTerm, courseId);
+            }
+        });
+        
         // Helper function to escape HTML
         function escapeHtml(text) {
+            if (!text) return '';
             const map = {
                 '&': '&amp;',
                 '<': '&lt;',
@@ -4645,7 +4949,7 @@
                 '"': '&quot;',
                 "'": '&#039;'
             };
-            return text.replace(/[&<>"']/g, m => map[m]);
+            return String(text).replace(/[&<>"']/g, m => map[m]);
         }
     });
     </script>

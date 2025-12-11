@@ -4069,3 +4069,250 @@ in APPPATH\Controllers\Materials.php on line 124.
  5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
  6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
  7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 01:28:59 --> mysqli_sql_exception: Duplicate entry '' for key 'control_number' in F:\xammp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 F:\xammp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `co...', 0)
+#1 F:\xammp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `co...')
+#2 F:\xammp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `co...')
+#3 F:\xammp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1841): CodeIgniter\Database\BaseConnection->query('INSERT INTO `co...', NULL, false)
+#4 F:\xammp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(2230): CodeIgniter\Database\BaseBuilder->batchExecute('_insertBatch', 100)
+#5 F:\xammp\htdocs\ITE311-MALILAY\app\Database\Seeds\CourseSeeder.php(57): CodeIgniter\Database\BaseBuilder->insertBatch(Array)
+#6 F:\xammp\htdocs\ITE311-MALILAY\system\Database\Seeder.php(149): App\Database\Seeds\CourseSeeder->run()
+#7 F:\xammp\htdocs\ITE311-MALILAY\system\Commands\Database\Seed.php(79): CodeIgniter\Database\Seeder->call('App\\Database\\Se...')
+#8 F:\xammp\htdocs\ITE311-MALILAY\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\Seed->run(Array)
+#9 F:\xammp\htdocs\ITE311-MALILAY\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('db:seed', Array)
+#10 F:\xammp\htdocs\ITE311-MALILAY\system\Boot.php(388): CodeIgniter\CLI\Console->run()
+#11 F:\xammp\htdocs\ITE311-MALILAY\system\Boot.php(133): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#12 F:\xammp\htdocs\ITE311-MALILAY\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#13 {main}
+CRITICAL - 2025-12-11 02:25:15 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 124.
+ 1 APPPATH\Controllers\Materials.php(32): App\Controllers\Materials->handleFileUpload('15')
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload('15')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:28:29 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:28:31 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:28:38 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:28:48 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:33:17 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:33:17 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:33:20 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:33:32 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:35:58 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:40:11 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:40:36 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:40:53 --> Error: Call to a member function initialize() on null
+[Method: POST, Route: teacher/course/15/upload]
+in APPPATH\Controllers\Materials.php on line 145.
+ 1 APPPATH\Controllers\Materials.php(40): App\Controllers\Materials->handleFileUpload(15)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Materials->upload(15)
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Materials))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:46:15 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "course/view.php"
+[Method: GET, Route: course/view/15]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('course/view.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('course/view', [], true)
+ 3 APPPATH\Controllers\Course.php(289): view('course/view', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Course->view('15')
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Course))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:46:47 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "course/view.php"
+[Method: GET, Route: course/view/15]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(214): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('course/view.php')
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('course/view', [], true)
+ 3 APPPATH\Controllers\Course.php(289): view('course/view', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Course->view('15')
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Course))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 02:59:49 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 03:00:04 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 03:00:04 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 03:00:04 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 03:00:05 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 03:00:05 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 03:00:05 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 03:00:05 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 03:00:05 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 03:00:05 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 03:00:15 --> Error: Object of class CodeIgniter\HTTP\RedirectResponse could not be converted to string
+[Method: POST, Route: admin/courses/update]
+in SYSTEMPATH\CodeIgniter.php on line 957.
+ 1 SYSTEMPATH\CodeIgniter.php(360): CodeIgniter\CodeIgniter->display404errors(Object(CodeIgniter\Exceptions\PageNotFoundException))
+ 2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

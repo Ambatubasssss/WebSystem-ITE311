@@ -491,6 +491,144 @@ class Admin extends BaseController
         }
     }
 
+    public function updateCourse()
+    {
+        if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Access denied. Admin role required.'
+            ]);
+        }
+
+        // Get course ID from POST data
+        $courseId = $this->request->getPost('id');
+        
+        if (empty($courseId) || !is_numeric($courseId)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid course ID provided.'
+            ]);
+        }
+
+        $courseId = (int) $courseId;
+
+        // Get form data
+        $title = trim($this->request->getPost('title') ?? '');
+        $controlNumber = trim($this->request->getPost('control_number') ?? '');
+        $units = $this->request->getPost('units');
+        $description = trim($this->request->getPost('description') ?? '');
+        $academicYearId = $this->request->getPost('academic_year_id');
+        $semesterId = $this->request->getPost('semester_id');
+        $yearLevelId = $this->request->getPost('year_level_id');
+
+        // Validate required fields
+        if (empty($title)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Course title is required.'
+            ]);
+        }
+
+        if (empty($controlNumber)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Control number is required.'
+            ]);
+        }
+
+        if (strlen($controlNumber) !== 4 || !is_numeric($controlNumber)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Control number must be exactly 4 digits.'
+            ]);
+        }
+
+        if (!is_numeric($units) || $units < 0 || $units > 5) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Units must be a number between 0 and 5.'
+            ]);
+        }
+
+        // Validate academic year, semester, and year level
+        if (empty($academicYearId) || !is_numeric($academicYearId)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Academic year is required.'
+            ]);
+        }
+
+        if (empty($semesterId) || !is_numeric($semesterId)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Semester is required.'
+            ]);
+        }
+
+        if (empty($yearLevelId) || !is_numeric($yearLevelId)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Year level is required.'
+            ]);
+        }
+
+        $courseModel = new \App\Models\CourseModel();
+
+        // Check if course exists
+        $course = $courseModel->find($courseId);
+        if (!$course) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Course not found.'
+            ]);
+        }
+
+        // Check if control number is already taken by another course
+        $existingCourse = $courseModel->where('control_number', $controlNumber)
+                                     ->where('id !=', $courseId)
+                                     ->first();
+        if ($existingCourse) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Control number is already taken by another course.'
+            ]);
+        }
+
+        // Prepare update data
+        $updateData = [
+            'title' => $title,
+            'control_number' => $controlNumber,
+            'units' => (int) $units,
+            'description' => !empty($description) ? $description : null,
+            'academic_year_id' => (int) $academicYearId,
+            'semester_id' => (int) $semesterId,
+            'year_level_id' => (int) $yearLevelId,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        try {
+            if ($courseModel->update($courseId, $updateData)) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Course updated successfully!',
+                    'csrf_token' => csrf_hash()
+                ]);
+            } else {
+                $errors = $courseModel->errors();
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update course. ' . (!empty($errors) ? implode(', ', $errors) : 'Unknown error')
+                ]);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error updating course: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to update course: ' . $e->getMessage()
+            ]);
+        }
+    }
+
     public function deleteCourse($courseId)
     {
         if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {
@@ -570,6 +708,9 @@ class Admin extends BaseController
             return redirect()->to('/dashboard?section=academic-years');
         }
 
+        // Get the currently active academic year before deactivating
+        $previousActiveYear = $academicYearModel->where('is_active', 1)->first();
+        
         // If setting as active, deactivate all others
         if ($isActive) {
             $academicYearModel->set('is_active', 0)->where('id !=', 0)->update();
@@ -584,8 +725,19 @@ class Admin extends BaseController
         ];
 
         if ($academicYearModel->insert($data)) {
-            // If academic year is set as active, notify all students and teachers
-            if ($isActive) {
+            // If academic year is set as active, archive previous active year's courses
+            if ($isActive && $previousActiveYear) {
+                $completionService = new \App\Libraries\CompletionService();
+                // Archive courses from the previous active academic year
+                $archiveResult = $completionService->archiveAcademicYearCourses($previousActiveYear['id']);
+                
+                // Notify all students and teachers about new academic year
+                $completionService->notifyAcademicYearOpened([
+                    'year_start' => $yearStart,
+                    'year_end' => $yearEnd
+                ]);
+            } elseif ($isActive) {
+                // No previous active year, just notify about new academic year
                 $completionService = new \App\Libraries\CompletionService();
                 $completionService->notifyAcademicYearOpened([
                     'year_start' => $yearStart,
@@ -620,21 +772,38 @@ class Admin extends BaseController
         $yearEnd = $this->request->getPost('year_end');
         $isActive = $this->request->getPost('is_active') ? 1 : 0;
 
+        // Get the currently active academic year before deactivating (excluding the one being updated)
+        $previousActiveYear = $academicYearModel->where('is_active', 1)
+                                                ->where('id !=', $id)
+                                                ->first();
+        
         // If setting as active, deactivate all others
         $wasActive = $academicYear['is_active'];
+        $completionService = new \App\Libraries\CompletionService();
+        
         if ($isActive && !$wasActive) {
             // Academic year is being activated for the first time
             $academicYearModel->set('is_active', 0)->where('id !=', $id)->update();
             
+            // Archive courses from the previous active academic year
+            if ($previousActiveYear) {
+                $completionService->archiveAcademicYearCourses($previousActiveYear['id']);
+            }
+            
+            // Reactivate courses for this academic year
+            $completionService->reactivateAcademicYearCourses($id);
+            
             // Notify all students and teachers
-            $completionService = new \App\Libraries\CompletionService();
             $completionService->notifyAcademicYearOpened([
                 'year_start' => $yearStart,
                 'year_end' => $yearEnd
             ]);
         } elseif ($isActive) {
-            // Just deactivate others, no notification needed
+            // Just deactivate others, no notification needed (already active)
             $academicYearModel->set('is_active', 0)->where('id !=', $id)->update();
+        } elseif (!$isActive && $wasActive) {
+            // Academic year is being deactivated - archive its courses
+            $completionService->archiveAcademicYearCourses($id);
         }
 
         $data = [
@@ -707,6 +876,11 @@ class Admin extends BaseController
             return redirect()->to('/dashboard?section=semesters');
         }
 
+        // Get the currently active semester in the same academic year before deactivating
+        $previousActiveSemester = $semesterModel->where('academic_year_id', $academicYearId)
+                                                ->where('is_active', 1)
+                                                ->first();
+        
         // If setting as active, deactivate all others in the same academic year
         if ($isActive) {
             $semesterModel->where('academic_year_id', $academicYearId)->set('is_active', 0)->update();
@@ -725,6 +899,12 @@ class Admin extends BaseController
         ];
 
         if ($semesterModel->insert($data)) {
+            // If semester is set as active, archive previous active semester's courses
+            if ($isActive && $previousActiveSemester) {
+                $completionService = new \App\Libraries\CompletionService();
+                $completionService->archiveSemesterCourses($previousActiveSemester['id']);
+            }
+            
             session()->setFlashdata('success', 'Semester created successfully.');
         } else {
             session()->setFlashdata('error', 'Failed to create semester.');
@@ -756,6 +936,14 @@ class Admin extends BaseController
         $endDate = $this->request->getPost('end_date');
         $isActive = $this->request->getPost('is_active') ? 1 : 0;
 
+        // Get the currently active semester in the same academic year before deactivating (excluding the one being updated)
+        $previousActiveSemester = $semesterModel->where('academic_year_id', $academicYearId)
+                                                ->where('is_active', 1)
+                                                ->where('id !=', $id)
+                                                ->first();
+        
+        $wasActive = $semesterRecord['is_active'];
+        
         // If setting as active, deactivate all others in the same academic year
         if ($isActive) {
             $semesterModel->set('is_active', 0)->where('academic_year_id', $academicYearId)->where('id !=', $id)->update();
@@ -773,6 +961,24 @@ class Admin extends BaseController
         ];
 
         if ($semesterModel->update($id, $data)) {
+            $completionService = new \App\Libraries\CompletionService();
+            
+            if ($isActive && !$wasActive) {
+                // Semester is being activated/reactivated
+                // Archive courses from the previous active semester
+                if ($previousActiveSemester) {
+                    $completionService->archiveSemesterCourses($previousActiveSemester['id']);
+                }
+                
+                // Reactivate courses for this semester
+                $completionService->reactivateSemesterCourses($id);
+            } elseif ($isActive) {
+                // Semester is already active, just deactivate others (no action needed)
+            } elseif (!$isActive && $wasActive) {
+                // Semester is being deactivated - archive its courses
+                $completionService->archiveSemesterCourses($id);
+            }
+            
             session()->setFlashdata('success', 'Semester updated successfully.');
         } else {
             session()->setFlashdata('error', 'Failed to update semester.');
@@ -1656,6 +1862,79 @@ class Admin extends BaseController
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Failed to restore course. ' . (!empty($errors) ? implode(', ', $errors) : 'Unknown error')
+            ]);
+        }
+    }
+
+    // Reactivate Completed Course
+    public function reactivateCourse()
+    {
+        if (!session()->get('logged_in') || strtolower(session('role')) !== 'admin') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Access denied. Admin role required.'
+            ]);
+        }
+
+        $courseId = $this->request->getPost('id');
+        
+        if (empty($courseId) || !is_numeric($courseId)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid course ID provided.'
+            ]);
+        }
+
+        $courseId = (int) $courseId;
+
+        $courseModel = new \App\Models\CourseModel();
+        
+        // Get completed course
+        $course = $courseModel->find($courseId);
+        
+        if (!$course) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Course not found.'
+            ]);
+        }
+        
+        if ($course['status'] !== 'completed') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Course is not completed. Only completed courses can be reactivated.'
+            ]);
+        }
+
+        // Reactivate the course (set status to null/active and clear completed_at)
+        if ($courseModel->update($courseId, [
+            'status' => null,
+            'completed_at' => null
+        ])) {
+            // Also reactivate related enrollments if needed
+            $enrollmentModel = new \App\Models\EnrollmentModel();
+            $enrollments = $enrollmentModel->where('course_id', $courseId)
+                                         ->where('status', 'completed')
+                                         ->findAll();
+            
+            foreach ($enrollments as $enrollment) {
+                // Reactivate enrollments back to approved status
+                $enrollmentModel->update($enrollment['id'], [
+                    'status' => 'approved',
+                    'completed_at' => null
+                ]);
+            }
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => "Course '{$course['title']}' has been reactivated successfully!",
+                'csrf_token' => csrf_hash()
+            ]);
+        } else {
+            $errors = $courseModel->errors();
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to reactivate course. ' . (!empty($errors) ? implode(', ', $errors) : 'Unknown error')
             ]);
         }
     }

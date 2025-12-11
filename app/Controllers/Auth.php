@@ -167,6 +167,8 @@ class Auth extends BaseController
         try {
             $completionService = new \App\Libraries\CompletionService();
             $completionService->checkAndUpdateCompletions();
+            // Check and process completed academic years
+            $completionService->checkAndProcessCompletedAcademicYears();
         } catch (\Exception $e) {
             // Log error but don't break the dashboard
             log_message('error', 'Error checking completions: ' . $e->getMessage());
@@ -259,8 +261,18 @@ class Auth extends BaseController
                     $data['selectedTerm'] = null;
                 }
                 
-                // Get filtered courses (exclude soft deleted - like GALORPOT's flow)
+                // Get filtered courses (exclude soft deleted and completed - like GALORPOT's flow)
+                // Only show active courses (status is null, 'active', or not 'completed')
+                $courseQuery->groupStart()
+                           ->where('status !=', 'completed')
+                           ->orWhere('status', null)
+                           ->groupEnd();
                 $data['courses'] = $courseQuery->orderBy('title', 'ASC')->findAll();
+                
+                // Get completed courses separately
+                $completedCoursesQuery = $courseModel->where('status', 'completed')
+                                                    ->where('deleted_at', null);
+                $data['completed_courses'] = $completedCoursesQuery->orderBy('completed_at', 'DESC')->findAll();
                 
                 // Get deleted courses separately (like GALORPOT's flow)
                 $data['deleted_courses'] = $courseModel->withDeleted()
@@ -270,6 +282,26 @@ class Auth extends BaseController
                 
                 // Get material counts and academic info for each course
                 foreach ($data['courses'] as &$course) {
+                    $course['material_count'] = $materialModel->where('course_id', $course['id'])->countAllResults();
+                    
+                    // Get academic year info
+                    if ($course['academic_year_id']) {
+                        $course['academic_year'] = $academicYearModel->find($course['academic_year_id']);
+                    }
+                    
+                    // Get semester info
+                    if ($course['semester_id']) {
+                        $course['semester'] = $semesterModel->find($course['semester_id']);
+                    }
+                    
+                    // Get year level info
+                    if ($course['year_level_id']) {
+                        $course['year_level'] = $yearLevelModel->find($course['year_level_id']);
+                    }
+                }
+                
+                // Get material counts and academic info for completed courses
+                foreach ($data['completed_courses'] as &$course) {
                     $course['material_count'] = $materialModel->where('course_id', $course['id'])->countAllResults();
                     
                     // Get academic year info
@@ -840,6 +872,240 @@ class Auth extends BaseController
                 'success' => false,
                 'message' => 'Error updating password: ' . $e->getMessage()
             ]);
+        }
+    }
+
+    /**
+     * Unified search method for all dashboard sections
+     * Supports both client-side filtering and server-side AJAX search
+     */
+    public function search()
+    {
+        // Check if user is logged in
+        if (!session()->get('logged_in')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'You must be logged in to search.'
+            ])->setStatusCode(401);
+        }
+
+        // Get search parameters
+        $section = $this->request->getGet('section') ?? $this->request->getPost('section') ?? '';
+        $searchTerm = trim($this->request->getGet('search_term') ?? $this->request->getPost('search_term') ?? '');
+        $filterType = $this->request->getGet('filter_type') ?? $this->request->getPost('filter_type') ?? '';
+        
+        // Security: Sanitize search term
+        $searchTerm = htmlspecialchars($searchTerm, ENT_QUOTES, 'UTF-8');
+        
+        $userRole = strtolower(session('role') ?? '');
+        $results = [];
+        $message = '';
+
+        try {
+            switch ($section) {
+                case 'courses':
+                    if ($userRole !== 'admin') {
+                        return $this->response->setJSON([
+                            'success' => false,
+                            'message' => 'Access denied.'
+                        ])->setStatusCode(403);
+                    }
+                    $courseModel = new \App\Models\CourseModel();
+                    $query = $courseModel;
+                    
+                    if (!empty($searchTerm)) {
+                        $query->groupStart()
+                              ->like('title', $searchTerm)
+                              ->orLike('control_number', $searchTerm)
+                              ->orLike('description', $searchTerm)
+                              ->groupEnd();
+                    }
+                    
+                    if (!empty($filterType)) {
+                        if ($filterType === 'active') {
+                            $query->where('deleted_at', null);
+                        } elseif ($filterType === 'deleted') {
+                            $query->where('deleted_at !=', null);
+                        }
+                    }
+                    
+                    $results = $query->orderBy('title', 'ASC')->findAll();
+                    $message = count($results) . ' course(s) found';
+                    break;
+
+                case 'users':
+                    if ($userRole !== 'admin') {
+                        return $this->response->setJSON([
+                            'success' => false,
+                            'message' => 'Access denied.'
+                        ])->setStatusCode(403);
+                    }
+                    $userModel = new \App\Models\UserModel();
+                    $query = $userModel;
+                    
+                    if (!empty($searchTerm)) {
+                        $query->groupStart()
+                              ->like('name', $searchTerm)
+                              ->orLike('email', $searchTerm)
+                              ->groupEnd();
+                    }
+                    
+                    if (!empty($filterType)) {
+                        if ($filterType === 'active') {
+                            $query->where('is_active', 1);
+                        } elseif ($filterType === 'inactive') {
+                            $query->where('is_active', 0);
+                        } elseif (in_array($filterType, ['admin', 'teacher', 'student'])) {
+                            $query->where('role', $filterType);
+                        }
+                    }
+                    
+                    $results = $query->orderBy('name', 'ASC')->findAll();
+                    $message = count($results) . ' user(s) found';
+                    break;
+
+                case 'materials':
+                    $materialModel = new \App\Models\MaterialModel();
+                    $courseId = $this->request->getGet('course_id') ?? $this->request->getPost('course_id');
+                    
+                    $query = $materialModel;
+                    
+                    if ($courseId) {
+                        $query->where('course_id', $courseId);
+                    }
+                    
+                    if (!empty($searchTerm)) {
+                        $query->groupStart()
+                              ->like('file_name', $searchTerm)
+                              ->orLike('file_type', $searchTerm)
+                              ->groupEnd();
+                    }
+                    
+                    $results = $query->orderBy('created_at', 'DESC')->findAll();
+                    $message = count($results) . ' material(s) found';
+                    break;
+
+                case 'assignments':
+                    $assignmentModel = new \App\Models\AssignmentModel();
+                    $courseId = $this->request->getGet('course_id') ?? $this->request->getPost('course_id');
+                    
+                    $query = $assignmentModel;
+                    
+                    if ($courseId) {
+                        $query->where('course_id', $courseId);
+                    }
+                    
+                    if (!empty($searchTerm)) {
+                        $query->groupStart()
+                              ->like('title', $searchTerm)
+                              ->orLike('description', $searchTerm)
+                              ->groupEnd();
+                    }
+                    
+                    if (!empty($filterType)) {
+                        if ($filterType === 'active') {
+                            $query->where('due_date >=', date('Y-m-d'));
+                        } elseif ($filterType === 'past') {
+                            $query->where('due_date <', date('Y-m-d'));
+                        }
+                    }
+                    
+                    $results = $query->orderBy('due_date', 'ASC')->findAll();
+                    $message = count($results) . ' assignment(s) found';
+                    break;
+
+                case 'enrollments':
+                case 'enroll-students':
+                    $enrollmentModel = new \App\Models\EnrollmentModel();
+                    
+                    if ($userRole === 'student') {
+                        $userId = session('userID');
+                        $query = $enrollmentModel->where('user_id', $userId);
+                    } else {
+                        $courseId = $this->request->getGet('course_id') ?? $this->request->getPost('course_id');
+                        if ($courseId) {
+                            $query = $enrollmentModel->where('course_id', $courseId);
+                        } else {
+                            $query = $enrollmentModel;
+                        }
+                    }
+                    
+                    if (!empty($searchTerm)) {
+                        // Join with users and courses for search
+                        $userModel = new \App\Models\UserModel();
+                        $courseModel = new \App\Models\CourseModel();
+                        
+                        // Get user IDs matching search
+                        $matchingUsers = $userModel->select('id')
+                                                   ->groupStart()
+                                                   ->like('name', $searchTerm)
+                                                   ->orLike('email', $searchTerm)
+                                                   ->groupEnd()
+                                                   ->findAll();
+                        $userIds = array_column($matchingUsers, 'id');
+                        
+                        // Get course IDs matching search
+                        $matchingCourses = $courseModel->select('id')
+                                                      ->groupStart()
+                                                      ->like('title', $searchTerm)
+                                                      ->orLike('description', $searchTerm)
+                                                      ->groupEnd()
+                                                      ->findAll();
+                        $courseIds = array_column($matchingCourses, 'id');
+                        
+                        if (!empty($userIds) || !empty($courseIds)) {
+                            $query->groupStart();
+                            if (!empty($userIds)) {
+                                $query->whereIn('user_id', $userIds);
+                            }
+                            if (!empty($courseIds)) {
+                                $query->orWhereIn('course_id', $courseIds);
+                            }
+                            $query->groupEnd();
+                        } else {
+                            // No matches, return empty
+                            $results = [];
+                            $message = 'No enrollments found';
+                            break;
+                        }
+                    }
+                    
+                    if (!empty($filterType)) {
+                        if ($filterType === 'approved') {
+                            $query->where('status', 'approved');
+                        } elseif ($filterType === 'pending') {
+                            $query->where('status', 'pending');
+                        } elseif ($filterType === 'rejected') {
+                            $query->where('status', 'rejected');
+                        }
+                    }
+                    
+                    $results = $query->orderBy('created_at', 'DESC')->findAll();
+                    $message = count($results) . ' enrollment(s) found';
+                    break;
+
+                default:
+                    return $this->response->setJSON([
+                        'success' => false,
+                        'message' => 'Invalid search section.'
+                    ])->setStatusCode(400);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'results' => $results,
+                'count' => count($results),
+                'message' => $message,
+                'search_term' => $searchTerm,
+                'section' => $section
+            ]);
+
+        } catch (\Exception $e) {
+            log_message('error', 'Search error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'An error occurred during search: ' . $e->getMessage()
+            ])->setStatusCode(500);
         }
     }
 }

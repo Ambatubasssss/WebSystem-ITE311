@@ -80,6 +80,19 @@ class Course extends BaseController
             ]);
         }
 
+        // Check if course has a teacher assigned (only for student self-enrollment)
+        if ($userRole === 'student') {
+            $courseTeacherModel = new \App\Models\CourseTeacherModel();
+            $teachers = $courseTeacherModel->getTeachersByCourse($courseId);
+            
+            if (empty($teachers)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => "There's no teacher assigned yet in this course. Please wait until a teacher is assigned before enrolling."
+                ]);
+            }
+        }
+
         // Check for schedule conflicts (for both student self-enrollment and teacher enrollment)
         // This prevents students from being enrolled in conflicting courses
         $conflictCheck = $this->checkStudentScheduleConflict($courseId, $userId);
@@ -265,13 +278,20 @@ class Course extends BaseController
     }
 
     /**
-     * Display course details (for future use)
+     * Display course details - redirects to dashboard with materials section
      */
     public function view($courseId)
     {
         if (!session()->get('logged_in')) {
             session()->setFlashdata('error', 'You must be logged in to view courses.');
             return redirect()->to('/login');
+        }
+
+        // Validate course_id
+        $courseId = (int) $courseId;
+        if ($courseId <= 0) {
+            session()->setFlashdata('error', 'Invalid course ID.');
+            return redirect()->to('/dashboard');
         }
 
         $course = $this->courseModel->find($courseId);
@@ -281,12 +301,20 @@ class Course extends BaseController
             return redirect()->to('/dashboard');
         }
 
-        $data = [
-            'course' => $course,
-            'title' => $course['title']
-        ];
-
-        return view('course/view', $data);
+        // Get user role to determine appropriate redirect
+        $userRole = strtolower(session('role') ?? '');
+        
+        // Check if user is enrolled (for students) or has access (for teachers/admins)
+        if ($userRole === 'student') {
+            // Check if student is enrolled
+            if (!$this->enrollmentModel->isApprovedEnrolled(session('userID'), $courseId)) {
+                session()->setFlashdata('error', 'You are not enrolled in this course.');
+                return redirect()->to('/dashboard');
+            }
+        }
+        
+        // Redirect to unified dashboard with materials section to view course details
+        return redirect()->to('/dashboard?section=materials&course_id=' . $courseId);
     }
 
     /**

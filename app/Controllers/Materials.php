@@ -27,30 +27,51 @@ class Materials extends BaseController
      */
     public function upload($course_id)
     {
-        // Handle POST request - Process file upload (using strtolower to handle case-insensitive comparison)
-        if (strtolower($this->request->getMethod()) === 'post') {
-            return $this->handleFileUpload($course_id);
-        }
-        
-        // Handle GET request - Show upload form
-        
-        // Check if user is admin/teacher
-        $userRole = strtolower(session('role') ?? '');
-        
-        if ($userRole !== 'admin' && $userRole !== 'teacher') {
-            session()->setFlashdata('error', 'Access denied. Admin/Teacher privileges required.');
+        try {
+            // Validate and cast course_id to integer
+            $course_id = (int) $course_id;
+            if ($course_id <= 0) {
+                session()->setFlashdata('error', 'Invalid course ID.');
+                return redirect()->to('/dashboard');
+            }
+            
+            // Handle POST request - Process file upload (using strtolower to handle case-insensitive comparison)
+            if (strtolower($this->request->getMethod()) === 'post') {
+                return $this->handleFileUpload($course_id);
+            }
+            
+            // Handle GET request - Show upload form
+            
+            // Check if user is logged in
+            if (!session('userID')) {
+                session()->setFlashdata('error', 'Please login to access this page.');
+                return redirect()->to('/login');
+            }
+            
+            // Check if user is admin/teacher
+            $userRole = strtolower(session('role') ?? '');
+            
+            if ($userRole !== 'admin' && $userRole !== 'teacher') {
+                session()->setFlashdata('error', 'Access denied. Admin/Teacher privileges required.');
+                return redirect()->to('/dashboard');
+            }
+
+            // Get course details
+            $course = $this->courseModel->find($course_id);
+            if (!$course) {
+                $redirectPath = ($userRole === 'admin') ? '/dashboard?section=courses' : '/dashboard?section=my-courses';
+                return redirect()->to($redirectPath)->with('error', 'Course not found.');
+            }
+
+            // Redirect to unified dashboard with upload section
+            return redirect()->to('/dashboard?section=upload&course_id=' . $course_id);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Materials::upload error: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
+            session()->setFlashdata('error', 'An error occurred. Please try again.');
             return redirect()->to('/dashboard');
         }
-
-        // Get course details
-        $course = $this->courseModel->find($course_id);
-        if (!$course) {
-            $redirectPath = ($userRole === 'admin') ? '/dashboard?section=courses' : '/dashboard?section=my-courses';
-            return redirect()->to($redirectPath)->with('error', 'Course not found.');
-        }
-
-        // Redirect to unified dashboard with upload section
-        return redirect()->to('/dashboard?section=upload&course_id=' . $course_id);
     }
 
     /**
@@ -110,28 +131,34 @@ class Materials extends BaseController
         // Generate unique filename with timestamp to prevent overwrites
         $uniqueFileName = 'upload_' . time() . '_' . uniqid() . '_' . $sanitizedOriginalName;
         
-        // Configure CodeIgniter's Upload Library
-        $config = [
-            'upload_path'   => $uploadPath,
-            'allowed_types' => implode('|', $allowedExtensions),
-            'max_size'      => 10240, // 10MB in KB
-            'file_name'     => $uniqueFileName,
-            'overwrite'     => false
-        ];
+        // Move the file using CodeIgniter 4's File class
+        try {
+            if (!$file->hasMoved()) {
+                if (!$file->move($uploadPath, $uniqueFileName)) {
+                    $errors = $file->getErrorString();
+                    $errorMessage = !empty($errors) ? $errors : 'File upload failed. Please try again.';
+                    return redirect()->back()->with('error', $errorMessage);
+                }
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'File move error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to save file: ' . $e->getMessage());
+        }
         
-        // Load and configure the Upload Library
-        $upload = \Config\Services::upload();
-        $upload->initialize($config);
+        // Get the moved file path
+        $movedFilePath = $uploadPath . $uniqueFileName;
         
-        // Perform the upload using CodeIgniter's library
-        if (!$upload->doUpload('material_file')) {
-            $errors = $upload->getErrors();
-            $errorMessage = !empty($errors) ? implode(', ', $errors) : 'File upload failed. Please try again.';
-            return redirect()->back()->with('error', $errorMessage);
+        // Verify file was moved successfully
+        if (!file_exists($movedFilePath)) {
+            return redirect()->back()->with('error', 'File upload failed. File was not saved.');
         }
         
         // Get upload data
-        $uploadData = $upload->data();
+        $uploadData = [
+            'file_name' => $uniqueFileName,
+            'file_size' => filesize($movedFilePath),
+            'file_type' => $file->getClientMimeType()
+        ];
         
         // Insert into database using model method
         try {
@@ -187,20 +214,19 @@ class Materials extends BaseController
                 return redirect()->to($redirectPath)->with('success', 'Material uploaded successfully!');
             } else {
                 // Delete uploaded file if database insert fails
-                $filePath = $uploadPath . $uploadData['file_name'];
-                if (file_exists($filePath)) {
-                    unlink($filePath);
+                if (isset($movedFilePath) && file_exists($movedFilePath)) {
+                    unlink($movedFilePath);
                 }
                 return redirect()->back()->with('error', 'Failed to save material to database.');
             }
             
         } catch (\Exception $e) {
             // Delete uploaded file if exception occurs
-            $filePath = $uploadPath . $uploadData['file_name'];
-            if (file_exists($filePath)) {
-                unlink($filePath);
+            if (isset($movedFilePath) && file_exists($movedFilePath)) {
+                unlink($movedFilePath);
             }
             log_message('error', 'Material upload exception: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
