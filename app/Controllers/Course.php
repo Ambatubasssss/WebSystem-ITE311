@@ -82,6 +82,33 @@ class Course extends BaseController
 
         // Check if course has a teacher assigned (only for student self-enrollment)
         if ($userRole === 'student') {
+            // Check year level match for students
+            $userModel = new \App\Models\UserModel();
+            $userData = $userModel->find($userId);
+            
+            if ($userData && isset($userData['year_level_id']) && $userData['year_level_id']) {
+                $studentYearLevelId = $userData['year_level_id'];
+                
+                // Check if course has a year level requirement
+                if (!empty($course['year_level_id'])) {
+                    // Student can only enroll if their year level matches the course's year level
+                    if ($course['year_level_id'] != $studentYearLevelId) {
+                        // Get year level names for better error message
+                        $yearLevelModel = new \App\Models\YearLevelModel();
+                        $studentYearLevel = $yearLevelModel->find($studentYearLevelId);
+                        $courseYearLevel = $yearLevelModel->find($course['year_level_id']);
+                        
+                        $studentLevelName = $studentYearLevel ? $studentYearLevel['level'] : 'your current year level';
+                        $courseLevelName = $courseYearLevel ? $courseYearLevel['level'] : 'a different year level';
+                        
+                        return $this->response->setJSON([
+                            'success' => false,
+                            'message' => "You cannot enroll in this course. This course is for {$courseLevelName} students, but you are in {$studentLevelName}."
+                        ]);
+                    }
+                }
+            }
+            
             $courseTeacherModel = new \App\Models\CourseTeacherModel();
             $teachers = $courseTeacherModel->getTeachersByCourse($courseId);
             

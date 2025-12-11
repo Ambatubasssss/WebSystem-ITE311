@@ -472,16 +472,14 @@ class Auth extends BaseController
                 // Get course ID from query
                 $courseId = $this->request->getGet('course_id');
                 if ($courseId) {
-                    // Verify the teacher is assigned to this course
-                    if ($courseTeacherModel->isTeacherAssigned($courseId, $teacherId)) {
-                        $course = $courseModel->find($courseId);
-                        if ($course) {
-                            $data['course'] = $course;
-                            $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
-                        }
+                    // Admin can view all courses - no need to check teacher assignment
+                    $course = $courseModel->find($courseId);
+                    if ($course) {
+                        $data['course'] = $course;
+                        $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
                     } else {
-                        session()->setFlashdata('error', 'You are not assigned to this course.');
-                        return redirect()->to('/dashboard?section=my-courses');
+                        session()->setFlashdata('error', 'Course not found.');
+                        return redirect()->to('/dashboard');
                     }
                 }
             }
@@ -550,14 +548,23 @@ class Auth extends BaseController
                     }
                 }
                 $data['courses'] = $assignedCourses;
-                $data['students'] = $userModel->where('role', 'student')->findAll();
+                $data['students'] = []; // Initialize empty array - will be populated when course is selected
                 
                 // Get course ID from query if provided to show enrolled students
                 $courseId = $this->request->getGet('course_id');
                 if ($courseId) {
                     // Verify the teacher is assigned to this course
                     if ($courseTeacherModel->isTeacherAssigned($courseId, $teacherId)) {
-                        $data['selectedCourse'] = $courseModel->find($courseId);
+                        $selectedCourse = $courseModel->find($courseId);
+                        $data['selectedCourse'] = $selectedCourse;
+                        
+                        // Filter students by course's year level
+                        $studentQuery = $userModel->where('role', 'student');
+                        if ($selectedCourse && !empty($selectedCourse['year_level_id'])) {
+                            // Only show students matching the course's year level
+                            $studentQuery->where('year_level_id', $selectedCourse['year_level_id']);
+                        }
+                        $data['students'] = $studentQuery->findAll();
                         
                         // Get approved enrolled students for this course
                         $db = \Config\Database::connect();
@@ -706,10 +713,26 @@ class Auth extends BaseController
                 $allCourses = $allCoursesQuery->getResultArray();
                 
                 // Filter available courses (not enrolled and matching year level)
+                // Get student's year level
+                $studentYearLevelId = null;
+                if (isset($userData['year_level_id']) && $userData['year_level_id']) {
+                    $studentYearLevelId = $userData['year_level_id'];
+                }
+                
                 foreach ($allCourses as $course) {
-                    if (!in_array($course['id'], $enrolledCourseIds)) {
-                        $availableCourses[] = $course;
+                    // Skip if already enrolled
+                    if (in_array($course['id'], $enrolledCourseIds)) {
+                        continue;
                     }
+                    
+                    // Filter by year level - only show courses matching student's year level
+                    if ($studentYearLevelId) {
+                        if (empty($course['year_level_id']) || $course['year_level_id'] != $studentYearLevelId) {
+                            continue; // Skip courses that don't match the student's year level
+                        }
+                    }
+                    
+                    $availableCourses[] = $course;
                 }
             } catch (\Exception $e) {
                 // If database query fails, use empty arrays
