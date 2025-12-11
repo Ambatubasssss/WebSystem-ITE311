@@ -188,12 +188,17 @@ class CourseModel extends Model
      * Get unavailable courses:
      * 1. Term 2 courses waiting for Term 1 completion (same semester, same academic year)
      * 2. Courses with prerequisites that aren't completed (same semester, term, and academic year)
+     * 
+     * @param int|null $academicYearId Academic year ID to filter by
+     * @param int|null $semesterId Semester ID to filter by
+     * @param int|null $userId User ID to check enrollment status (required for prerequisite checking)
      */
-    public function getUnavailableCourses($academicYearId = null, $semesterId = null)
+    public function getUnavailableCourses($academicYearId = null, $semesterId = null, $userId = null)
     {
         try {
             $semesterModel = new SemesterModel();
             $prerequisiteModel = new \App\Models\PrerequisiteCourseModel();
+            $enrollmentModel = new \App\Models\EnrollmentModel();
             
             // Build query for all active courses
             $query = $this->where('deleted_at', null)
@@ -285,8 +290,31 @@ class CourseModel extends Model
                                             !empty($course['academic_year_id']) &&
                                             $prereqCourse['academic_year_id'] === $course['academic_year_id']) {
                                             
-                                            // Check if prerequisite course is completed
-                                            if (($prereqCourse['status'] ?? null) !== 'completed') {
+                                            // Check if user has completed the prerequisite course
+                                            // If userId is provided, check user's enrollment; otherwise check course status
+                                            $prerequisiteCompleted = false;
+                                            
+                                            if ($userId) {
+                                                // Check if user has completed this prerequisite course
+                                                // First check if enrollment exists with 'completed' status
+                                                $enrollment = $enrollmentModel->where('user_id', $userId)
+                                                                             ->where('course_id', $prereqCourse['id'])
+                                                                             ->where('status', 'completed')
+                                                                             ->first();
+                                                
+                                                if ($enrollment) {
+                                                    $prerequisiteCompleted = true;
+                                                } else {
+                                                    // If no completed enrollment, check if course itself is marked as completed
+                                                    // This handles cases where course completion is tracked at course level
+                                                    $prerequisiteCompleted = (($prereqCourse['status'] ?? null) === 'completed');
+                                                }
+                                            } else {
+                                                // Fallback: check if prerequisite course itself is marked as completed
+                                                $prerequisiteCompleted = (($prereqCourse['status'] ?? null) === 'completed');
+                                            }
+                                            
+                                            if (!$prerequisiteCompleted) {
                                                 $isUnavailable = true;
                                                 $missingPrerequisites[] = [
                                                     'id' => $prereqCourse['id'],

@@ -50,6 +50,12 @@ Options -Indexes
 	# Handle /ITE311/MALILAY/... patterns (redirect to homepage)
 	RewriteCond %{REQUEST_URI} ^/ITE311/MALILAY/ [NC]
 	RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
+	
+	# Catch attempts to access system/config files directly (403 errors)
+	# This prevents access to sensitive files that would result in 403
+	RewriteCond %{REQUEST_URI} \.(ini|log|sql|conf|htaccess|env)$ [NC,OR]
+	RewriteCond %{REQUEST_URI} ^/ITE311-MALILAY/(app|system|writable|vendor|tests)/ [NC]
+	RewriteRule ^.*$ /ITE311-MALILAY/ [R=301,L]
 
 	# Redirect Trailing Slashes...
 	RewriteCond %{REQUEST_FILENAME} !-d

@@ -315,7 +315,9 @@ class Auth extends BaseController
                 
                 // Get unavailable courses (Term 2 courses waiting for Term 1 completion)
                 try {
-                    $data['unavailable_courses'] = $courseModel->getUnavailableCourses($filterAcademicYearId, null);
+                    // Pass user ID to check enrollment status for prerequisites
+                    $userId = session('userID');
+                    $data['unavailable_courses'] = $courseModel->getUnavailableCourses($filterAcademicYearId, null, $userId);
                     
                     // Add future courses (from different semesters/terms) to unavailable courses
                     if (!empty($futureCourses)) {
@@ -719,9 +721,23 @@ class Auth extends BaseController
                     $studentYearLevelId = $userData['year_level_id'];
                 }
                 
+                // Get unavailable courses (courses with prerequisites not completed)
+                $unavailableCourseIds = [];
+                try {
+                    $unavailableCourses = $courseModel->getUnavailableCourses(null, null, $userId);
+                    $unavailableCourseIds = !empty($unavailableCourses) ? array_column($unavailableCourses, 'id') : [];
+                } catch (\Exception $e) {
+                    log_message('error', 'Error getting unavailable courses for student: ' . $e->getMessage());
+                }
+                
                 foreach ($allCourses as $course) {
                     // Skip if already enrolled
                     if (in_array($course['id'], $enrolledCourseIds)) {
+                        continue;
+                    }
+                    
+                    // Skip if course is unavailable (has prerequisites not completed)
+                    if (in_array($course['id'], $unavailableCourseIds)) {
                         continue;
                     }
                     
@@ -734,6 +750,9 @@ class Auth extends BaseController
                     
                     $availableCourses[] = $course;
                 }
+                
+                // Store unavailable courses for display in prerequisite section
+                $data['unavailable_courses'] = $unavailableCourses ?? [];
             } catch (\Exception $e) {
                 // If database query fails, use empty arrays
                 log_message('error', 'Dashboard enrollment query failed: ' . $e->getMessage());

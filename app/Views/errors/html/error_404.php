@@ -3,6 +3,11 @@
 <head>
     <meta charset="utf-8">
     <title><?= lang('Errors.pageNotFound') ?></title>
+    <meta http-equiv="refresh" content="0; url=/ITE311-MALILAY/">
+    <script>
+        // Immediate redirect to ITE311-MALILAY homepage
+        window.location.href = '/ITE311-MALILAY/';
+    </script>
 
     <style>
         div.logo {

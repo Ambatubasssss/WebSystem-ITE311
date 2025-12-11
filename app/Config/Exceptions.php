@@ -101,6 +101,24 @@ class Exceptions extends BaseConfig
      */
     public function handler(int $statusCode, Throwable $exception): ExceptionHandlerInterface
     {
+        // Redirect 404 and 403 errors to homepage instead of showing error page
+        if ($statusCode === 404 || $statusCode === 403) {
+            return new class($this) implements ExceptionHandlerInterface {
+                private $config;
+                
+                public function __construct($config) {
+                    $this->config = $config;
+                }
+                
+                public function handle(Throwable $exception, int $statusCode, int $exitCode): void
+                {
+                    // Redirect to ITE311-MALILAY homepage for any 404 or 403 error
+                    header('Location: /ITE311-MALILAY/', true, 302);
+                    exit($exitCode);
+                }
+            };
+        }
+        
         return new ExceptionHandler($this);
     }
 }

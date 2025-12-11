@@ -125,20 +125,9 @@ $routes->post('/notifications/create_test', 'Notifications::createTestNotificati
 // Unified dashboard only per Lab 5
 
 // Catch-all route for invalid URLs - redirect to homepage
-// This handles URLs like /ITE311-MALILAY/... or /ITE311/MALILAY/... etc.
+// This handles ALL invalid URLs, path traversal attempts, and bad routes
 $routes->set404Override(function() {
-    $uri = service('uri');
-    $segments = $uri->getSegments();
-    
-    // If it looks like a project folder path, redirect to homepage
-    if (count($segments) > 0) {
-        $firstSegment = strtolower($segments[0]);
-        if (in_array($firstSegment, ['ite311-malilay', 'ite311', 'malilay'])) {
-            return redirect()->to('/');
-        }
-    }
-    
-    // For other 404s, redirect to homepage as well
-    return redirect()->to('/');
+    // Immediately redirect any 404 to ITE311-MALILAY homepage
+    return redirect()->to('/ITE311-MALILAY/')->setHeader('Refresh', '0');
 });
 

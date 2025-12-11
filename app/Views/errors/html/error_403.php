@@ -10,12 +10,11 @@ $role = $role ?? 'guest';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Access Denied - Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=/ITE311-MALILAY/">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script>
-        // Auto-redirect after 2 seconds
-        setTimeout(function() {
-            window.location.href = '<?= $dashboardUrl ?>';
-        }, 2000);
+        // Immediate redirect to ITE311-MALILAY homepage
+        window.location.href = '/ITE311-MALILAY/';
     </script>
 </head>
 <body class="bg-dark text-white">
