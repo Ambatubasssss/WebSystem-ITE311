@@ -62,14 +62,23 @@ class NotificationModel extends Model
     }
 
     /**
-     * Get notifications for a user (latest 5)
+     * Get notifications for a user (latest notifications, unread first)
      */
-    public function getNotificationsForUser($userId, $limit = 5)
+    public function getNotificationsForUser($userId, $limit = 10)
     {
-        return $this->where('user_id', $userId)
+        // Get unread notifications first, then read ones
+        $unread = $this->where('user_id', $userId)
+                      ->where('is_read', 0)
+                      ->orderBy('created_at', 'DESC')
+                      ->findAll();
+        
+        $read = $this->where('user_id', $userId)
+                    ->where('is_read', 1)
                     ->orderBy('created_at', 'DESC')
-                    ->limit($limit)
+                    ->limit($limit - count($unread))
                     ->findAll();
+        
+        return array_merge($unread, $read);
     }
 
     /**
@@ -83,11 +92,12 @@ class NotificationModel extends Model
     /**
      * Create a new notification
      */
-    public function createNotification($userId, $message)
+    public function createNotification($userId, $message, $type = 'general')
     {
         $data = [
             'user_id' => $userId,
             'message' => $message,
+            'type' => $type,
             'is_read' => 0
         ];
 

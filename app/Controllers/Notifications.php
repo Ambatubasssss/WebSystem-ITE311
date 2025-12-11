@@ -52,7 +52,7 @@ class Notifications extends BaseController
             // Get unread count
             $unreadCount = $this->notificationModel->getUnreadCount($userId);
             
-            // Get latest notifications (limit 10 to show more history including read ones)
+            // Get latest notifications (limit 10 - unread first, then read ones)
             $notifications = $this->notificationModel->getNotificationsForUser($userId, 10);
             
             // Format notifications for JSON response
@@ -166,7 +166,7 @@ class Notifications extends BaseController
         $message = 'Test notification created at ' . date('Y-m-d H:i:s');
         
         try {
-            $result = $this->notificationModel->createNotification($userId, $message);
+            $result = $this->notificationModel->createNotification($userId, $message, 'general');
             
             if ($result) {
                 return $this->response->setJSON([

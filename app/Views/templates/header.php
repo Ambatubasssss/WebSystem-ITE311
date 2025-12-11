@@ -708,18 +708,25 @@
 
         let html = '';
         notifications.forEach(function(notification) {
+            // Use Bootstrap alert classes: alert-info for unread, alert-light for read
             const alertClass = notification.is_read ? 'alert-light' : 'alert-info';
             const readClass = notification.is_read ? 'text-muted' : 'fw-bold';
+            const iconClass = notification.is_read ? 'fa-check-circle' : 'fa-bell';
             
             html += `
-                <div class="alert ${alertClass} mb-2 notification-item" data-id="${notification.id}">
+                <div class="alert ${alertClass} mb-2 notification-item" data-id="${notification.id}" role="alert">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <p class="mb-1 ${readClass}">${escapeHtml(notification.message)}</p>
-                            <small class="text-muted">${notification.time_ago}</small>
+                            <div class="d-flex align-items-start">
+                                <i class="fas ${iconClass} me-2 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1 ${readClass}">${escapeHtml(notification.message)}</p>
+                                    <small class="text-muted"><i class="fas fa-clock"></i> ${notification.time_ago || 'Recently'}</small>
+                                </div>
+                            </div>
                         </div>
                         ${!notification.is_read ? `
-                            <button class="btn btn-sm btn-outline-success mark-read-btn" data-id="${notification.id}">
+                            <button class="btn btn-sm btn-outline-success mark-read-btn ms-2" data-id="${notification.id}" title="Mark as read">
                                 <i class="fas fa-check"></i>
                             </button>
                         ` : ''}

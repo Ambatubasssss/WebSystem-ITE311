@@ -259,14 +259,14 @@ class Auth extends BaseController
                     $data['selectedTerm'] = null;
                 }
                 
-            // Get filtered courses (exclude soft deleted - like GALORPOT's flow)
-            $data['courses'] = $courseQuery->orderBy('title', 'ASC')->findAll();
-            
-            // Get deleted courses separately (like GALORPOT's flow)
-            $data['deleted_courses'] = $courseModel->withDeleted()
-                                                   ->onlyDeleted()
-                                                   ->orderBy('deleted_at', 'DESC')
-                                                   ->findAll();
+                // Get filtered courses (exclude soft deleted - like GALORPOT's flow)
+                $data['courses'] = $courseQuery->orderBy('title', 'ASC')->findAll();
+                
+                // Get deleted courses separately (like GALORPOT's flow)
+                $data['deleted_courses'] = $courseModel->withDeleted()
+                                                       ->onlyDeleted()
+                                                       ->orderBy('deleted_at', 'DESC')
+                                                       ->findAll();
                 
                 // Get material counts and academic info for each course
                 foreach ($data['courses'] as &$course) {
@@ -660,12 +660,12 @@ class Auth extends BaseController
         $validation->setRules([
             'name' => [
                 'label' => 'Name',
-                'rules' => 'required|min_length[3]|max_length[100]|alpha_numeric_space',
+                'rules' => 'required|min_length[3]|max_length[100]|alpha_space',
                 'errors' => [
                     'required' => 'The {field} field is required.',
                     'min_length' => 'The {field} must be at least {param} characters long.',
                     'max_length' => 'The {field} cannot exceed {param} characters.',
-                    'alpha_numeric_space' => 'The {field} can only contain letters, numbers, and spaces.'
+                    'alpha_space' => 'The {field} can only contain letters and spaces.'
                 ]
             ],
             'email' => [

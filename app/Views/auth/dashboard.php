@@ -409,7 +409,7 @@
                                                 <div class="col-md-6 mb-3">
                                                     <label for="user_name" class="form-label">Name <span class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" id="user_name" name="name" required minlength="3" maxlength="100" placeholder="Enter full name">
-                                                    <div class="form-text">Minimum 3 characters, letters, numbers, and spaces only</div>
+                                                    <div class="form-text">Minimum 3 characters, letters and spaces only</div>
                                                 </div>
                                                 <div class="col-md-6 mb-3">
                                                     <label for="user_email" class="form-label">Email <span class="text-danger">*</span></label>
@@ -528,12 +528,31 @@
                             </a>
                         </div>
                         <div class="card-body">
-                            <!-- Filter Section -->
+                            <!-- Search and Filter Section -->
                             <div class="card mb-4 border-info">
                                 <div class="card-header bg-info text-white">
-                                    <h5 class="mb-0"><i class="fas fa-filter"></i> Filter Courses</h5>
+                                    <h5 class="mb-0"><i class="fas fa-filter"></i> Search & Filter Courses</h5>
                                 </div>
                                 <div class="card-body">
+                                    <!-- Search Box -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <label for="course_search" class="form-label">Search Courses</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       id="course_search" 
+                                                       placeholder="Search by course title, control number, or description..."
+                                                       onkeyup="filterCoursesTable()">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="clearCourseSearch()">
+                                                    <i class="fas fa-times"></i> Clear
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Filter Form -->
                                     <form method="GET" action="<?= base_url('dashboard') ?>" id="courseFilterForm">
                                         <input type="hidden" name="section" value="courses">
                                         <div class="row">
@@ -714,7 +733,7 @@
                                             </thead>
                                             <tbody id="coursesTableBody">
                                                 <?php foreach ($courses as $course): ?>
-                                                    <tr id="course-row-<?= $course['id'] ?>">
+                                                    <tr id="course-row-<?= $course['id'] ?>" class="course-table-row">
                                                         <td><?= $course['id'] ?></td>
                                                         <td>
                                                             <?php if (!empty($course['control_number'])): ?>
@@ -2789,7 +2808,7 @@
                                                                maxlength="100" 
                                                                value="<?= esc($currentUser['name'] ?? session('name')) ?>"
                                                                placeholder="Enter your full name">
-                                                        <div class="form-text">Minimum 3 characters, letters, numbers, and spaces only</div>
+                                                        <div class="form-text">Minimum 3 characters, letters and spaces only</div>
                                                     </div>
                                                     <div class="col-md-6 mb-3">
                                                         <label for="profile_email" class="form-label">Email <span class="text-danger">*</span></label>
@@ -4362,6 +4381,55 @@
         }
         
         $(document).on('keyup', '.course-search-input', filterCourses);
+        
+        // Course Management Table Search Function
+        function filterCoursesTable() {
+            const searchInput = document.getElementById('course_search');
+            if (!searchInput) return;
+            
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const tableBody = document.getElementById('coursesTableBody');
+            if (!tableBody) return;
+            
+            const rows = tableBody.getElementsByTagName('tr');
+            let visibleCount = 0;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const rowText = row.textContent || row.innerText || '';
+                const matches = !searchTerm || rowText.toLowerCase().includes(searchTerm);
+                
+                if (matches) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+            
+            // Show/hide "no results" message
+            let noResultsMsg = document.getElementById('noCoursesResults');
+            if (searchTerm && visibleCount === 0) {
+                if (!noResultsMsg) {
+                    noResultsMsg = document.createElement('tr');
+                    noResultsMsg.id = 'noCoursesResults';
+                    noResultsMsg.innerHTML = '<td colspan="8" class="text-center py-4"><i class="fas fa-search"></i> No courses found matching "' + escapeHtml(searchTerm) + '"</td>';
+                    tableBody.appendChild(noResultsMsg);
+                }
+            } else {
+                if (noResultsMsg) {
+                    noResultsMsg.remove();
+                }
+            }
+        }
+        
+        function clearCourseSearch() {
+            const searchInput = document.getElementById('course_search');
+            if (searchInput) {
+                searchInput.value = '';
+                filterCoursesTable();
+            }
+        }
         
         // Assignments Search and Filter
         function filterAssignments() {

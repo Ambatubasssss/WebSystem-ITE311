@@ -146,6 +146,40 @@ class Materials extends BaseController
             $result = $this->materialModel->insertMaterial($data);
             
             if ($result) {
+                // Get course information for notifications
+                $course = $this->courseModel->find($course_id);
+                $uploaderName = session('name') ?? 'Teacher';
+                $materialName = $sanitizedOriginalName;
+                
+                // Send notifications
+                $notificationModel = new \App\Models\NotificationModel();
+                $userModel = new \App\Models\UserModel();
+                
+                // 1. Notify all admins
+                $admins = $userModel->where('role', 'admin')->findAll();
+                foreach ($admins as $admin) {
+                    $notificationModel->insert([
+                        'user_id' => $admin['id'],
+                        'message' => "{$uploaderName} uploaded a new material '{$materialName}' to the course '{$course['title']}'.",
+                        'type' => 'material',
+                        'is_read' => 0
+                    ]);
+                }
+                
+                // 2. Notify all enrolled students in the course
+                $enrolledStudents = $this->enrollmentModel->where('course_id', $course_id)
+                                                          ->where('status', 'approved')
+                                                          ->findAll();
+                
+                foreach ($enrolledStudents as $enrollment) {
+                    $notificationModel->insert([
+                        'user_id' => $enrollment['user_id'],
+                        'message' => "New material '{$materialName}' has been uploaded to the course '{$course['title']}'.",
+                        'type' => 'material',
+                        'is_read' => 0
+                    ]);
+                }
+                
                 // Get user role for redirect
                 $userRole = strtolower(session('role') ?? '');
                 $redirectPath = '/dashboard?section=upload&course_id=' . $course_id;

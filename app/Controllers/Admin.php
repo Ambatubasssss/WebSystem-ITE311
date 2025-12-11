@@ -77,12 +77,12 @@ class Admin extends BaseController
         $validation->setRules([
             'name' => [
                 'label' => 'Name',
-                'rules' => 'required|min_length[3]|max_length[100]|alpha_numeric_space',
+                'rules' => 'required|min_length[3]|max_length[100]|alpha_space',
                 'errors' => [
                     'required' => 'The {field} field is required.',
                     'min_length' => 'The {field} must be at least {param} characters long.',
                     'max_length' => 'The {field} cannot exceed {param} characters.',
-                    'alpha_numeric_space' => 'The {field} can only contain letters, numbers, and spaces.'
+                    'alpha_space' => 'The {field} can only contain letters and spaces.'
                 ]
             ],
             'email' => [
@@ -1148,6 +1148,17 @@ class Admin extends BaseController
             $result = $courseTeacherModel->assignTeacher($courseId, $teacherId, $isPrimary);
             
             if ($result) {
+                // Send notification to the assigned teacher
+                $notificationModel = new \App\Models\NotificationModel();
+                $roleText = $isPrimary ? 'primary teacher' : 'teacher';
+                $notificationMessage = "You have been assigned as {$roleText} to the course '{$course['title']}'.";
+                $notificationModel->insert([
+                    'user_id' => $teacherId,
+                    'message' => $notificationMessage,
+                    'type' => 'assignment',
+                    'is_read' => 0
+                ]);
+                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Teacher assigned to course successfully!',
@@ -1435,6 +1446,30 @@ class Admin extends BaseController
             }
 
             if ($courseTeacherModel->update($assignmentId, $updateData)) {
+                // Send notification if teacher was changed
+                $notificationModel = new \App\Models\NotificationModel();
+                if ($existingAssignment['teacher_id'] != $teacherId) {
+                    // New teacher assigned
+                    $roleText = $isPrimary ? 'primary teacher' : 'teacher';
+                    $notificationMessage = "You have been assigned as {$roleText} to the course '{$course['title']}'.";
+                    $notificationModel->insert([
+                        'user_id' => $teacherId,
+                        'message' => $notificationMessage,
+                        'type' => 'assignment',
+                        'is_read' => 0
+                    ]);
+                } elseif ($existingAssignment['is_primary'] != $isPrimary) {
+                    // Primary status changed for same teacher
+                    $roleText = $isPrimary ? 'primary teacher' : 'teacher';
+                    $notificationMessage = "Your role for the course '{$course['title']}' has been updated. You are now assigned as {$roleText}.";
+                    $notificationModel->insert([
+                        'user_id' => $teacherId,
+                        'message' => $notificationMessage,
+                        'type' => 'assignment',
+                        'is_read' => 0
+                    ]);
+                }
+                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Teacher assignment updated successfully!',

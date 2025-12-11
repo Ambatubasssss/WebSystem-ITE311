@@ -150,13 +150,13 @@ class Course extends BaseController
                     $student = $userModel->find($userId);
                     $studentName = $student ? $student['name'] : 'Student';
                     $notificationMessage = "You have been enrolled in " . $course['title'] . " by your teacher!";
-                    $notificationModel->createNotification($userId, $notificationMessage);
+                    $notificationModel->createNotification($userId, $notificationMessage, 'enrollment');
                     
                     // Notify teachers assigned to this course about the enrollment
                     $courseTeacherModel = new \App\Models\CourseTeacherModel();
                     $teachers = $courseTeacherModel->getTeachersByCourse($courseId);
                     foreach ($teachers as $teacher) {
-                        $notificationModel->createNotification($teacher['teacher_id'], "Student {$studentName} has been enrolled in {$course['title']}.");
+                        $notificationModel->createNotification($teacher['teacher_id'], "Student {$studentName} has been enrolled in {$course['title']}.", 'enrollment');
                     }
                 } else {
                     // Student enrolled - notify teachers for approval
@@ -167,11 +167,11 @@ class Course extends BaseController
                     $studentName = $student ? $student['name'] : 'Student';
                     
                     foreach ($teachers as $teacher) {
-                        $notificationModel->createNotification($teacher['teacher_id'], "{$studentName} has requested enrollment in {$course['title']}. Please review and approve.");
+                        $notificationModel->createNotification($teacher['teacher_id'], "{$studentName} has requested enrollment in {$course['title']}. Please review and approve.", 'enrollment');
                     }
                     
                     $notificationMessage = "Your enrollment request for " . $course['title'] . " is pending teacher approval.";
-                    $notificationModel->createNotification($userId, $notificationMessage);
+                    $notificationModel->createNotification($userId, $notificationMessage, 'enrollment');
                 }
                 
                 $successMessage = ($userRole === 'teacher') 
@@ -490,7 +490,8 @@ class Course extends BaseController
                 $notificationModel = new \App\Models\NotificationModel();
                 $notificationModel->createNotification(
                     $enrollment['user_id'],
-                    "Your enrollment request for {$course['title']} has been approved!"
+                    "Your enrollment request for {$course['title']} has been approved!",
+                    'enrollment'
                 );
                 
                 return $this->response->setJSON([
@@ -597,7 +598,8 @@ class Course extends BaseController
                 $reasonText = $rejectionReason ? " Reason: {$rejectionReason}" : "";
                 $notificationModel->createNotification(
                     $enrollment['user_id'],
-                    "Your enrollment request for {$course['title']} has been rejected.{$reasonText}"
+                    "Your enrollment request for {$course['title']} has been rejected.{$reasonText}",
+                    'enrollment'
                 );
                 
                 return $this->response->setJSON([
@@ -763,7 +765,8 @@ class Course extends BaseController
                 $notificationModel = new \App\Models\NotificationModel();
                 $notificationModel->createNotification(
                     $studentId,
-                    "You have been unenrolled from {$courseTitle}."
+                    "You have been unenrolled from {$courseTitle}.",
+                    'enrollment'
                 );
                 
                 return $this->response->setJSON([
