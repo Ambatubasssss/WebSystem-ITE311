@@ -225,7 +225,7 @@ class Auth extends BaseController
                 // Get filter parameters from query string
                 $filterAcademicYearId = $this->request->getGet('academic_year_id');
                 $filterSemester = $this->request->getGet('semester'); // 1st or 2nd
-                $filterTerm = $this->request->getGet('term'); // 1st, 2nd, or 3rd
+                $filterTerm = $this->request->getGet('term'); // 1st or 2nd (half semester each)
                 
                 // Build course query with filters
                 $courseQuery = $courseModel;
@@ -267,12 +267,122 @@ class Auth extends BaseController
                            ->where('status !=', 'completed')
                            ->orWhere('status', null)
                            ->groupEnd();
-                $data['courses'] = $courseQuery->orderBy('title', 'ASC')->findAll();
+                $allActiveCourses = $courseQuery->orderBy('title', 'ASC')->findAll();
+                
+                // Get the CURRENT ACTIVE semester (where is_active = 1)
+                $currentActiveSemester = null;
+                try {
+                    $currentActiveSemester = $semesterModel->where('is_active', 1)->first();
+                } catch (\Exception $e) {
+                    log_message('error', 'Error getting current active semester: ' . $e->getMessage());
+                }
+                
+                // Separate courses into: current active semester/term vs others
+                $currentSemesterCourses = [];
+                $futureCourses = []; // Courses from future terms/semesters
+                
+                if ($currentActiveSemester) {
+                    foreach ($allActiveCourses as $course) {
+                        if (!empty($course['semester_id'])) {
+                            try {
+                                $courseSemester = $semesterModel->find($course['semester_id']);
+                                if ($courseSemester) {
+                                    // Check if course is from the current active semester and term
+                                    if ($courseSemester['id'] == $currentActiveSemester['id']) {
+                                        // Course is from current active semester and term - add to active courses
+                                        $currentSemesterCourses[] = $course;
+                                    } else {
+                                        // Course is from a different semester or term - add to future courses (prerequisite section)
+                                        $futureCourses[] = $course;
+                                    }
+                                } else {
+                                    // If semester not found, include in current courses (backward compatibility)
+                                    $currentSemesterCourses[] = $course;
+                                }
+                            } catch (\Exception $e) {
+                                log_message('error', 'Error processing course semester: ' . $e->getMessage());
+                                $currentSemesterCourses[] = $course;
+                            }
+                        } else {
+                            // If course has no semester, include in current courses
+                            $currentSemesterCourses[] = $course;
+                        }
+                    }
+                } else {
+                    // If no active semester found, show all courses (backward compatibility)
+                    $currentSemesterCourses = $allActiveCourses;
+                }
+                
+                // Get unavailable courses (Term 2 courses waiting for Term 1 completion)
+                try {
+                    $data['unavailable_courses'] = $courseModel->getUnavailableCourses($filterAcademicYearId, null);
+                    
+                    // Add future courses (from different semesters/terms) to unavailable courses
+                    if (!empty($futureCourses)) {
+                        foreach ($futureCourses as $futureCourse) {
+                            // Check if not already in unavailable courses
+                            $alreadyExists = false;
+                            if (!empty($data['unavailable_courses'])) {
+                                foreach ($data['unavailable_courses'] as $unavCourse) {
+                                    if (isset($unavCourse['id']) && isset($futureCourse['id']) && $unavCourse['id'] == $futureCourse['id']) {
+                                        $alreadyExists = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (!$alreadyExists) {
+                                // Add semester info to the course
+                                if (!empty($futureCourse['semester_id'])) {
+                                    try {
+                                        $futureSemester = $semesterModel->find($futureCourse['semester_id']);
+                                        if ($futureSemester) {
+                                            $futureCourse['semester_info'] = $futureSemester;
+                                            $futureCourse['unavailable_reason'] = 'This course is from a different semester or term';
+                                            $data['unavailable_courses'][] = $futureCourse;
+                                        }
+                                    } catch (\Exception $e) {
+                                        log_message('error', 'Error processing future course semester: ' . $e->getMessage());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Get unavailable course IDs to exclude from active courses
+                    $unavailableCourseIds = !empty($data['unavailable_courses']) ? array_column($data['unavailable_courses'], 'id') : [];
+                    
+                    // Filter out unavailable courses from current semester courses
+                    $data['courses'] = array_filter($currentSemesterCourses, function($course) use ($unavailableCourseIds) {
+                        return !in_array($course['id'] ?? 0, $unavailableCourseIds);
+                    });
+                    $data['courses'] = array_values($data['courses']); // Re-index array
+                } catch (\Exception $e) {
+                    // If there's an error getting unavailable courses, just show current semester courses
+                    log_message('error', 'Error getting unavailable courses: ' . $e->getMessage());
+                    $data['courses'] = $currentSemesterCourses;
+                    $data['unavailable_courses'] = !empty($futureCourses) ? $futureCourses : [];
+                }
+                
+                // Ensure unavailable_courses is always set
+                if (!isset($data['unavailable_courses'])) {
+                    $data['unavailable_courses'] = [];
+                }
                 
                 // Get completed courses separately
-                $completedCoursesQuery = $courseModel->where('status', 'completed')
-                                                    ->where('deleted_at', null);
-                $data['completed_courses'] = $completedCoursesQuery->orderBy('completed_at', 'DESC')->findAll();
+                try {
+                    $completedCoursesQuery = $courseModel->where('status', 'completed')
+                                                        ->where('deleted_at', null);
+                    $data['completed_courses'] = $completedCoursesQuery->orderBy('completed_at', 'DESC')->findAll();
+                } catch (\Exception $e) {
+                    log_message('error', 'Error getting completed courses: ' . $e->getMessage());
+                    $data['completed_courses'] = [];
+                }
+                
+                // Ensure completed_courses is always set
+                if (!isset($data['completed_courses'])) {
+                    $data['completed_courses'] = [];
+                }
                 
                 // Get deleted courses separately (like GALORPOT's flow)
                 $data['deleted_courses'] = $courseModel->withDeleted()

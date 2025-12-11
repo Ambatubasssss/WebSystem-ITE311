@@ -29,7 +29,7 @@ class CreateSemestersTable extends Migration
                 'type'       => 'VARCHAR',
                 'constraint' => 10,
                 'default'    => '1st',
-                'comment'    => 'Term within the semester. 3rd term means whole semester (spans both 1st and 2nd term)',
+                'comment'    => 'Term within the semester. 1st Term = first half, 2nd Term = second half',
             ],
             'academic_year_id' => [
                 'type'       => 'INT',

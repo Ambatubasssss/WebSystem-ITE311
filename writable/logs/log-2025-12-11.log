@@ -4316,3 +4316,923 @@ in SYSTEMPATH\CodeIgniter.php on line 957.
  2 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
  3 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
  4 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 07:51:04 --> ErrorException: Undefined variable $courseTeacherModel
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 366.
+ 1 APPPATH\Controllers\Auth.php(366): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $courseTeacherModel', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 366)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 07:51:07 --> ErrorException: Undefined variable $courseTeacherModel
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 366.
+ 1 APPPATH\Controllers\Auth.php(366): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $courseTeacherModel', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 366)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 07:51:10 --> ErrorException: Undefined variable $courseTeacherModel
+[Method: GET, Route: dashboard]
+in APPPATH\Controllers\Auth.php on line 366.
+ 1 APPPATH\Controllers\Auth.php(366): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $courseTeacherModel', 'C:\\xampp\\htdocs\\ITE311-MALILAY\\app\\Controllers\\Auth.php', 366)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:10:49 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+CRITICAL - 2025-12-11 08:10:49 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+[Method: GET, Route: dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 2 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 5 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 6 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:10:49 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 4 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 7 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 8 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:10:49 --> [Caused by] mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 5 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 8 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 9 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+10 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+11 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+12 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+13 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+14 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+15 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:12:49 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+CRITICAL - 2025-12-11 08:12:49 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+[Method: GET, Route: dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 2 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 5 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 6 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:12:49 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 4 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 7 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 8 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:12:49 --> [Caused by] mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 5 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 8 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 9 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+10 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+11 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+12 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+13 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+14 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+15 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:12:50 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+CRITICAL - 2025-12-11 08:12:50 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+[Method: GET, Route: dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 2 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 5 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 6 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:12:50 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 4 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 7 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 8 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:12:50 --> [Caused by] mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 5 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 8 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 9 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+10 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+11 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+12 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+13 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+14 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+15 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:16:57 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+CRITICAL - 2025-12-11 08:16:57 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+[Method: GET, Route: dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 2 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 5 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 6 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:16:57 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 4 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 7 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 8 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:16:57 --> [Caused by] mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 5 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 8 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 9 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+10 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+11 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+12 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+13 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+14 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+15 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:20:00 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+CRITICAL - 2025-12-11 08:20:00 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+[Method: GET, Route: dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 2 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 5 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 6 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:20:00 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 4 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 7 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 8 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:20:00 --> [Caused by] mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 5 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 8 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 9 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+10 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+11 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+12 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+13 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+14 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+15 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:21:27 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+CRITICAL - 2025-12-11 08:21:27 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+[Method: GET, Route: dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 2 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 5 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 6 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:21:27 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 4 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 7 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 8 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:21:27 --> [Caused by] mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 5 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 8 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 9 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+10 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+11 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+12 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+13 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+14 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+15 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:22:30 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+CRITICAL - 2025-12-11 08:22:30 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+[Method: GET, Route: dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 2 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 5 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 6 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:22:30 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 4 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 7 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 8 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:22:30 --> [Caused by] mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = \'13\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequisite_courses`.*, `courses`.`title` as `prerequisite_title`, `courses`.`control_number` as `prerequisite_control_number`
+FROM `prerequisite_courses`
+JOIN `courses` ON `courses`.`id` = `prerequisite_courses`.`prerequisite_course_id`
+WHERE `course_id` = :course_id:', [...], false)
+ 5 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+ 8 APPPATH\Models\CourseModel.php(258): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+ 9 APPPATH\Controllers\Auth.php(273): App\Models\CourseModel->getUnavailableCourses(null, null)
+10 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+11 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+12 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+13 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+14 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+15 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:25:22 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(266): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(275): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+ERROR - 2025-12-11 08:25:22 --> Error in getUnavailableCourses: Table 'lms_malilay.prerequisite_courses' doesn't exist
+ERROR - 2025-12-11 08:25:29 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(266): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(275): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+ERROR - 2025-12-11 08:25:29 --> Error in getUnavailableCourses: Table 'lms_malilay.prerequisite_courses' doesn't exist
+ERROR - 2025-12-11 08:25:30 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(266): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(275): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+ERROR - 2025-12-11 08:25:30 --> Error in getUnavailableCourses: Table 'lms_malilay.prerequisite_courses' doesn't exist
+ERROR - 2025-12-11 08:31:53 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(266): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(303): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+ERROR - 2025-12-11 08:31:53 --> Error in getUnavailableCourses: Table 'lms_malilay.prerequisite_courses' doesn't exist
+CRITICAL - 2025-12-11 08:31:53 --> ParseError: syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 5084.
+ 1 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 3 APPPATH\Controllers\Auth.php(766): view('auth/dashboard', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:34:01 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(266): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(318): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+ERROR - 2025-12-11 08:34:01 --> Error in getUnavailableCourses: Table 'lms_malilay.prerequisite_courses' doesn't exist
+CRITICAL - 2025-12-11 08:34:01 --> ParseError: syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 5084.
+ 1 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 3 APPPATH\Controllers\Auth.php(789): view('auth/dashboard', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:34:03 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(266): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(318): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+ERROR - 2025-12-11 08:34:03 --> Error in getUnavailableCourses: Table 'lms_malilay.prerequisite_courses' doesn't exist
+CRITICAL - 2025-12-11 08:34:03 --> ParseError: syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 5084.
+ 1 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 3 APPPATH\Controllers\Auth.php(789): view('auth/dashboard', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:34:13 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(266): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(318): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+ERROR - 2025-12-11 08:34:13 --> Error in getUnavailableCourses: Table 'lms_malilay.prerequisite_courses' doesn't exist
+CRITICAL - 2025-12-11 08:34:13 --> ParseError: syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 5084.
+ 1 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 3 APPPATH\Controllers\Auth.php(789): view('auth/dashboard', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:35:16 --> ParseError: syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 5084.
+ 1 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 3 APPPATH\Controllers\Auth.php(789): view('auth/dashboard', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-12-11 08:35:18 --> mysqli_sql_exception: Table 'lms_malilay.prerequisite_courses' doesn't exist in C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-MALILAY\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `prerequ...', 0)
+#1 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `prerequ...')
+#2 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `prerequ...')
+#3 C:\xampp\htdocs\ITE311-MALILAY\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `prerequ...', Array, false)
+#4 C:\xampp\htdocs\ITE311-MALILAY\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-MALILAY\system\BaseModel.php(677): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\ITE311-MALILAY\app\Models\PrerequisiteCourseModel.php(58): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\ITE311-MALILAY\app\Models\CourseModel.php(266): App\Models\PrerequisiteCourseModel->getPrerequisites('13')
+#8 C:\xampp\htdocs\ITE311-MALILAY\app\Controllers\Auth.php(318): App\Models\CourseModel->getUnavailableCourses(NULL, NULL)
+#9 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+#10 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+#11 C:\xampp\htdocs\ITE311-MALILAY\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#13 C:\xampp\htdocs\ITE311-MALILAY\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#14 C:\xampp\htdocs\ITE311-MALILAY\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#15 {main}
+ERROR - 2025-12-11 08:35:18 --> Error in getUnavailableCourses: Table 'lms_malilay.prerequisite_courses' doesn't exist
+CRITICAL - 2025-12-11 08:35:18 --> ParseError: syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 5084.
+ 1 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 3 APPPATH\Controllers\Auth.php(789): view('auth/dashboard', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:35:19 --> ParseError: syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 5084.
+ 1 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 3 APPPATH\Controllers\Auth.php(789): view('auth/dashboard', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:35:44 --> ParseError: syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 5084.
+ 1 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 3 APPPATH\Controllers\Auth.php(789): view('auth/dashboard', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-11 08:36:10 --> ParseError: syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 5084.
+ 1 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 2 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 3 APPPATH\Controllers\Auth.php(789): view('auth/dashboard', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Auth->dashboard()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(88): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

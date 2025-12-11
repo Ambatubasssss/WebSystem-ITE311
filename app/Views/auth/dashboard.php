@@ -759,19 +759,153 @@
                                 <?php endif; ?>
                             </div>
 
+                            <!-- Unavailable/Prerequisite Courses Section -->
+                            <?php if (isset($unavailable_courses)): ?>
+                                <div class="card mt-4 border-warning">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-lock"></i> Prerequisite Courses (Unavailable)
+                                            <?php if (!empty($unavailable_courses)): ?>
+                                                <span class="badge bg-dark text-white"><?= count($unavailable_courses) ?></span>
+                                            <?php endif; ?>
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted">
+                                            <i class="fas fa-info-circle"></i> These courses are not yet available because:
+                                            <ul class="mb-0 mt-2">
+                                                <li>Term 2 courses require Term 1 to be completed first (same semester and academic year)</li>
+                                                <li>Courses with prerequisites require prerequisite courses to be completed first (same semester, term, and academic year)</li>
+                                            </ul>
+                                        </p>
+                                        <?php if (!empty($unavailable_courses)): ?>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>CN</th>
+                                                        <th>Course Title</th>
+                                                        <th>Units</th>
+                                                        <th>Academic Year | Semester, Term</th>
+                                                        <th>Prerequisite Requirement</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($unavailable_courses as $course): ?>
+                                                        <tr class="unavailable-course-row">
+                                                            <td><?= $course['id'] ?></td>
+                                                            <td>
+                                                                <?php if (!empty($course['control_number'])): ?>
+                                                                    <span class="badge bg-secondary"><?= esc($course['control_number']) ?></span>
+                                                                <?php else: ?>
+                                                                    <span class="text-muted">-</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td>
+                                                                <strong><?= esc($course['title']) ?></strong>
+                                                                <?php if (isset($course['semester_info'])): ?>
+                                                                    <br><small class="text-warning">
+                                                                        <i class="fas fa-calendar-alt"></i> 
+                                                                        <?php 
+                                                                        $academicYearModel = new \App\Models\AcademicYearModel();
+                                                                        $academicYear = $academicYearModel->find($course['academic_year_id']);
+                                                                        if ($academicYear): 
+                                                                            echo esc($academicYear['year_start']) . '-' . esc($academicYear['year_end']);
+                                                                        endif;
+                                                                        ?>
+                                                                        | <?= esc($course['semester_info']['semester'] ?? '') ?> Sem, <?= esc($course['semester_info']['term'] ?? '') ?> Term
+                                                                    </small>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td><span class="badge bg-info"><?= $course['units'] ?? 0 ?> units</span></td>
+                                                            <td>
+                                                                <?php 
+                                                                $academicYearModel = new \App\Models\AcademicYearModel();
+                                                                $academicYear = $academicYearModel->find($course['academic_year_id']);
+                                                                if ($academicYear): 
+                                                                    echo esc($academicYear['year_start']) . '-' . esc($academicYear['year_end']);
+                                                                else:
+                                                                    echo '<span class="text-muted">N/A</span>';
+                                                                endif;
+                                                                ?>
+                                                                <?php if (isset($course['semester_info'])): ?>
+                                                                    <br><small class="text-muted">
+                                                                        <?= esc($course['semester_info']['semester'] ?? '') ?> Sem, <?= esc($course['semester_info']['term'] ?? '') ?> Term
+                                                                    </small>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-warning text-dark mb-1">
+                                                                    <i class="fas fa-lock"></i> <?= esc($course['unavailable_reason'] ?? 'Prerequisites required') ?>
+                                                                </span>
+                                                                <?php if (!empty($course['missing_prerequisites'])): ?>
+                                                                    <br><small class="text-muted mt-1 d-block">
+                                                                        <strong>Missing Prerequisites:</strong>
+                                                                        <ul class="mb-0 mt-1" style="padding-left: 20px;">
+                                                                            <?php foreach ($course['missing_prerequisites'] as $prereq): ?>
+                                                                                <li>
+                                                                                    <?= esc($prereq['title']) ?>
+                                                                                    <?php if (!empty($prereq['control_number'])): ?>
+                                                                                        (CN: <?= esc($prereq['control_number']) ?>)
+                                                                                    <?php endif; ?>
+                                                                                    - <?= esc($prereq['semester']) ?> Sem, <?= esc($prereq['term']) ?> Term
+                                                                                </li>
+                                                                            <?php endforeach; ?>
+                                                                        </ul>
+                                                                    </small>
+                                                                <?php elseif (isset($course['required_term'])): ?>
+                                                                    <br><small class="text-muted mt-1 d-block">
+                                                                        <strong>Required:</strong> <?= esc($course['required_term']) ?> must be completed first
+                                                                    </small>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td>
+                                                                <div class="btn-group-vertical" role="group" style="gap: 2px;">
+                                                                    <a href="<?= base_url("materials/view/{$course['id']}") ?>" 
+                                                                       class="btn btn-sm btn-info" title="View Course">
+                                                                        <i class="fas fa-eye"></i> View
+                                                                    </a>
+                                                                    <button type="button" 
+                                                                            class="btn btn-sm btn-secondary" 
+                                                                            disabled
+                                                                            title="Course unavailable - Complete prerequisites first">
+                                                                        <i class="fas fa-lock"></i> Unavailable
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <?php else: ?>
+                                            <div class="text-center py-4">
+                                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                                <p class="text-muted mb-0">No prerequisite courses. All courses are available for enrollment!</p>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
                             <!-- Completed Courses Section -->
-                            <?php if (!empty($completed_courses ?? [])): ?>
+                            <?php if (isset($completed_courses)): ?>
                                 <div class="card mt-4 border-success">
                                     <div class="card-header bg-success text-white">
                                         <h5 class="mb-0">
                                             <i class="fas fa-check-circle"></i> Completed Courses 
-                                            <span class="badge bg-light text-dark"><?= count($completed_courses) ?></span>
+                                            <?php if (!empty($completed_courses)): ?>
+                                                <span class="badge bg-light text-dark"><?= count($completed_courses) ?></span>
+                                            <?php endif; ?>
                                         </h5>
                                     </div>
                                     <div class="card-body">
                                         <p class="text-muted">
                                             <i class="fas fa-info-circle"></i> These courses have been completed and archived from previous academic years.
                                         </p>
+                                        <?php if (!empty($completed_courses)): ?>
                                         <div class="table-responsive">
                                             <table class="table table-striped table-hover">
                                                 <thead>
@@ -840,6 +974,12 @@
                                                 </tbody>
                                             </table>
                                         </div>
+                                        <?php else: ?>
+                                            <div class="text-center py-4">
+                                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted mb-0">No completed courses yet.</p>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -1326,9 +1466,8 @@
                                             <div class="col-md-3 mb-3">
                                                 <label for="term" class="form-label">Term <span class="text-danger">*</span></label>
                                                 <select class="form-select" id="term" name="term" required>
-                                                    <option value="1st">1st Term</option>
-                                                    <option value="2nd">2nd Term</option>
-                                                    <option value="3rd">3rd (Whole Semester)</option>
+                                                    <option value="1st">1st Term (Half Semester)</option>
+                                                    <option value="2nd">2nd Term (Half Semester)</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-4 mb-3">
@@ -1449,9 +1588,8 @@
                                                                         <div class="mb-3">
                                                                             <label for="term_edit<?= $sem['id'] ?>" class="form-label">Term <span class="text-danger">*</span></label>
                                                                             <select class="form-select" id="term_edit<?= $sem['id'] ?>" name="term" required>
-                                                                                <option value="1st" <?= $sem['term'] === '1st' ? 'selected' : '' ?>>1st Term</option>
-                                                                                <option value="2nd" <?= $sem['term'] === '2nd' ? 'selected' : '' ?>>2nd Term</option>
-                                                                                <option value="3rd" <?= $sem['term'] === '3rd' ? 'selected' : '' ?>>3rd (Whole Semester)</option>
+                                                                                <option value="1st" <?= $sem['term'] === '1st' ? 'selected' : '' ?>>1st Term (Half Semester)</option>
+                                                                                <option value="2nd" <?= $sem['term'] === '2nd' ? 'selected' : '' ?>>2nd Term (Half Semester)</option>
                                                                             </select>
                                                                         </div>
                                                                         <div class="mb-3">

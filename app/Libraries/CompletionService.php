@@ -52,48 +52,44 @@ class CompletionService
             
             $shouldNotify = $existingNotifications === 0;
 
+            // Get the semester's term to determine completion logic
+            $semesterTerm = $semester['term'] ?? '';
+            
+            // System now uses only Term 1 and Term 2 (each half semester)
+            // - Term 1 = first half of semester
+            // - Term 2 = second half of semester
+            // When a term ends, only courses in that specific term should be completed
+            
             // Get all courses for this semester that are still active
             $courses = $this->courseModel->where('semester_id', $semester['id'])
                                          ->where('status', 'active')
                                          ->findAll();
 
             foreach ($courses as $course) {
-                // Update course status to completed
-                $this->courseModel->update($course['id'], [
-                    'status' => 'completed',
-                    'completed_at' => date('Y-m-d H:i:s')
-                ]);
-
-                // Get all approved enrollments for this course
-                $enrollments = $this->enrollmentModel->where('course_id', $course['id'])
-                                                    ->where('status', 'approved')
-                                                    ->findAll();
-
-                // Update enrollment status to completed
-                foreach ($enrollments as $enrollment) {
-                    $this->enrollmentModel->update($enrollment['id'], [
-                        'status' => 'completed',
-                        'completed_at' => date('Y-m-d H:i:s')
-                    ]);
-
-                    // Notify student about course completion (only if not already notified today)
-                    $existingCourseNotification = $this->notificationModel->where('user_id', $enrollment['user_id'])
-                                                                          ->where('type', 'completion')
-                                                                          ->like('message', $course['title'] . '%')
-                                                                          ->where('DATE(created_at)', date('Y-m-d'))
-                                                                          ->countAllResults();
-                    
-                    if ($existingCourseNotification === 0) {
-                        $this->notificationModel->insert([
-                            'user_id' => $enrollment['user_id'],
-                            'message' => "Course '{$course['title']}' has been completed. The {$semester['semester']} Semester ({$semester['term']} Term) has ended.",
-                            'type' => 'completion',
-                            'is_read' => 0
-                        ]);
-                    }
+                // Get the course's semester to check its term
+                $courseSemester = $this->semesterModel->find($course['semester_id']);
+                if (!$courseSemester) {
+                    continue; // Skip if semester not found
                 }
-
-                $updatedCourses[] = $course['id'];
+                
+                $courseTerm = $courseSemester['term'] ?? '';
+                
+                // Logic: Only complete courses that match the ending term
+                // - When Term 1 ends, only complete Term 1 courses
+                // - When Term 2 ends, only complete Term 2 courses
+                
+                if (($semesterTerm === '1st' || $semesterTerm === '1') && 
+                    ($courseTerm === '1st' || $courseTerm === '1')) {
+                    // Term 1 ending - complete Term 1 courses
+                    $this->completeCourse($course, $semester);
+                    $updatedCourses[] = $course['id'];
+                } elseif (($semesterTerm === '2nd' || $semesterTerm === '2') && 
+                          ($courseTerm === '2nd' || $courseTerm === '2')) {
+                    // Term 2 ending - complete Term 2 courses
+                    $this->completeCourse($course, $semester);
+                    $updatedCourses[] = $course['id'];
+                }
+                // Courses in other terms are not affected
             }
 
             // Notify all students about semester completion (only once per day)
@@ -110,6 +106,47 @@ class CompletionService
     }
 
     /**
+     * Helper method to complete a course and its enrollments
+     */
+    protected function completeCourse($course, $semester)
+    {
+        // Update course status to completed
+        $this->courseModel->update($course['id'], [
+            'status' => 'completed',
+            'completed_at' => date('Y-m-d H:i:s')
+        ]);
+
+        // Get all approved enrollments for this course
+        $enrollments = $this->enrollmentModel->where('course_id', $course['id'])
+                                            ->where('status', 'approved')
+                                            ->findAll();
+
+        // Update enrollment status to completed
+        foreach ($enrollments as $enrollment) {
+            $this->enrollmentModel->update($enrollment['id'], [
+                'status' => 'completed',
+                'completed_at' => date('Y-m-d H:i:s')
+            ]);
+
+            // Notify student about course completion (only if not already notified today)
+            $existingCourseNotification = $this->notificationModel->where('user_id', $enrollment['user_id'])
+                                                                  ->where('type', 'completion')
+                                                                  ->like('message', $course['title'] . '%')
+                                                                  ->where('DATE(created_at)', date('Y-m-d'))
+                                                                  ->countAllResults();
+            
+            if ($existingCourseNotification === 0) {
+                $this->notificationModel->insert([
+                    'user_id' => $enrollment['user_id'],
+                    'message' => "Course '{$course['title']}' has been completed. The {$semester['semester']} Semester ({$semester['term']} Term) has ended.",
+                    'type' => 'completion',
+                    'is_read' => 0
+                ]);
+            }
+        }
+    }
+
+    /**
      * Notify all students about semester completion
      */
     protected function notifySemesterCompletion($semester)
@@ -118,7 +155,8 @@ class CompletionService
         $students = $userModel->where('role', 'student')->findAll();
 
         $semesterName = $semester['name'] ?? ($semester['semester'] . ' Semester');
-        $message = "The {$semesterName} ({$semester['term']} Term) has been completed. All courses for this semester are now marked as completed.";
+        $term = $semester['term'] ?? '';
+        $message = "The {$semesterName} ({$term} Term) has been completed. All courses for this term are now marked as completed.";
 
         foreach ($students as $student) {
             $this->notificationModel->insert([
