@@ -79,6 +79,14 @@ class Course extends BaseController
                 'message' => 'Course not found.'
             ]);
         }
+        
+        // Check if course is completed - prevent enrollment in completed courses
+        if ($course['status'] === 'completed') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'This course has been completed and is no longer available for enrollment.'
+            ]);
+        }
 
         // Check if course has a teacher assigned (only for student self-enrollment)
         if ($userRole === 'student') {
@@ -417,6 +425,11 @@ class Course extends BaseController
      * Search courses by title or description
      * Supports both AJAX (JSON) and regular (view) requests
      */
+    /**
+     * Search courses by title, control number, or description
+     * Supports both GET and POST requests
+     * Returns JSON for AJAX requests
+     */
     public function search()
     {
         // Get search term from GET or POST request
@@ -428,37 +441,31 @@ class Course extends BaseController
         // Create a new model instance for this query to avoid modifying the shared instance
         $searchModel = new CourseModel();
         
+        // Exclude deleted courses
+        $searchModel->where('deleted_at', null);
+        
         // Build query using CodeIgniter's Query Builder
         if (!empty($searchTerm)) {
-            // Use LIKE queries for searching in title and description
+            // Use LIKE queries for searching in title, control_number, and description
             $searchModel->groupStart()
                         ->like('title', $searchTerm)
+                        ->orLike('control_number', $searchTerm)
                         ->orLike('description', $searchTerm)
                         ->groupEnd();
         }
         
-        // Get all matching courses
+        // Get all matching courses (include all statuses - active, completed, etc.)
+        // The filtering by status will be done on the client side based on which section is searching
         $courses = $searchModel->orderBy('title', 'ASC')->findAll();
         
         // Check if request is AJAX
         if ($this->request->isAJAX()) {
             // Return JSON response for AJAX requests
-            return $this->response->setJSON([
-                'success' => true,
-                'courses' => $courses,
-                'count' => count($courses),
-                'search_term' => $searchTerm
-            ]);
+            return $this->response->setJSON($courses);
         }
         
-        // For regular requests, render view (if search_results view exists)
-        $data = [
-            'courses' => $courses,
-            'searchTerm' => $searchTerm
-        ];
-        
-        // Redirect to dashboard with search results
-        return redirect()->to('/dashboard?section=enrollments&search=' . urlencode($searchTerm));
+        // For regular requests, redirect to dashboard with search results
+        return redirect()->to('/dashboard?section=courses&search=' . urlencode($searchTerm));
     }
     
     /**

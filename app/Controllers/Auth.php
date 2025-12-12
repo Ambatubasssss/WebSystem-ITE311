@@ -163,7 +163,17 @@ class Auth extends BaseController
             ],
         ];
 
+        // First, automatically update active semesters based on current date (Asia/Manila timezone)
+        try {
+            $activationService = new \App\Libraries\SemesterActivationService();
+            $activationService->updateActiveSemesters();
+        } catch (\Exception $e) {
+            // Log error but don't break the dashboard
+            log_message('error', 'Error updating active semesters: ' . $e->getMessage());
+        }
+        
         // Check and update course/enrollment completion status
+        // This should only complete courses from semesters that are NOT active
         try {
             $completionService = new \App\Libraries\CompletionService();
             $completionService->checkAndUpdateCompletions();
@@ -209,6 +219,10 @@ class Auth extends BaseController
         if ($role === 'admin') {
             $data['totalUsers'] = $userModel->countAllResults();
             $data['recentUsers'] = $userModel->orderBy('created_at', 'DESC')->limit(5)->findAll();
+            
+            // Calculate total courses count for admin (all courses including completed, active, and unavailable)
+            // Admins can see all courses, so count everything except soft-deleted
+            $data['totalCourses'] = $courseModel->where('deleted_at', null)->countAllResults();
             
             // Section-specific data
             if ($section === 'users') {
@@ -277,9 +291,14 @@ class Auth extends BaseController
                     log_message('error', 'Error getting current active semester: ' . $e->getMessage());
                 }
                 
-                // Separate courses into: current active semester/term vs others
+                // Separate courses into: current active semester/term vs future vs past
+                // Based on semester dates (Asia/Manila timezone)
+                date_default_timezone_set('Asia/Manila');
+                $today = date('Y-m-d');
+                
                 $currentSemesterCourses = [];
-                $futureCourses = []; // Courses from future terms/semesters
+                $futureCourses = []; // Courses from future terms/semesters (start_date > today)
+                $pastCourses = []; // Courses from past semesters (end_date < today) - should be in completed
                 
                 if ($currentActiveSemester) {
                     foreach ($allActiveCourses as $course) {
@@ -287,12 +306,27 @@ class Auth extends BaseController
                             try {
                                 $courseSemester = $semesterModel->find($course['semester_id']);
                                 if ($courseSemester) {
+                                    $semesterStartDate = $courseSemester['start_date'] ?? null;
+                                    $semesterEndDate = $courseSemester['end_date'] ?? null;
+                                    
                                     // Check if course is from the current active semester and term
                                     if ($courseSemester['id'] == $currentActiveSemester['id']) {
                                         // Course is from current active semester and term - add to active courses
                                         $currentSemesterCourses[] = $course;
+                                    } elseif ($semesterStartDate && $semesterEndDate) {
+                                        // Check if semester is in the future (start_date > today)
+                                        if ($semesterStartDate > $today) {
+                                            // Future semester - add to future courses (prerequisite section)
+                                            $futureCourses[] = $course;
+                                        } elseif ($semesterEndDate < $today) {
+                                            // Past semester - should be in completed, not in active courses
+                                            $pastCourses[] = $course;
+                                        } else {
+                                            // Semester is ongoing but not active (edge case) - treat as current
+                                            $currentSemesterCourses[] = $course;
+                                        }
                                     } else {
-                                        // Course is from a different semester or term - add to future courses (prerequisite section)
+                                        // Semester has no dates - compare by ID (backward compatibility)
                                         $futureCourses[] = $course;
                                     }
                                 } else {
@@ -309,9 +343,45 @@ class Auth extends BaseController
                         }
                     }
                 } else {
-                    // If no active semester found, show all courses (backward compatibility)
-                    $currentSemesterCourses = $allActiveCourses;
+                    // If no active semester found, check dates to separate current vs future vs past
+                    foreach ($allActiveCourses as $course) {
+                        if (!empty($course['semester_id'])) {
+                            try {
+                                $courseSemester = $semesterModel->find($course['semester_id']);
+                                if ($courseSemester) {
+                                    $semesterStartDate = $courseSemester['start_date'] ?? null;
+                                    $semesterEndDate = $courseSemester['end_date'] ?? null;
+                                    
+                                    if ($semesterStartDate && $semesterEndDate) {
+                                        if ($semesterStartDate > $today) {
+                                            // Future semester
+                                            $futureCourses[] = $course;
+                                        } elseif ($semesterEndDate < $today) {
+                                            // Past semester
+                                            $pastCourses[] = $course;
+                                        } else {
+                                            // Current semester (dates include today)
+                                            $currentSemesterCourses[] = $course;
+                                        }
+                                    } else {
+                                        // No dates - include in current (backward compatibility)
+                                        $currentSemesterCourses[] = $course;
+                                    }
+                                } else {
+                                    $currentSemesterCourses[] = $course;
+                                }
+                            } catch (\Exception $e) {
+                                log_message('error', 'Error processing course semester: ' . $e->getMessage());
+                                $currentSemesterCourses[] = $course;
+                            }
+                        } else {
+                            $currentSemesterCourses[] = $course;
+                        }
+                    }
                 }
+                
+                // Reset timezone
+                date_default_timezone_set(date_default_timezone_get());
                 
                 // Get unavailable courses (Term 2 courses waiting for Term 1 completion)
                 try {
@@ -320,6 +390,7 @@ class Auth extends BaseController
                     $data['unavailable_courses'] = $courseModel->getUnavailableCourses($filterAcademicYearId, null, $userId);
                     
                     // Add future courses (from different semesters/terms) to unavailable courses
+                    // These are courses from future semesters (start_date > today)
                     if (!empty($futureCourses)) {
                         foreach ($futureCourses as $futureCourse) {
                             // Check if not already in unavailable courses
@@ -339,8 +410,16 @@ class Auth extends BaseController
                                     try {
                                         $futureSemester = $semesterModel->find($futureCourse['semester_id']);
                                         if ($futureSemester) {
+                                            $semesterStartDate = $futureSemester['start_date'] ?? null;
                                             $futureCourse['semester_info'] = $futureSemester;
-                                            $futureCourse['unavailable_reason'] = 'This course is from a different semester or term';
+                                            
+                                            // Set appropriate reason based on date
+                                            if ($semesterStartDate && $semesterStartDate > $today) {
+                                                $futureCourse['unavailable_reason'] = 'This course is from a future semester or term (starts on ' . date('M d, Y', strtotime($semesterStartDate)) . ')';
+                                            } else {
+                                                $futureCourse['unavailable_reason'] = 'This course is from a different semester or term';
+                                            }
+                                            
                                             $data['unavailable_courses'][] = $futureCourse;
                                         }
                                     } catch (\Exception $e) {
@@ -372,13 +451,41 @@ class Auth extends BaseController
                 }
                 
                 // Get completed courses separately
+                // Only show courses that are truly completed (from past, inactive semesters)
                 try {
-                    $completedCoursesQuery = $courseModel->where('status', 'completed')
-                                                        ->where('deleted_at', null);
-                    $data['completed_courses'] = $completedCoursesQuery->orderBy('completed_at', 'DESC')->findAll();
+                    // Set timezone to Asia/Manila for date comparison
+                    date_default_timezone_set('Asia/Manila');
+                    $today = date('Y-m-d');
+                    
+                    // Get completed courses that belong to semesters that:
+                    // 1. Course status is 'completed'
+                    // 2. Semester is either inactive OR has end_date that has passed
+                    // 3. Also include courses with no semester (semester_id IS NULL) if they're completed
+                    // This ensures completed courses show even if semester dates aren't set properly
+                    $db = \Config\Database::connect();
+                    $completedCoursesQuery = $db->query("
+                        SELECT c.* 
+                        FROM courses c
+                        LEFT JOIN semesters s ON c.semester_id = s.id
+                        WHERE c.status = 'completed'
+                        AND c.deleted_at IS NULL
+                        AND (
+                            c.semester_id IS NULL
+                            OR s.id IS NULL
+                            OR s.is_active = 0 
+                            OR (s.end_date IS NOT NULL AND s.end_date < ?)
+                        )
+                        ORDER BY c.completed_at DESC
+                    ", [$today]);
+                    $data['completed_courses'] = $completedCoursesQuery->getResultArray();
+                    
+                    // Reset timezone
+                    date_default_timezone_set(date_default_timezone_get());
                 } catch (\Exception $e) {
                     log_message('error', 'Error getting completed courses: ' . $e->getMessage());
                     $data['completed_courses'] = [];
+                    // Reset timezone in case of error
+                    date_default_timezone_set(date_default_timezone_get());
                 }
                 
                 // Ensure completed_courses is always set
@@ -492,19 +599,31 @@ class Auth extends BaseController
             $teacherId = session('userID');
             $courseTeacherModel = new \App\Models\CourseTeacherModel();
             
-            // Calculate teacher's course count for overview
+            // Calculate teacher's course count for overview (exclude completed courses)
             $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
-            $data['myCoursesCount'] = count($teacherCourses);
+            $activeCoursesCount = 0;
+            foreach ($teacherCourses as $teacherCourse) {
+                $course = $courseModel->find($teacherCourse['course_id']);
+                if ($course && $course['status'] !== 'completed') {
+                    $activeCoursesCount++;
+                }
+            }
+            $data['myCoursesCount'] = $activeCoursesCount;
             
             // Section-specific data
             if ($section === 'my-courses') {
-                // Get only courses assigned to this teacher
+                // Get only courses assigned to this teacher (exclude completed courses)
                 $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
                 $coursesWithMaterials = [];
                 
                 foreach ($teacherCourses as $teacherCourse) {
                     $course = $courseModel->find($teacherCourse['course_id']);
                     if ($course) {
+                        // Filter out completed courses - they should not appear in "My Courses"
+                        if ($course['status'] === 'completed') {
+                            continue; // Skip completed courses
+                        }
+                        
                         $materialCount = $materialModel->where('course_id', $course['id'])->countAllResults();
                         $course['material_count'] = $materialCount;
                         $course['is_primary'] = $teacherCourse['is_primary'];
@@ -520,32 +639,37 @@ class Auth extends BaseController
                     if ($courseTeacherModel->isTeacherAssigned($courseId, $teacherId)) {
                         $course = $courseModel->find($courseId);
                         if ($course) {
+                            // Check if course is completed - redirect if so
+                            if ($course['status'] === 'completed') {
+                                session()->setFlashdata('error', 'This course has been completed and is no longer available.');
+                                return redirect()->to('/dashboard?section=upload');
+                            }
                             $data['course'] = $course;
                             $data['materials'] = $materialModel->getMaterialsByCourse($courseId);
                         }
                     } else {
                         session()->setFlashdata('error', 'You are not assigned to this course.');
-                        return redirect()->to('/dashboard?section=my-courses');
+                        return redirect()->to('/dashboard?section=upload');
                     }
                 } else {
-                    // Show only courses assigned to this teacher for selection
+                    // Show only courses assigned to this teacher for selection (exclude completed)
                     $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
                     $assignedCourses = [];
                     foreach ($teacherCourses as $teacherCourse) {
                         $course = $courseModel->find($teacherCourse['course_id']);
-                        if ($course) {
+                        if ($course && $course['status'] !== 'completed') {
                             $assignedCourses[] = $course;
                         }
                     }
                     $data['courses'] = $assignedCourses;
                 }
             } elseif ($section === 'enroll-students') {
-                // Get only courses assigned to this teacher
+                // Get only courses assigned to this teacher (exclude completed)
                 $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
                 $assignedCourses = [];
                 foreach ($teacherCourses as $teacherCourse) {
                     $course = $courseModel->find($teacherCourse['course_id']);
-                    if ($course) {
+                    if ($course && $course['status'] !== 'completed') {
                         $assignedCourses[] = $course;
                     }
                 }
@@ -558,6 +682,11 @@ class Auth extends BaseController
                     // Verify the teacher is assigned to this course
                     if ($courseTeacherModel->isTeacherAssigned($courseId, $teacherId)) {
                         $selectedCourse = $courseModel->find($courseId);
+                        // Check if course is completed - redirect if so
+                        if ($selectedCourse && $selectedCourse['status'] === 'completed') {
+                            session()->setFlashdata('error', 'This course has been completed and is no longer available for enrollment.');
+                            return redirect()->to('/dashboard?section=enroll-students');
+                        }
                         $data['selectedCourse'] = $selectedCourse;
                         
                         // Filter students by course's year level
@@ -608,12 +737,12 @@ class Auth extends BaseController
                     }
                 }
             } elseif ($section === 'create-assignment') {
-                // Get only courses assigned to this teacher for assignment creation
+                // Get only courses assigned to this teacher for assignment creation (exclude completed)
                 $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
                 $assignedCourses = [];
                 foreach ($teacherCourses as $teacherCourse) {
                     $course = $courseModel->find($teacherCourse['course_id']);
-                    if ($course) {
+                    if ($course && $course['status'] !== 'completed') {
                         $assignedCourses[] = $course;
                     }
                 }
@@ -631,12 +760,12 @@ class Auth extends BaseController
                         return redirect()->to('/dashboard?section=assignments');
                     }
                 } else {
-                    // Show only courses assigned to this teacher for selection
+                    // Show only courses assigned to this teacher for selection (exclude completed)
                     $teacherCourses = $courseTeacherModel->getCoursesByTeacher($teacherId);
                     $assignedCourses = [];
                     foreach ($teacherCourses as $teacherCourse) {
                         $course = $courseModel->find($teacherCourse['course_id']);
-                        if ($course) {
+                        if ($course && $course['status'] !== 'completed') {
                             $assignedCourses[] = $course;
                         }
                     }
@@ -681,10 +810,19 @@ class Auth extends BaseController
                 ", [$userId]);
                 $allEnrollments = $allEnrollmentsQuery->getResultArray();
                 
-                // Get only approved enrollments for enrolled courses list
+                // Get only approved enrollments for enrolled courses list (exclude completed courses)
                 $enrolledCourses = array_filter($allEnrollments, function($enrollment) {
+                    // Only show approved enrollments that are not completed
                     return $enrollment['status'] === 'approved';
                 });
+                
+                // Further filter: Remove courses that are marked as completed
+                $enrolledCourses = array_filter($enrolledCourses, function($enrollment) use ($courseModel) {
+                    $course = $courseModel->find($enrollment['course_id']);
+                    // Exclude if course is completed
+                    return $course && $course['status'] !== 'completed';
+                });
+                
                 $enrolledCourses = array_values($enrolledCourses);
                 
                 // Get enrolled course IDs (all statuses) to exclude from available courses
@@ -694,21 +832,24 @@ class Auth extends BaseController
                 $data['allEnrollments'] = $allEnrollments;
                 
                 // Build query for available courses - filter by year level if student has one
+                // Exclude completed courses from available courses
                 if ($studentYearLevelId) {
-                    // Only show courses matching the student's year level
+                    // Only show courses matching the student's year level (exclude completed)
                     $allCoursesQuery = $db->query("
                         SELECT id, title, description, year_level_id 
                         FROM courses 
                         WHERE deleted_at IS NULL 
                         AND year_level_id = ? 
+                        AND (status IS NULL OR status != 'completed')
                         ORDER BY title ASC
                     ", [$studentYearLevelId]);
                 } else {
-                    // If student has no year level, show all courses (for backwards compatibility)
+                    // If student has no year level, show all courses (for backwards compatibility, exclude completed)
                     $allCoursesQuery = $db->query("
                         SELECT id, title, description, year_level_id 
                         FROM courses 
                         WHERE deleted_at IS NULL 
+                        AND (status IS NULL OR status != 'completed')
                         ORDER BY title ASC
                     ");
                 }
@@ -739,6 +880,12 @@ class Auth extends BaseController
                     // Skip if course is unavailable (has prerequisites not completed)
                     if (in_array($course['id'], $unavailableCourseIds)) {
                         continue;
+                    }
+                    
+                    // Double-check: Skip if course is completed (extra safety)
+                    $fullCourse = $courseModel->find($course['id']);
+                    if ($fullCourse && $fullCourse['status'] === 'completed') {
+                        continue; // Skip completed courses
                     }
                     
                     // Filter by year level - only show courses matching student's year level

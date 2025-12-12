@@ -109,7 +109,7 @@
                                         <div class="card bg-success text-white mb-3">
                                             <div class="card-body">
                                                 <h6 class="card-title">Total Courses</h6>
-                                                <p class="mb-0"><?= count($courses ?? []) ?></p>
+                                                <p class="mb-0"><?= $totalCourses ?? count($courses ?? []) ?></p>
                                             </div>
                                         </div>
                                     </div>
@@ -198,11 +198,27 @@
                                                 <h5 class="mb-0"><i class="fas fa-graduation-cap"></i> My Enrolled Courses</h5>
                                             </div>
                                             <div class="card-body">
+                                                <!-- Search Form for Enrolled Courses -->
+                                                <div class="row mb-4">
+                                                    <div class="col-md-12">
+                                                        <form id="enrolledSearchForm" class="d-flex">
+                                                            <input type="text" 
+                                                                   id="enrolledSearchInput" 
+                                                                   class="form-control" 
+                                                                   placeholder="Search enrolled courses..." 
+                                                                   name="search_term">
+                                                            <button class="btn btn-outline-primary ms-2" type="submit">
+                                                                <i class="fas fa-search"></i> Search
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                
                                                 <div id="enrolledCoursesContainer">
                                                     <?php if (!empty($enrolledCourses)): ?>
                                                         <div class="row">
                                                             <?php foreach ($enrolledCourses as $enrollment): ?>
-                                                            <div class="col-md-6 mb-3">
+                                                            <div class="col-md-6 mb-3 enrolled-course-card">
                                                                 <div class="card border-primary">
                                                                     <div class="card-body">
                                                                         <h6 class="card-title text-primary"><?= esc($enrollment['title']) ?></h6>
@@ -298,14 +314,14 @@
                                                 <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Available Courses</h5>
                                             </div>
                                             <div class="card-body">
-                                                <!-- Search Form (Step 4) -->
+                                                <!-- Search Form for Available Courses -->
                                                 <div class="row mb-4">
                                                     <div class="col-md-12">
-                                                        <form id="searchForm" class="d-flex">
+                                                        <form id="availableSearchForm" class="d-flex">
                                                             <input type="text" 
-                                                                   id="searchInput" 
+                                                                   id="availableSearchInput" 
                                                                    class="form-control" 
-                                                                   placeholder="Search courses..." 
+                                                                   placeholder="Search available courses..." 
                                                                    name="search_term">
                                                             <button class="btn btn-outline-primary ms-2" type="submit">
                                                                 <i class="fas fa-search"></i> Search
@@ -534,23 +550,19 @@
                                     <h5 class="mb-0"><i class="fas fa-search"></i> Search Courses</h5>
                                 </div>
                                 <div class="card-body">
-                                    <!-- Search Box -->
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <label for="course_search" class="form-label">Search Courses</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                                <input type="text" 
-                                                       class="form-control" 
-                                                       id="course_search" 
-                                                       placeholder="Search by course title, control number, or description..."
-                                                       onkeyup="filterCoursesTable()">
-                                                <button class="btn btn-outline-secondary" type="button" onclick="clearCourseSearch()">
-                                                    <i class="fas fa-times"></i> Clear
-                                                </button>
-                                            </div>
+                                    <!-- Search Form (Step 4) -->
+                                    <form id="searchForm" class="d-flex">
+                                        <div class="input-group w-100">
+                                            <input type="text" 
+                                                   id="searchInput" 
+                                                   class="form-control" 
+                                                   placeholder="Search courses by title, control number, or description..." 
+                                                   name="search_term">
+                                            <button class="btn btn-outline-primary" type="submit">
+                                                <i class="fas fa-search"></i> Search
+                                            </button>
                                         </div>
-                                    </div>
+                                    </form>
                                 </div>
                             </div>
 
@@ -778,6 +790,25 @@
                                                 <li>Courses with prerequisites require prerequisite courses to be completed first (same semester, term, and academic year)</li>
                                             </ul>
                                         </p>
+                                        
+                                        <!-- Search Form for Prerequisite Courses -->
+                                        <?php if (!empty($unavailable_courses)): ?>
+                                        <div class="mb-3">
+                                            <form id="prerequisiteSearchForm" class="d-flex" onsubmit="return false;">
+                                                <div class="input-group w-100">
+                                                    <input type="text" 
+                                                           id="prerequisiteSearchInput" 
+                                                           class="form-control" 
+                                                           placeholder="Search prerequisite courses by title, control number, or description..." 
+                                                           name="search_term">
+                                                    <button class="btn btn-outline-warning" type="submit">
+                                                        <i class="fas fa-search"></i> Search
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <?php endif; ?>
+                                        
                                         <?php if (!empty($unavailable_courses)): ?>
                                         <div class="table-responsive">
                                             <table class="table table-striped table-hover">
@@ -792,9 +823,9 @@
                                                         <th>Actions</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
+                                                <tbody id="prerequisiteCoursesTableBody">
                                                     <?php foreach ($unavailable_courses as $course): ?>
-                                                        <tr class="unavailable-course-row">
+                                                        <tr class="unavailable-course-row prerequisite-course-row">
                                                             <td><?= $course['id'] ?></td>
                                                             <td>
                                                                 <?php if (!empty($course['control_number'])): ?>
@@ -905,6 +936,25 @@
                                         <p class="text-muted">
                                             <i class="fas fa-info-circle"></i> These courses have been completed and archived from previous academic years.
                                         </p>
+                                        
+                                        <!-- Search Form for Completed Courses -->
+                                        <?php if (!empty($completed_courses)): ?>
+                                        <div class="mb-3">
+                                            <form id="completedSearchForm" class="d-flex" onsubmit="return false;">
+                                                <div class="input-group w-100">
+                                                    <input type="text" 
+                                                           id="completedSearchInput" 
+                                                           class="form-control" 
+                                                           placeholder="Search completed courses by title, control number, or description..." 
+                                                           name="search_term">
+                                                    <button class="btn btn-outline-success" type="submit">
+                                                        <i class="fas fa-search"></i> Search
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <?php endif; ?>
+                                        
                                         <?php if (!empty($completed_courses)): ?>
                                         <div class="table-responsive">
                                             <table class="table table-striped table-hover">
@@ -919,9 +969,9 @@
                                                         <th>Actions</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
+                                                <tbody id="completedCoursesTableBody">
                                                     <?php foreach ($completed_courses as $course): ?>
-                                                        <tr class="completed-course-row">
+                                                        <tr class="completed-course-row completed-course-table-row">
                                                             <td><?= $course['id'] ?></td>
                                                             <td>
                                                                 <?php if (!empty($course['control_number'])): ?>
@@ -4638,16 +4688,16 @@
         
         $(document).on('keyup', '.course-search-input', filterCourses);
         
-        // Course Management Table Search Function
+        // Course Management Table Search Function (backup/fallback)
         function filterCoursesTable() {
-            const searchInput = document.getElementById('course_search');
+            const searchInput = document.getElementById('searchInput') || document.getElementById('course_search');
             if (!searchInput) return;
             
             const searchTerm = searchInput.value.toLowerCase().trim();
             const tableBody = document.getElementById('coursesTableBody');
             if (!tableBody) return;
             
-            const rows = tableBody.getElementsByTagName('tr');
+            const rows = tableBody.getElementsByClassName('course-table-row');
             let visibleCount = 0;
             
             for (let i = 0; i < rows.length; i++) {
@@ -4669,11 +4719,11 @@
                 if (!noResultsMsg) {
                     noResultsMsg = document.createElement('tr');
                     noResultsMsg.id = 'noCoursesResults';
-                    noResultsMsg.innerHTML = '<td colspan="8" class="text-center py-4"><i class="fas fa-search fa-2x text-muted mb-2"></i><p class="text-muted mb-0">There\'s no "<strong>' + escapeHtml(searchTerm) + '</strong>", search another</p></td>';
+                    noResultsMsg.innerHTML = '<td colspan="8" class="text-center py-4"><i class="fas fa-search fa-2x text-muted mb-2"></i><p class="text-muted mb-0">No courses found matching your search.</p></td>';
                     tableBody.appendChild(noResultsMsg);
                 } else {
                     // Update existing message
-                    noResultsMsg.innerHTML = '<td colspan="8" class="text-center py-4"><i class="fas fa-search fa-2x text-muted mb-2"></i><p class="text-muted mb-0">There\'s no "<strong>' + escapeHtml(searchTerm) + '</strong>", search another</p></td>';
+                    noResultsMsg.innerHTML = '<td colspan="8" class="text-center py-4"><i class="fas fa-search fa-2x text-muted mb-2"></i><p class="text-muted mb-0">No courses found matching your search.</p></td>';
                 }
             } else {
                 if (noResultsMsg) {
@@ -4683,12 +4733,576 @@
         }
         
         function clearCourseSearch() {
-            const searchInput = document.getElementById('course_search');
+            const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.value = '';
                 filterCoursesTable();
             }
         }
+        
+        // Step 5: Implement Client-Side Filtering with jQuery (for Admin Course Management)
+        // Only run if we're on the admin course management page
+        <?php if ($userRole === 'admin' && $currentSection === 'courses'): ?>
+        $(document).ready(function() {
+            // Client-side filtering for course table rows (instant filtering on keyup)
+            $('#searchInput').on('keyup', function() {
+                const value = $(this).val().toLowerCase();
+                
+                // Filter table rows - show/hide based on search term
+                $('.course-table-row').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+                
+                // Show/hide "no results" message
+                const visibleRows = $('.course-table-row:visible').length;
+                let noResultsMsg = $('#noCoursesResults');
+                
+                if (value && visibleRows === 0) {
+                    if (noResultsMsg.length === 0) {
+                        $('#coursesTableBody').append(
+                            '<tr id="noCoursesResults"><td colspan="8" class="text-center py-4">' +
+                            '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                            '<p class="text-muted mb-0">No courses found matching your search.</p>' +
+                            '</td></tr>'
+                        );
+                    }
+                } else {
+                    noResultsMsg.remove();
+                }
+            });
+            
+            // Server-side search with AJAX (when form is submitted)
+            $('#searchForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const searchTerm = $('#searchInput').val();
+                
+                $.get('<?= base_url('courses/search') ?>', { search_term: searchTerm })
+                    .done(function(data) {
+                        $('#coursesTableBody').empty();
+                        
+                        if (data.length > 0) {
+                            $.each(data, function(index, course) {
+                                // Build course row HTML (simplified version - you may need to adjust based on your actual course data structure)
+                                const courseRow = `
+                                    <tr id="course-row-${course.id}" class="course-table-row">
+                                        <td>${course.id}</td>
+                                        <td>
+                                            ${course.control_number ? 
+                                                '<span class="badge bg-secondary">' + escapeHtml(course.control_number) + '</span>' : 
+                                                '<span class="text-muted">-</span>'}
+                                        </td>
+                                        <td>
+                                            <strong>${escapeHtml(course.title || '')}</strong>
+                                        </td>
+                                        <td><span class="badge bg-info">${course.units || 0} units</span></td>
+                                        <td>${escapeHtml(course.description || '') || '<span class="text-muted">-</span>'}</td>
+                                        <td><span class="badge bg-primary">0 files</span></td>
+                                        <td>${course.created_at ? new Date(course.created_at).toLocaleDateString() : '-'}</td>
+                                        <td>
+                                            <div class="btn-group-vertical" role="group">
+                                                <button class="btn btn-warning btn-sm mb-1" onclick="editCourse(${course.id})" title="Edit">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                                <button class="btn btn-success btn-sm mb-1" onclick="openScheduleModal(${course.id})" title="Schedule & Teachers">
+                                                    <i class="fas fa-calendar"></i> Schedule & Teachers
+                                                </button>
+                                                <button class="btn btn-info btn-sm mb-1" onclick="viewCourseMaterials(${course.id})" title="Materials">
+                                                    <i class="fas fa-upload"></i> Materials
+                                                </button>
+                                                <a href="<?= base_url('course/view') ?>/${course.id}" class="btn btn-primary btn-sm mb-1" title="View">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                <button class="btn btn-danger btn-sm" onclick="deleteCourse(${course.id}, '${(course.title || '').replace(/'/g, "\\'")}')" title="Delete">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                                $('#coursesTableBody').append(courseRow);
+                            });
+                        } else {
+                            $('#coursesTableBody').html(
+                                '<tr id="noCoursesResults"><td colspan="8" class="text-center py-4">' +
+                                '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                                '<p class="text-muted mb-0">No courses found matching your search.</p>' +
+                                '</td></tr>'
+                            );
+                        }
+                    })
+                    .fail(function() {
+                        $('#coursesTableBody').html(
+                            '<tr><td colspan="8" class="text-center py-4">' +
+                            '<div class="alert alert-danger">' +
+                            '<i class="fas fa-exclamation-triangle"></i> Error loading search results.' +
+                            '</div></td></tr>'
+                        );
+                    });
+            });
+        });
+        <?php endif; ?>
+        
+        // Step 5: Implement Client-Side Filtering with jQuery (for Student Prerequisite and Completed Courses)
+        <?php if (isset($userRole) && $userRole === 'student'): ?>
+        $(document).ready(function() {
+            // Ensure jQuery is loaded
+            if (typeof jQuery === 'undefined') {
+                console.error('jQuery is not loaded!');
+                return;
+            }
+            
+            // Store original course data for prerequisite courses
+            const originalPrerequisiteCourses = <?= json_encode(!empty($unavailable_courses) ? $unavailable_courses : []) ?>;
+            
+            // Client-side filtering for Prerequisite Courses (instant filtering on keyup)
+            $(document).on('keyup', '#prerequisiteSearchInput', function() {
+                const value = $(this).val().toLowerCase();
+                
+                // Filter table rows - show/hide based on search term
+                $('.prerequisite-course-row').each(function() {
+                    const rowText = $(this).text().toLowerCase();
+                    $(this).toggle(rowText.indexOf(value) > -1);
+                });
+                
+                // Show/hide "no results" message
+                const visibleRows = $('.prerequisite-course-row:visible').length;
+                let noResultsMsg = $('#noPrerequisiteResults');
+                
+                if (value && visibleRows === 0) {
+                    if (noResultsMsg.length === 0) {
+                        $('#prerequisiteCoursesTableBody').append(
+                            '<tr id="noPrerequisiteResults"><td colspan="7" class="text-center py-4">' +
+                            '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                            '<p class="text-muted mb-0">No prerequisite courses found matching your search.</p>' +
+                            '</td></tr>'
+                        );
+                    } else {
+                        noResultsMsg.show();
+                    }
+                } else {
+                    noResultsMsg.remove();
+                }
+            });
+            
+            // Server-side search with AJAX for Prerequisite Courses (when form is submitted)
+            $(document).on('submit', '#prerequisiteSearchForm', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                const searchTerm = $('#prerequisiteSearchInput').val().trim();
+                
+                if (!searchTerm) {
+                    // If search is empty, show all original courses
+                    location.reload();
+                    return;
+                }
+                
+                $.ajax({
+                    url: '<?= base_url('courses/search') ?>',
+                    method: 'GET',
+                    data: { search_term: searchTerm },
+                    dataType: 'json',
+                    success: function(data) {
+                        // Filter to only show unavailable courses from the search results
+                        const unavailableCourseIds = originalPrerequisiteCourses.map(c => c.id);
+                        const filteredData = data.filter(course => unavailableCourseIds.includes(course.id));
+                        
+                        $('#prerequisiteCoursesTableBody').empty();
+                        
+                        if (filteredData.length > 0) {
+                            // Find matching original course data to preserve all metadata
+                            filteredData.forEach(function(course) {
+                                const originalCourse = originalPrerequisiteCourses.find(c => c.id === course.id);
+                                if (originalCourse) {
+                                    // Use original course data to preserve all information
+                                    const semesterInfo = originalCourse.semester_info || {};
+                                    const unavailableReason = originalCourse.unavailable_reason || 'Prerequisites required';
+                                    const academicYear = originalCourse.academic_year || '2025-2026';
+                                    const semesterTerm = semesterInfo.semester && semesterInfo.term ? 
+                                        `${semesterInfo.semester} Sem, ${semesterInfo.term} Term` : '';
+                                    
+                                    const courseRow = `
+                                        <tr class="unavailable-course-row prerequisite-course-row">
+                                            <td>${originalCourse.id}</td>
+                                            <td>
+                                                ${originalCourse.control_number ? 
+                                                    '<span class="badge bg-secondary">' + escapeHtml(originalCourse.control_number) + '</span>' : 
+                                                    '<span class="text-muted">-</span>'}
+                                            </td>
+                                            <td>
+                                                <strong>${escapeHtml(originalCourse.title || '')}</strong>
+                                                ${semesterTerm ? '<br><small class="text-muted">' + academicYear + ' | ' + semesterTerm + '</small>' : ''}
+                                            </td>
+                                            <td><span class="badge bg-info">${originalCourse.units || 0} units</span></td>
+                                            <td>${academicYear}${semesterTerm ? '<br>' + semesterTerm : ''}</td>
+                                            <td>
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-lock"></i> ${escapeHtml(unavailableReason)}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group-vertical" role="group" style="gap: 2px;">
+                                                    <a href="<?= base_url('materials/view') ?>/${originalCourse.id}" class="btn btn-sm btn-info" title="View Course">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-secondary" disabled title="Course unavailable">
+                                                        <i class="fas fa-lock"></i> Unavailable
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                    $('#prerequisiteCoursesTableBody').append(courseRow);
+                                }
+                            });
+                        } else {
+                            $('#prerequisiteCoursesTableBody').html(
+                                '<tr id="noPrerequisiteResults"><td colspan="7" class="text-center py-4">' +
+                                '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                                '<p class="text-muted mb-0">No prerequisite courses found matching your search.</p>' +
+                                '</td></tr>'
+                            );
+                        }
+                    },
+                    error: function() {
+                        $('#prerequisiteCoursesTableBody').html(
+                            '<tr><td colspan="7" class="text-center py-4">' +
+                            '<div class="alert alert-danger">' +
+                            '<i class="fas fa-exclamation-triangle"></i> Error loading search results.' +
+                            '</div></td></tr>'
+                        );
+                    }
+                });
+                
+                return false;
+            });
+            
+            // Store original course data for completed courses
+            const originalCompletedCourses = <?= json_encode(!empty($completed_courses) ? $completed_courses : []) ?>;
+            
+            // Client-side filtering for Completed Courses (instant filtering on keyup)
+            $(document).on('keyup', '#completedSearchInput', function() {
+                const value = $(this).val().toLowerCase();
+                
+                // Filter table rows - show/hide based on search term
+                $('.completed-course-table-row').each(function() {
+                    const rowText = $(this).text().toLowerCase();
+                    $(this).toggle(rowText.indexOf(value) > -1);
+                });
+                
+                // Show/hide "no results" message
+                const visibleRows = $('.completed-course-table-row:visible').length;
+                let noResultsMsg = $('#noCompletedResults');
+                
+                if (value && visibleRows === 0) {
+                    if (noResultsMsg.length === 0) {
+                        $('#completedCoursesTableBody').append(
+                            '<tr id="noCompletedResults"><td colspan="7" class="text-center py-4">' +
+                            '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                            '<p class="text-muted mb-0">No completed courses found matching your search.</p>' +
+                            '</td></tr>'
+                        );
+                    } else {
+                        noResultsMsg.show();
+                    }
+                } else {
+                    noResultsMsg.remove();
+                }
+            });
+            
+            // Server-side search with AJAX for Completed Courses (when form is submitted)
+            $(document).on('submit', '#completedSearchForm', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                const searchTerm = $('#completedSearchInput').val().trim();
+                
+                if (!searchTerm) {
+                    // If search is empty, show all original courses
+                    location.reload();
+                    return;
+                }
+                
+                $.ajax({
+                    url: '<?= base_url('courses/search') ?>',
+                    method: 'GET',
+                    data: { search_term: searchTerm },
+                    dataType: 'json',
+                    success: function(data) {
+                        // Filter to only show completed courses from the search results
+                        const completedCourseIds = originalCompletedCourses.map(c => c.id);
+                        const filteredData = data.filter(course => completedCourseIds.includes(course.id));
+                        
+                        $('#completedCoursesTableBody').empty();
+                        
+                        if (filteredData.length > 0) {
+                            // Find matching original course data to preserve all metadata
+                            filteredData.forEach(function(course) {
+                                const originalCourse = originalCompletedCourses.find(c => c.id === course.id);
+                                if (originalCourse) {
+                                    const academicYear = originalCourse.academic_year || '2025-2026';
+                                    const completedDate = originalCourse.completed_at || originalCourse.updated_at;
+                                    
+                                    const courseRow = `
+                                        <tr class="completed-course-row completed-course-table-row">
+                                            <td>${originalCourse.id}</td>
+                                            <td>
+                                                ${originalCourse.control_number ? 
+                                                    '<span class="badge bg-secondary">' + escapeHtml(originalCourse.control_number) + '</span>' : 
+                                                    '<span class="text-muted">-</span>'}
+                                            </td>
+                                            <td>
+                                                <strong>${escapeHtml(originalCourse.title || '')}</strong>
+                                                ${academicYear ? '<br><small class="text-muted">' + academicYear + '</small>' : ''}
+                                            </td>
+                                            <td><span class="badge bg-info">${originalCourse.units || 0} units</span></td>
+                                            <td>${academicYear}</td>
+                                            <td>
+                                                ${completedDate ? 
+                                                    '<span class="badge bg-success">' + new Date(completedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</span>' : 
+                                                    '<span class="text-muted">N/A</span>'}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group-vertical" role="group" style="gap: 2px;">
+                                                    <a href="<?= base_url('materials/view') ?>/${originalCourse.id}" class="btn btn-sm btn-info" title="View Course">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-warning" onclick="reactivateCourse(${originalCourse.id}, '${(originalCourse.title || '').replace(/'/g, "\\'")}')" title="Reactivate Course">
+                                                        <i class="fas fa-redo"></i> Reactivate
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                    $('#completedCoursesTableBody').append(courseRow);
+                                }
+                            });
+                        } else {
+                            $('#completedCoursesTableBody').html(
+                                '<tr id="noCompletedResults"><td colspan="7" class="text-center py-4">' +
+                                '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                                '<p class="text-muted mb-0">No completed courses found matching your search.</p>' +
+                                '</td></tr>'
+                            );
+                        }
+                    },
+                    error: function() {
+                        $('#completedCoursesTableBody').html(
+                            '<tr><td colspan="7" class="text-center py-4">' +
+                            '<div class="alert alert-danger">' +
+                            '<i class="fas fa-exclamation-triangle"></i> Error loading search results.' +
+                            '</div></td></tr>'
+                        );
+                    }
+                });
+                
+                return false;
+            });
+        });
+        <?php endif; ?>
+        
+        // Enrolled Courses and Available Courses Search and Filter (for Student Overview Section)
+        <?php if (isset($userRole) && $userRole === 'student'): ?>
+        $(document).ready(function() {
+            // Client-side filtering for Enrolled Courses (instant filtering on keyup)
+            $('#enrolledSearchInput').on('keyup', function() {
+                const value = $(this).val().toLowerCase();
+                let visibleCount = 0;
+                
+                // Filter enrolled course cards - show/hide based on search term
+                $('.enrolled-course-card').each(function() {
+                    const cardText = $(this).text().toLowerCase();
+                    if (!value || cardText.indexOf(value) > -1) {
+                        $(this).show();
+                        visibleCount++;
+                    } else {
+                        $(this).hide();
+                    }
+                });
+                
+                // Show/hide "no results" message
+                const container = $('#enrolledCoursesContainer');
+                let noResultsMsg = container.find('.no-enrolled-results');
+                
+                if (value && visibleCount === 0) {
+                    if (noResultsMsg.length === 0) {
+                        container.append(
+                            '<div class="col-12 no-enrolled-results">' +
+                            '<div class="text-center py-4">' +
+                            '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                            '<p class="text-muted mb-0">No enrolled courses found matching your search.</p>' +
+                            '</div></div>'
+                        );
+                    } else {
+                        noResultsMsg.show();
+                    }
+                } else {
+                    noResultsMsg.remove();
+                }
+            });
+            
+            // Server-side search with AJAX for Enrolled Courses (when form is submitted)
+            $('#enrolledSearchForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const searchTerm = $('#enrolledSearchInput').val();
+                
+                $.get('<?= base_url('courses/search') ?>', { search_term: searchTerm })
+                    .done(function(data) {
+                        // Filter to only show enrolled courses from the search results
+                        const enrolledCourseIds = <?= json_encode(!empty($enrolledCourses) ? array_column($enrolledCourses, 'course_id') : []) ?>;
+                        const filteredData = data.filter(course => enrolledCourseIds.includes(course.id));
+                        
+                        const container = $('#enrolledCoursesContainer');
+                        container.find('.row').empty();
+                        
+                        if (filteredData.length > 0) {
+                            filteredData.forEach(function(course) {
+                                const enrollment = <?= json_encode(!empty($enrolledCourses) ? $enrolledCourses : []) ?>.find(e => e.course_id === course.id);
+                                const enrollmentDate = enrollment ? enrollment.created_at : course.created_at;
+                                
+                                const courseCard = `
+                                    <div class="col-md-6 mb-3 enrolled-course-card">
+                                        <div class="card border-primary">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-primary">${escapeHtml(course.title || '')}</h6>
+                                                <p class="card-text small">${escapeHtml(course.description || '')}</p>
+                                                <small class="text-muted d-block mb-2">
+                                                    <i class="fas fa-calendar"></i> 
+                                                    Enrolled: ${new Date(enrollmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                </small>
+                                                <a href="<?= base_url('dashboard?section=materials&course_id=') ?>${course.id}" 
+                                                   class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-file-alt"></i> View Materials
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                container.find('.row').append(courseCard);
+                            });
+                        } else {
+                            container.find('.row').html(
+                                '<div class="col-12">' +
+                                '<div class="text-center py-4">' +
+                                '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                                '<p class="text-muted mb-0">No enrolled courses found matching your search.</p>' +
+                                '</div></div>'
+                            );
+                        }
+                    })
+                    .fail(function() {
+                        $('#enrolledCoursesContainer .row').html(
+                            '<div class="col-12">' +
+                            '<div class="alert alert-danger text-center">' +
+                            '<i class="fas fa-exclamation-triangle"></i> Error loading search results.' +
+                            '</div></div>'
+                        );
+                    });
+            });
+            
+            // Client-side filtering for Available Courses (instant filtering on keyup)
+            $('#availableSearchInput').on('keyup', function() {
+                const value = $(this).val().toLowerCase();
+                let visibleCount = 0;
+                
+                // Filter available course cards - show/hide based on search term
+                $('#coursesContainer .course-card').each(function() {
+                    const cardText = $(this).text().toLowerCase();
+                    if (!value || cardText.indexOf(value) > -1) {
+                        $(this).closest('.col-md-12').show();
+                        visibleCount++;
+                    } else {
+                        $(this).closest('.col-md-12').hide();
+                    }
+                });
+                
+                // Show/hide "no results" message
+                const container = $('#coursesContainer');
+                let noResultsMsg = container.find('.no-available-results');
+                
+                if (value && visibleCount === 0) {
+                    if (noResultsMsg.length === 0) {
+                        container.append(
+                            '<div class="col-12 no-available-results">' +
+                            '<div class="text-center py-4">' +
+                            '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                            '<p class="text-muted mb-0">No available courses found matching your search.</p>' +
+                            '</div></div>'
+                        );
+                    } else {
+                        noResultsMsg.show();
+                    }
+                } else {
+                    noResultsMsg.remove();
+                }
+            });
+            
+            // Server-side search with AJAX for Available Courses (when form is submitted)
+            $('#availableSearchForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const searchTerm = $('#availableSearchInput').val();
+                
+                $.get('<?= base_url('courses/search') ?>', { search_term: searchTerm })
+                    .done(function(data) {
+                        // Filter to only show available courses from the search results
+                        const availableCourseIds = <?= json_encode(!empty($availableCourses) ? array_column($availableCourses, 'id') : []) ?>;
+                        const filteredData = data.filter(course => availableCourseIds.includes(course.id));
+                        
+                        const container = $('#coursesContainer');
+                        container.empty();
+                        
+                        if (filteredData.length > 0) {
+                            filteredData.forEach(function(course) {
+                                const courseCard = `
+                                    <div class="col-md-12 mb-3">
+                                        <div class="card course-card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-8">
+                                                        <h5 class="card-title">${escapeHtml(course.title || '')}</h5>
+                                                        <p class="card-text">${escapeHtml(course.description || '')}</p>
+                                                    </div>
+                                                    <div class="col-md-4 text-end">
+                                                        <a href="<?= base_url("course/view/") ?>${course.id}" class="btn btn-primary btn-sm mb-2 d-block">View Course</a>
+                                                        <button class="btn btn-success btn-sm enroll-btn w-100" 
+                                                                data-course-id="${course.id}"
+                                                                data-course-title="${escapeHtml(course.title || '').replace(/'/g, "\\'")}">
+                                                            <i class="fas fa-plus"></i> Enroll Now
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                container.append(courseCard);
+                            });
+                        } else {
+                            container.html(
+                                '<div class="col-12">' +
+                                '<div class="text-center py-4">' +
+                                '<i class="fas fa-search fa-2x text-muted mb-2"></i>' +
+                                '<p class="text-muted mb-0">No available courses found matching your search.</p>' +
+                                '</div></div>'
+                            );
+                        }
+                    })
+                    .fail(function() {
+                        $('#coursesContainer').html(
+                            '<div class="col-12">' +
+                            '<div class="alert alert-danger text-center">' +
+                            '<i class="fas fa-exclamation-triangle"></i> Error loading search results.' +
+                            '</div></div>'
+                        );
+                    });
+            });
+        });
+        <?php endif; ?>
         
         // Assignments Search and Filter
         function filterAssignments() {

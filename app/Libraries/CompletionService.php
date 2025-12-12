@@ -30,16 +30,20 @@ class CompletionService
      */
     public function checkAndUpdateCompletions()
     {
+        // Set timezone to Asia/Manila for date comparisons
+        date_default_timezone_set('Asia/Manila');
         $today = date('Y-m-d');
         $updatedCourses = [];
         $notifiedSemesters = [];
 
-        // Get all semesters with end dates that have passed
+        // Get all semesters with end dates that have passed AND are NOT active
+        // Only complete courses from semesters that are no longer active
         $db = \Config\Database::connect();
         $semesters = $db->query("
             SELECT * FROM semesters 
             WHERE end_date IS NOT NULL 
             AND end_date <= ?
+            AND is_active = 0
             ORDER BY end_date DESC
         ", [$today])->getResultArray();
 
@@ -60,9 +64,13 @@ class CompletionService
             // - Term 2 = second half of semester
             // When a term ends, only courses in that specific term should be completed
             
-            // Get all courses for this semester that are still active
+            // Get all courses for this semester that are still active (status = null or 'active')
+            // New courses have status = null, so we need to check both
             $courses = $this->courseModel->where('semester_id', $semester['id'])
+                                         ->groupStart()
                                          ->where('status', 'active')
+                                         ->orWhere('status', null)
+                                         ->groupEnd()
                                          ->findAll();
 
             foreach ($courses as $course) {
@@ -99,6 +107,9 @@ class CompletionService
             }
         }
 
+        // Reset timezone to default
+        date_default_timezone_set(date_default_timezone_get());
+        
         return [
             'courses_updated' => count($updatedCourses),
             'semesters_processed' => count($notifiedSemesters)
@@ -136,12 +147,40 @@ class CompletionService
                                                                   ->countAllResults();
             
             if ($existingCourseNotification === 0) {
+                $semesterName = ($semester['semester'] ?? '') . ' Semester';
+                $termName = ($semester['term'] ?? '') . ' Term';
                 $this->notificationModel->insert([
                     'user_id' => $enrollment['user_id'],
-                    'message' => "Course '{$course['title']}' has been completed. The {$semester['semester']} Semester ({$semester['term']} Term) has ended.",
+                    'message' => "Course '{$course['title']}' has been completed. The {$semesterName} ({$termName}) has ended.",
                     'type' => 'completion',
                     'is_read' => 0
                 ]);
+            }
+        }
+        
+        // Notify all teachers assigned to this course
+        $courseTeacherModel = new \App\Models\CourseTeacherModel();
+        $assignedTeachers = $courseTeacherModel->getTeachersByCourse($course['id']);
+        
+        foreach ($assignedTeachers as $teacherAssignment) {
+            if (!empty($teacherAssignment['teacher_id'])) {
+                // Check if teacher has already been notified today
+                $existingTeacherNotification = $this->notificationModel->where('user_id', $teacherAssignment['teacher_id'])
+                                                                       ->where('type', 'course_completion')
+                                                                       ->like('message', $course['title'] . '%')
+                                                                       ->where('DATE(created_at)', date('Y-m-d'))
+                                                                       ->countAllResults();
+                
+                if ($existingTeacherNotification === 0) {
+                    $semesterName = ($semester['semester'] ?? '') . ' Semester';
+                    $termName = ($semester['term'] ?? '') . ' Term';
+                    $this->notificationModel->insert([
+                        'user_id' => $teacherAssignment['teacher_id'],
+                        'message' => "Course '{$course['title']}' that you are assigned to teach has been completed. The {$semesterName} ({$termName}) has ended. This course has been removed from your 'My Courses' section.",
+                        'type' => 'course_completion',
+                        'is_read' => 0
+                    ]);
+                }
             }
         }
     }

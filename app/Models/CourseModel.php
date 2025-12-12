@@ -52,11 +52,17 @@ class CourseModel extends Model
     protected $afterDelete    = [];
 
     /**
-     * Get all available courses
+     * Get all available courses (exclude completed and deleted)
      */
     public function getAvailableCourses()
     {
-        return $this->orderBy('title', 'ASC')->findAll();
+        return $this->where('deleted_at', null)
+                   ->groupStart()
+                   ->where('status !=', 'completed')
+                   ->orWhere('status', null)
+                   ->groupEnd()
+                   ->orderBy('title', 'ASC')
+                   ->findAll();
     }
 
     /**
@@ -69,8 +75,12 @@ class CourseModel extends Model
         $semesterModel = new SemesterModel();
         $enrollmentModel = new EnrollmentModel();
         
-        // Build query - filter by year level if provided
-        $query = $this->where('deleted_at', null);
+        // Build query - filter by year level if provided, exclude completed courses
+        $query = $this->where('deleted_at', null)
+                     ->groupStart()
+                     ->where('status !=', 'completed')
+                     ->orWhere('status', null)
+                     ->groupEnd();
         
         // If year level is provided, only show courses for that year level
         if ($year_level_id) {
@@ -102,6 +112,11 @@ class CourseModel extends Model
         foreach ($allCourses as $course) {
             // Skip if already enrolled
             if (in_array($course['id'], $enrolledIds)) {
+                continue;
+            }
+            
+            // Skip if course is completed (extra safety check)
+            if ($course['status'] === 'completed') {
                 continue;
             }
             
@@ -188,6 +203,7 @@ class CourseModel extends Model
      * Get unavailable courses:
      * 1. Term 2 courses waiting for Term 1 completion (same semester, same academic year)
      * 2. Courses with prerequisites that aren't completed (same semester, term, and academic year)
+     * 3. Courses from future semesters/terms (start_date > today)
      * 
      * @param int|null $academicYearId Academic year ID to filter by
      * @param int|null $semesterId Semester ID to filter by
@@ -196,6 +212,10 @@ class CourseModel extends Model
     public function getUnavailableCourses($academicYearId = null, $semesterId = null, $userId = null)
     {
         try {
+            // Set timezone to Asia/Manila for date comparisons
+            date_default_timezone_set('Asia/Manila');
+            $today = date('Y-m-d');
+            
             $semesterModel = new SemesterModel();
             $prerequisiteModel = new \App\Models\PrerequisiteCourseModel();
             $enrollmentModel = new \App\Models\EnrollmentModel();
@@ -237,7 +257,27 @@ class CourseModel extends Model
             if (!empty($course['semester_id'])) {
                 $semester = $semesterModel->find($course['semester_id']);
                 if ($semester) {
+                    $semesterStartDate = $semester['start_date'] ?? null;
+                    $semesterEndDate = $semester['end_date'] ?? null;
                     $courseTerm = $semester['term'] ?? '';
+                    
+                    // Check 0: If semester is in the future (start_date > today), it's unavailable
+                    if ($semesterStartDate && $semesterStartDate > $today) {
+                        $isUnavailable = true;
+                        $unavailableReason = 'This course is from a future semester or term (starts on ' . date('M d, Y', strtotime($semesterStartDate)) . ')';
+                        $course['semester_info'] = $semester;
+                        $course['unavailable_reason'] = $unavailableReason;
+                        $unavailableCourses[] = $course;
+                        $processedCourseIds[] = $course['id'];
+                        continue; // Skip other checks for future courses
+                    }
+                    
+                    // Check 0.5: If semester has ended (end_date < today), it should be in completed, not unavailable
+                    // Skip this course from unavailable list if it's from a past semester
+                    if ($semesterEndDate && $semesterEndDate < $today) {
+                        // This course should be in completed courses, not unavailable
+                        continue; // Skip adding to unavailable courses
+                    }
                     
                     // Check 1: If this is a Term 2 course, check if Term 1 is completed
                     if ($courseTerm === '2nd' || $courseTerm === '2') {
@@ -350,8 +390,13 @@ class CourseModel extends Model
             }
         }
         
+        // Reset timezone
+        date_default_timezone_set(date_default_timezone_get());
+        
         return $unavailableCourses;
         } catch (\Exception $e) {
+            // Reset timezone in case of error
+            date_default_timezone_set(date_default_timezone_get());
             // Log error and return empty array to prevent breaking the page
             log_message('error', 'Error in getUnavailableCourses: ' . $e->getMessage());
             return [];

@@ -745,6 +745,15 @@ class Admin extends BaseController
                 ]);
             }
             
+            // Automatically update active semesters and academic years based on dates (Asia/Manila timezone)
+            // This will override manual is_active setting if dates don't match
+            try {
+                $activationService = new \App\Libraries\SemesterActivationService();
+                $activationService->updateActiveSemesters();
+            } catch (\Exception $e) {
+                log_message('error', 'Error updating active semesters after academic year creation: ' . $e->getMessage());
+            }
+            
             session()->setFlashdata('success', 'Academic year created successfully.');
         } else {
             session()->setFlashdata('error', 'Failed to create academic year.');
@@ -814,6 +823,15 @@ class Admin extends BaseController
         ];
 
         if ($academicYearModel->update($id, $data)) {
+            // Automatically update active semesters and academic years based on dates (Asia/Manila timezone)
+            // This will override manual is_active setting if dates don't match
+            try {
+                $activationService = new \App\Libraries\SemesterActivationService();
+                $activationService->updateActiveSemesters();
+            } catch (\Exception $e) {
+                log_message('error', 'Error updating active semesters after academic year update: ' . $e->getMessage());
+            }
+            
             session()->setFlashdata('success', 'Academic year updated successfully.');
         } else {
             session()->setFlashdata('error', 'Failed to update academic year.');
@@ -899,6 +917,15 @@ class Admin extends BaseController
         ];
 
         if ($semesterModel->insert($data)) {
+            // Automatically update active semesters based on dates (Asia/Manila timezone)
+            // This will override manual is_active setting if dates don't match
+            try {
+                $activationService = new \App\Libraries\SemesterActivationService();
+                $activationService->updateActiveSemesters();
+            } catch (\Exception $e) {
+                log_message('error', 'Error updating active semesters after creation: ' . $e->getMessage());
+            }
+            
             // If semester is set as active, archive previous active semester's courses
             if ($isActive && $previousActiveSemester) {
                 $completionService = new \App\Libraries\CompletionService();
@@ -961,6 +988,15 @@ class Admin extends BaseController
         ];
 
         if ($semesterModel->update($id, $data)) {
+            // Automatically update active semesters based on dates (Asia/Manila timezone)
+            // This will override manual is_active setting if dates don't match
+            try {
+                $activationService = new \App\Libraries\SemesterActivationService();
+                $activationService->updateActiveSemesters();
+            } catch (\Exception $e) {
+                log_message('error', 'Error updating active semesters after update: ' . $e->getMessage());
+            }
+            
             $completionService = new \App\Libraries\CompletionService();
             
             if ($isActive && !$wasActive) {
